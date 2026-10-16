@@ -154,6 +154,13 @@
     .lvl{display:none}
     .q.rapid .why{display:block}
   }
+
+  .si .row{margin:.35rem 0}
+  .si input{font-size:1em;padding:.4rem .6rem;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);min-width:14rem}
+  .si .lbl{font-family:var(--mono);font-size:.85rem;color:var(--muted);min-width:7rem}
+  .savechip.ok{background:var(--good-wash);border-color:var(--good);color:var(--good)}
+  .savechip.warn{background:var(--amber-wash);border-color:var(--amber);color:#7A5208}
+  @media print{#signin{display:none}}
 </style>
 </head>
 <body>
@@ -161,13 +168,13 @@
   <div class="wrap">
     <p class="kicker">IB DP Computer Science · Y2 · Fri 16 Oct · 12:25 to 13:50</p>
     <h1>Reflection Workbench: A3 Databases and A2.1 Networks</h1>
-    <p>No new content today. You look back at two assessments, find out what has stuck since, and decide what to do about the rest. The page checks the quick questions; you mark the written ones against the markscheme. Nothing is sent anywhere: your answers stay in this browser until you print them.</p>
+    <p>No new content today. You look back at two assessments, find out what has stuck since, and decide what to do about the rest. The page checks the quick questions; you mark the written ones against the markscheme. Sign in and your work saves to the class sheet as you go.</p>
   </div>
 </header>
 
 <div class="bar">
   <div class="wrap">
-    <span class="lvl"><button data-l="sl">SL</button><button data-l="hl">HL</button></span>
+    <span class="chip savechip" id="savechip">Sign in below</span>
     <span class="chip">Checked by the page: <b id="autoscore">0 / 0</b></span>
     <span class="chip">Marked by you: <b id="writtenscore">0 / 0</b></span>
     <span class="chip">Timer: <b id="clock">00:00</b></span>
@@ -177,15 +184,25 @@
 
 <div class="wrap">
 
+  <section id="signin">
+    <h2><span class="n">Start here</span>Sign in</h2>
+    <div class="q si">
+      <div class="row"><label class="lbl" for="si-first">First name</label><input id="si-first" autocomplete="given-name" maxlength="40"></div>
+      <div class="row"><label class="lbl" for="si-last">Last name</label><input id="si-last" autocomplete="family-name" maxlength="40"></div>
+      <div class="row"><span class="lbl">Level</span><span class="lvl"><button data-l="sl">SL</button><button data-l="hl">HL</button></span></div>
+      <div class="row"><button class="submit" id="si-go">Start</button><span class="hint" id="si-msg"></span></div>
+    </div>
+  </section>
+
   <section>
     <h2><span class="n">How this works</span>Four parts, 85 minutes, on your own</h2>
     <div class="howto">
-      <p style="margin-bottom:.4rem"><b>First, click SL or HL at the top.</b> SL students will not see the HL-only questions.</p>
+      <p style="margin-bottom:.4rem"><b>First, sign in above</b> with your real name and your level. Everything you do saves to Mr. Tzanis's class sheet as you go, so if your laptop dies, sign in on another one with the same name and carry on. SL students will not see the HL-only questions.</p>
       <ol>
         <li><b>Before you start (2 min).</b> Rate how confident you feel on each topic. Be honest: nobody sees this but you and Mr. Tzanis.</li>
         <li><b>Part 1, paper audit (15 min).</b> Open your marked A3 test and your marked A2.1 quiz, plus the two answer keys on Classroom. Enter your mark for every question, and for each one where you lost marks, pick the reason.</li>
         <li><b>Part 2, retrieval (45 min).</b> 16 quick questions, then written questions on a new scenario. These are the ideas the class found hardest, reworded. No notes, no answer keys open.</li>
-        <li><b>Part 3, reflect (15 min).</b> Read your diagnosis, answer three questions, print this page to PDF and upload it to the Classroom assignment <b>"Reflection workbench, 16 Oct"</b> by 13:50. That upload is the register for today.</li>
+        <li><b>Part 3, reflect (15 min).</b> Read your diagnosis and answer three questions. Your work goes to the class sheet automatically: before you close the page, check the top bar says <b>"Saved to the class sheet"</b>. That is your hand-in and the register for today.</li>
       </ol>
       <p style="margin-top:.5rem"><b>Rules:</b> close the answer keys before Part 2. Once you submit a written answer you cannot edit it, and that is the point: you are finding out what you know now, not what you can look up.</p>
     </div>
@@ -232,10 +249,10 @@
       <div class="q"><p class="qh">3. Name one thing you understand now that you did not on the day of the test or the quiz.</p><textarea data-r="r3" placeholder="One idea, in a sentence or two."></textarea></div>
     </div>
     <div class="howto" style="margin-top:1rem">
-      <p><b>Before you leave (13:50):</b> Print / save as PDF at the top, then upload the PDF to the Classroom assignment <b>"Reflection workbench, 16 Oct"</b>.</p>
+      <p><b>Before you leave (13:50):</b> check the top bar says <b>"Saved to the class sheet"</b>. That is your hand-in and today's register. Print / save as PDF only if you want a copy for yourself.</p>
     </div>
     <div class="nohw"><b>No homework over the break.</b> Enjoy it. After the break we pick up A2.2 with network models.</div>
-    <p class="foot">Nothing you type here leaves your laptop; it is saved in this browser only. If the page is reloaded your answers are still here. "Start over" wipes them.</p>
+    <p class="foot">Your work is saved in this browser and, once you sign in, on Mr. Tzanis's class sheet. Only your name, level and answers are sent. "Start over" wipes this device only.</p>
   </section>
 
 </div>
@@ -337,9 +354,33 @@ const WRITTEN = [
 </script>
 <script>(function(){
   const KEY='reflect-16oct-v1';
-  let state={lvl:null,conf:{},audit:{},mcq:{},written:{},refl:{},started:null};
-  try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(state,JSON.parse(raw));}catch(e){}
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  const SYNC_URL=/^https:/.test("https://script.google.com/macros/s/AKfycbxn9a7NdRBagFA2ELWfXYt360gDh3eTiwWZ7h5hiULiWpyOXhDZwpDpN76PGmf3mLyJ/exec")?"https://script.google.com/macros/s/AKfycbxn9a7NdRBagFA2ELWfXYt360gDh3eTiwWZ7h5hiULiWpyOXhDZwpDpN76PGmf3mLyJ/exec":'';
+  const blank=()=>({v:1,first:'',last:'',lvl:null,conf:{},audit:{},mcq:{},written:{},refl:{},started:null,updated:0});
+  let state=blank();
+  try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(blank(),JSON.parse(raw));}catch(e){}
+  let SUMMARY={};
+  const savechip=document.getElementById('savechip');
+  function chip(text,cls){if(!savechip)return;savechip.textContent=text;savechip.className='chip savechip'+(cls?' '+cls:'');}
+  function sid(){ if(!state.first||!state.last)return ''; return ('ib-'+state.last+'-'+state.first).toLowerCase().replace(/[^a-z0-9]+/g,'-').slice(0,80); }
+  function payload(){tally();return JSON.stringify({action:'save',sid:sid(),first:state.first,last:state.last,level:state.lvl||'',summary:SUMMARY,state:JSON.stringify(state)});}
+  function post(body){return fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body}).then(r=>r.json());}
+  let syncTimer=null,syncing=false,dirty=false;
+  function writeLocal(){try{localStorage.setItem(KEY,JSON.stringify(state));return true;}catch(e){return false;}}
+  function clockNow(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  function save(){
+    state.updated=Date.now(); const ok=writeLocal();
+    if(SYNC_URL&&sid()){ dirty=true; chip('Saving…'); clearTimeout(syncTimer); syncTimer=setTimeout(push,2000); }
+    else if(SYNC_URL){ chip('Not saved to the class sheet yet: sign in at the top','warn'); }
+    else if(!ok){ chip('Could not save on this device','warn'); }
+  }
+  function push(){
+    if(!SYNC_URL||!sid())return;
+    if(syncing){clearTimeout(syncTimer);syncTimer=setTimeout(push,1500);return;}
+    syncing=true;dirty=false;
+    post(payload()).then(j=>{ syncing=false; if(!j||!j.ok)throw new Error('refused'); if(!dirty)chip('Saved to the class sheet · '+clockNow(),'ok'); })
+    .catch(()=>{ syncing=false;dirty=true; chip('Saved on this device · the class sheet did not answer, trying again','warn'); clearTimeout(syncTimer);syncTimer=setTimeout(push,15000); });
+  }
+  window.addEventListener('pagehide',()=>{ writeLocal(); if(dirty&&SYNC_URL&&sid()&&navigator.sendBeacon){try{navigator.sendBeacon(SYNC_URL,payload());}catch(e){}} });
   function startClock(){ if(!state.started){state.started=Date.now();save();} }
   setInterval(()=>{ if(!state.started)return; const s=Math.floor((Date.now()-state.started)/1000);
     document.getElementById('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },1000);
@@ -456,6 +497,7 @@ const WRITTEN = [
 
     const keys=Object.keys(TOPICS).filter(k=>hl||!HLTOPICS.includes(k));
     const pc=o=>o&&o.p?Math.round(100*o.g/o.p):null;
+    const dg={};
     const rows=keys.map(k=>{ const p=pc(paper[k]), t=pc(today[k]), c=state.conf[k];
       if(p===null&&t===null&&!c)return '';
       let v,cls;
@@ -464,12 +506,48 @@ const WRITTEN = [
       else if(p!==null&&p<60&&t>=80){v='fixed since the test';cls='good';}
       else if(t>=80){v='solid';cls='good';}
       else {v='nearly there';cls='ok';}
+      dg[k]={conf:c||'',test:p===null?'':p+'%',today:t===null?'':t+'%',verdict:v+((c>=3&&t!==null&&t<60)?' (overconfident)':((c&&c<=2&&t!==null&&t>=80)?' (underconfident)':''))};
       const flag=(c>=3&&t!==null&&t<60)?'<br><span class="flag">more confident than your answers show</span>':((c&&c<=2&&t!==null&&t>=80)?'<br><span class="flag" style="color:var(--good)">better than you think</span>':'');
       return '<tr class="'+cls+'"><td>'+TOPICS[k]+'</td><td>'+(c?CONFW[c]:'-')+'</td><td class="num">'+(p===null?'-':paper[k].g+' / '+paper[k].p+' ('+p+'%)')+'</td><td class="num">'+(t===null?'-':today[k].g+' / '+today[k].p+' ('+t+'%)')+'</td><td>'+v+flag+'</td></tr>'; }).join('');
+    const auditStr=p=>Object.keys(state.audit).filter(k=>k[0]===p).sort((a,b)=>+a.slice(1)-+b.slice(1)).map(k=>{const a=state.audit[k];if(a.mark===''||a.mark===undefined||(a.hl&&!hl))return '';return 'Q'+k.slice(1)+' '+a.mark+'/'+a.max+(a.mark<a.max?' '+(a.cause||'?'):'');}).filter(Boolean).join('; ');
+    const top=ranked.length?ranked[0][0][1]:'';
+    const wr={}; WRITTEN.forEach(w=>{ if(w.hl&&!hl)return; const x=state.written[w.id]; if(!x||!x.text)return; wr[w.id]=(x.mark!==undefined?x.mark+'/'+w.marks:(x.sub?'unmarked':'draft'))+' | '+x.text; });
+    SUMMARY={a3:tots.A[1]?tots.A[0]+' / '+tots.A[1]:'',a21:tots.N[1]?tots.N[0]+' / '+tots.N[1]:'',
+      lost:CAUSES.map(c=>lost[c[0]]||0),unexplained:unexplained,top:top,
+      mcq:ag+' / '+ap+' of '+MCQ.length,written:wg+' / '+wp,diag:dg,refl:state.refl,wr:wr,auditA3:auditStr('A'),auditA21:auditStr('N')};
     $('diag').innerHTML=rows?'<table class="dt"><tr><th>Topic</th><th>Confidence</th><th>On the test</th><th>Today</th><th>Verdict</th></tr>'+rows+'</table>':'<p class="muted">Rate your confidence and answer some questions; your table appears here.</p>';
   }
   $('printbtn').addEventListener('click',()=>window.print());
   $('resetbtn').addEventListener('click',()=>{ if(confirm('Clear all your answers and scores on this device?')){try{localStorage.removeItem(KEY);}catch(e){}location.reload();} });
+  /* ---------- Sign in ---------- */
+  (function(){
+    const f=$('si-first'),l=$('si-last'),go=$('si-go'),msg=$('si-msg');
+    const hasWork=s=>Object.keys(s.audit||{}).length+Object.keys(s.mcq||{}).length+Object.keys(s.written||{}).length>0;
+    function show(){ f.value=state.first; l.value=state.last; go.textContent=sid()?'Change':'Start';
+      msg.className='hint';
+      msg.textContent=sid()?('You are '+state.first+' '+state.last+(state.lvl?', '+state.lvl.toUpperCase():'')+'. Everything you do is saved as you go.'):
+        (SYNC_URL?'Use your real name and the same spelling every time: that is how your work is found again.':'Your answers are saved in this browser on this computer.');
+      if(SYNC_URL&&sid())chip('Signed in as '+state.first+' '+state.last+' · saving to the class sheet','ok');
+      else if(SYNC_URL)chip('Not saved to the class sheet yet: sign in at the top','warn');
+      else chip('Saved on this device','ok'); }
+    go.addEventListener('click',()=>{
+      const first=f.value.trim(), last=l.value.trim();
+      if(!first||!last||!state.lvl){ msg.textContent='Type your first and last name and click SL or HL.'; msg.className='hint warn'; return; }
+      const old=sid(); state.first=first.slice(0,40); state.last=last.slice(0,40);
+      if(old&&old!==sid()){ state=Object.assign(blank(),{first:state.first,last:state.last,lvl:state.lvl}); }
+      const done=()=>{ save(); if(old&&old!==sid()){location.reload();return;} show(); };
+      if(!SYNC_URL){ done(); return; }
+      msg.textContent='Looking for work you saved before…'; go.disabled=true;
+      post(JSON.stringify({action:'load',sid:sid()})).then(j=>{
+        go.disabled=false; let remote=null;
+        try{ remote=j&&j.ok&&j.state?JSON.parse(j.state):null; }catch(e){}
+        if(remote&&remote.v===1&&hasWork(remote)&&(!hasWork(state)||remote.updated>state.updated)){
+          state=Object.assign(blank(),remote,{first:state.first,last:state.last}); writeLocal(); location.reload(); return; }
+        done();
+      }).catch(()=>{ go.disabled=false; done(); msg.textContent='Signed in. The class sheet did not answer just now; your work is saved on this device and will be sent when it does.'; });
+    });
+    show();
+  })();
   if(state.lvl)setLvl(state.lvl); else tally();
 })();
 </script>
