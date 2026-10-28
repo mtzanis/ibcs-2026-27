@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.4.2 Ten ways in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+
+:root{--paper:#F4F6F9;--card:#FFFFFF;--ink:#1B2A3A;--muted:#5B6B7E;--line:#C6D2E0;--blue:#2B5CAD;--blue-deep:#1E3F76;--blue-wash:#E3EAF6;--amber:#B97A14;--amber-wash:#F7EDD9;--good:#2F7D52;--good-wash:#E1F0E7;--bad:#B54434;--bad-wash:#F6E4E0;--display:"Bricolage Grotesque",Verdana,sans-serif;--body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;--mono:"IBM Plex Mono","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.75vw,30px);line-height:1.4;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;padding:4.2vh 5vw 9vh;flex-direction:column;overflow:auto}
+.slide.cur{display:flex}
+.slide.title{background:var(--blue-deep);color:#fff;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.62em;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.title .eyebrow{color:#F3C56B}
+h1{font-family:var(--display);font-weight:800;font-size:3.1em;line-height:1.02;margin:.15em 0 .25em}
+h2{font-family:var(--display);font-weight:800;font-size:1.85em;line-height:1.08;margin:.1em 0 .45em}
+p{margin:.35em 0}
+.prose{color:var(--muted);max-width:60em}
+body.board .prose{display:none}
+.cols{display:grid;gap:1.2em;flex:1;align-items:start}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.8em .9em}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.12em;margin-bottom:.25em}
+.reveal{cursor:pointer;position:relative}
+.reveal .hid{visibility:hidden}
+.reveal.open .hid{visibility:visible}
+.reveal:not(.open)::after{content:"click to reveal";position:absolute;right:.7em;bottom:.5em;font-family:var(--mono);font-size:.55em;color:var(--amber)}
+.reveal.open{border-color:var(--good);background:var(--good-wash)}
+.big{font-family:var(--display);font-weight:800;font-size:1.5em}
+.mono{font-family:var(--mono)}
+svg.t{width:100%;height:auto;max-height:30vh;display:block}
+svg.t line{stroke:var(--blue);stroke-width:4;stroke-linecap:round}
+svg.t circle{fill:#fff;stroke:var(--blue-deep);stroke-width:3.5}
+svg.t rect{fill:var(--blue-wash);stroke:var(--blue-deep);stroke-width:3.5}
+.timer{display:flex;align-items:center;gap:.6em;margin:.5em 0}
+.timer .clock{font-family:var(--mono);font-weight:600;font-size:2.6em;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.05em .4em;min-width:4.2em;text-align:center}
+.timer .clock.out{background:var(--bad)}
+button{font-family:var(--mono);font-size:.62em;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.45em .9em}
+ol,ul{margin:.3em 0 .3em 1.2em;padding:0}li{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:.78em}
+th,td{border:2px solid var(--line);padding:.35em .5em;text-align:left;vertical-align:top;background:var(--card)}
+th{background:var(--blue-wash);font-family:var(--display)}
+td.reveal:not(.open)::after{content:"?";right:.5em;bottom:.2em;font-size:1em}
+.weak{border-color:var(--bad);background:var(--bad-wash)}.strong{border-color:var(--good);background:var(--good-wash)}
+.due{background:var(--amber-wash);border:2px solid var(--amber);border-radius:14px;padding:.6em .9em;margin-top:.6em}
+footer{position:fixed;left:0;right:0;bottom:0;height:6.5vh;display:flex;align-items:center;justify-content:space-between;padding:0 2vw;background:var(--card);border-top:2px solid var(--line);font-family:var(--mono);font-size:.55em;z-index:5}
+footer .keys{color:var(--muted)}
+#notes{position:fixed;right:0;top:0;bottom:6.5vh;width:min(34vw,520px);background:#FFFDF6;border-left:3px solid var(--amber);padding:1em 1.1em;overflow:auto;font-size:.62em;line-height:1.45;display:none;z-index:6}
+#notes.show{display:block}
+#notes h4{font-family:var(--display);font-size:1.25em;margin-bottom:.4em;color:var(--amber)}
+aside.tn{display:none}
+body.notes .slide{right:min(34vw,520px)}
+.ret{grid-template-columns:repeat(3,1fr);gap:.6em;flex:0}
+.ret .card{font-size:.82em;padding:.55em .7em}
+.pkt{display:flex;font-family:var(--mono);font-size:.7em;margin:.4em 0 .8em;flex:0}
+.pkt div{border:2px solid var(--blue-deep);padding:.5em .7em;background:var(--blue-wash)}
+.pkt div+div{border-left:none}
+.pkt .pay{flex:1;background:var(--amber-wash);border-color:var(--amber)}
+.pkt small{display:block;color:var(--muted);font-size:.8em}
+.hook{grid-template-columns:repeat(4,1fr);gap:.7em;flex:0}
+.hook .card{font-size:.85em}
+.hook .t{font-family:var(--mono);font-weight:600;color:var(--amber)}
+.fam{font-family:var(--mono);font-size:.62em;font-weight:600;background:var(--blue-deep);color:#fff;border-radius:99px;padding:.15em .7em;display:inline-block;margin-bottom:.2em}
+.side{font-size:.84em}.side .card{padding:.45em .7em}.side .card h3{font-size:1em}
+.cia{display:inline-block;font-family:var(--mono);font-size:.75em;font-weight:600;border-radius:6px;padding:0 .4em;margin-left:.2em;background:var(--bad-wash);color:var(--bad)}
+.ctl{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;margin:.3em 0}
+.ctl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.ctl label{font-size:.8em}
+#botsl{width:100%}
+.meter{position:relative;height:2.1em;background:var(--card);border:2px solid var(--line);border-radius:10px;overflow:hidden;display:flex;margin:.5em 0 .2em}
+.meter .r{background:var(--good)}.meter .b{background:var(--bad)}
+#ddcap{position:absolute;top:0;bottom:0;border-left:3px dashed var(--ink)}
+.legend{font-family:var(--mono);font-size:.55em;color:var(--muted)}
+.readout{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.5em .8em;margin-top:.4em}
+.readout span{display:block;font-size:.68em;color:var(--muted)}
+.readout b{font-family:var(--mono);font-size:1.9em;color:var(--good)}
+.readout b.never{color:var(--bad)}
+.readout em{display:block;font-size:.66em;font-style:normal}
+#wpane,#qsql{font-family:var(--mono);font-size:.62em;white-space:pre-wrap;background:#14202E;color:#D9E4F2;border-radius:10px;padding:.7em .9em;min-height:7.5em;margin:.4em 0}
+#qsql{min-height:0}
+#qsql .inp{background:#6B4A0E;color:#FFE2A8;border-radius:3px}
+#wres,#qout{font-size:.75em;font-weight:700;border-radius:8px;padding:.35em .6em}
+.bad{background:var(--bad-wash);color:var(--bad)}.good{background:var(--good-wash);color:var(--good)}.warn{background:var(--amber-wash);color:var(--amber)}
+.form{display:grid;grid-template-columns:auto 1fr;gap:.35em .6em;align-items:center;font-size:.75em}
+.form input{font-family:var(--mono);font-size:1em;padding:.3em .5em;border:2px solid var(--line);border-radius:8px}
+.tries{display:flex;gap:.4em;flex-wrap:wrap;margin-top:.4em}.tries button{font-size:.52em}
+.mail{font-size:.72em;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:.55em .8em;line-height:1.35}
+.mail .hd{font-family:var(--mono);font-size:.85em;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:.3em;margin-bottom:.3em}
+.mail u{text-decoration-color:var(--bad);text-decoration-thickness:2px}
+.flags{grid-template-columns:1fr 1fr;gap:.4em}.flags .card{font-size:.72em;padding:.4em .6em}
+.tl{display:flex;align-items:stretch;margin:.4em 0;font-size:.66em;flex:0}
+.tl div{flex:1;padding:.45em .6em;border:2px solid var(--line);background:var(--card)}
+.tl div+div{border-left:none}
+.tl .zd{background:var(--bad-wash);border-color:var(--bad)}
+.tl .up{background:var(--amber-wash);border-color:var(--amber)}
+.tl b{display:block;font-family:var(--mono);font-size:.9em}
+.ten{font-size:.62em}.ten td,.ten th{padding:.25em .45em}
+.inc{grid-template-columns:repeat(4,1fr);gap:.5em;flex:0}
+.inc .card{font-size:.68em;padding:.45em .6em}
+.inc .card h3{font-size:1.05em}
+.inc .hid{margin-top:.3em;font-weight:700;color:var(--good)}
+.diff{grid-template-columns:1fr 1fr;gap:.6em;flex:0}
+.diff .card{font-size:.82em;padding:.5em .7em}
+.ms .card{font-size:.74em;padding:.45em .65em}
+.ex .card{font-size:.84em}
+.ret .card h3{font-size:.98em}
+.timer.sm{margin:.3em 0}.timer.sm .clock{font-size:1.6em}
+.inc .card{font-size:.65em}
+.ms .card{font-size:.7em}
+.tk .card{font-size:.84em;padding:.6em .8em}.tk .pkt{margin:.3em 0 .2em}
+.ret .card{padding:.45em .65em}.ret{gap:.5em}
+
+</style>
+</head>
+<body class="">
+<section class="slide title">
+  <div class="eyebrow">IB Computer Science HL, A2.4.2 Network vulnerabilities</div>
+  <h1>Ten ways in</h1>
+  <p class="big" style="font-weight:500">How networks are attacked, and where the weak point is.</p>
+  <p class="prose" style="color:#C9D6EC">Wednesday 28 October. Today you learn the ten common network vulnerabilities in the guide, how each one is exploited, and what it damages. Next HL lesson: how to defend against them.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Today's learning objectives</div>
+  <h2>By the end of the lesson you can...</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>1. Describe</h3><p>each of the ten common network vulnerabilities: what it is and how it is exploited.</p></div>
+    <div class="card"><h3>2. Explain</h3><p>what each one damages: confidentiality, integrity or availability.</p></div>
+    <div class="card"><h3>3. Identify</h3><p>the vulnerability behind a real incident, and say what it targeted.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin-top:1em">Key questions</h3>
+  <ul>
+    <li>Where is the weak point: a machine, the connection, the software or a person?</li>
+    <li>How does the attacker use it?</li>
+    <li>What does the attack damage?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Retrieval, 7 minutes, no notes: A2.2.2 servers</div>
+  <h2>Which server does this job?</h2>
+  <div class="cols ret">
+    <div class="card reveal"><h3>Turns www.bbc.co.uk into an IP address</h3><p class="hid"><strong>DNS server</strong></p></div>
+    <div class="card reveal"><h3>Gives your laptop an IP address when it joins the network</h3><p class="hid"><strong>DHCP server</strong></p></div>
+    <div class="card reveal"><h3>Stores your email and passes it on to other mail servers</h3><p class="hid"><strong>Mail server</strong></p></div>
+    <div class="card reveal"><h3>Sits between the school and the internet, filtering and caching web traffic</h3><p class="hid"><strong>Proxy server</strong></p></div>
+    <div class="card reveal"><h3>Sends a web page when a browser asks for it</h3><p class="hid"><strong>Web server</strong></p></div>
+    <div class="card reveal"><h3>Holds shared documents that staff open from any computer</h3><p class="hid"><strong>File server</strong></p></div>
+  </div>
+  <div class="card reveal" style="margin-top:.7em;flex:0"><h3>Bridge: an attacker wants to stop the whole school working at once. Which server would they knock offline, and why?</h3><p class="hid">Several good answers: DNS (no names resolve, so nothing loads), DHCP (new devices get no address), the web or file server. The point: a single server that everyone depends on is a target. Today: how attackers do it.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Toolkit part 1, 5 minutes: how data actually travels</div>
+  <h2>Two ideas you need before the attacks</h2>
+  <div class="cols c2 tk" style="flex:0">
+    <div class="card">
+      <h3>1. Addresses and packets <span class="mono" style="font-size:.6em;color:var(--muted)">(full detail in A2.3)</span></h3>
+      <p>Every device on a network has an <strong>IP address</strong>. Data is split into <strong>packets</strong>. Each one carries where it came from and where it is going, and it passes through other devices (the Wi-Fi access point, routers) on the way.</p>
+      <div class="pkt"><div>From<small>192.168.1.24</small></div><div>To<small>151.101.0.81</small></div><div class="pay">Payload: the data itself<small>for example, your password</small></div></div>
+    </div>
+    <div class="card">
+      <h3>2. Encryption <span class="mono" style="font-size:.6em;color:var(--muted)">(full detail in A2.4.4)</span></h3>
+      <p>Encryption scrambles the payload so that only a device with the right <strong>key</strong> can turn it back into readable data. Anyone else on the path sees nonsense.</p>
+      <p><strong>HTTPS</strong> is HTTP with encryption (TLS). <strong>HTTP</strong> has none: the payload travels as plain text.</p>
+    </div>
+  </div>
+  <div class="cols c2 tk" style="flex:0;margin-top:.6em">
+    <div class="card reveal"><h3>Who can read an HTTP payload on café Wi-Fi?</h3><p class="hid">Any device the packets pass through, or anyone listening on the same Wi-Fi.</p></div>
+    <div class="card reveal"><h3>A server answers every packet it receives. Why could that be a problem?</h3><p class="hid">Send it far more packets than it can answer and real users get nothing.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Toolkit part 2, 3 minutes: what a web page really is</div>
+  <h2>Two more ideas, for the web attacks</h2>
+  <div class="cols c2" style="flex:0">
+    <div class="card">
+      <h3>3. Scripts in web pages</h3>
+      <p>A web page is not just text. It can contain <strong>scripts</strong> (small JavaScript programs) that your browser runs automatically as soon as the page loads. You never click "run".</p>
+    </div>
+    <div class="card">
+      <h3>4. Session cookies</h3>
+      <p>After you log in, the site gives your browser a <strong>session cookie</strong>: a token that says "this is Maya, already logged in". Anyone who copies that token is logged in as you, with no password needed.</p>
+    </div>
+  </div>
+  <div class="card reveal" style="flex:0;margin-top:.8em"><h3>Why would an attacker want your session cookie?</h3><p class="hid">It works like your login. They become you on that site.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Hook, 3 minutes</div>
+  <h2>One Monday at a school</h2>
+  <div class="cols hook">
+    <div class="card"><p class="t">08:10</p><p>The school website and homework portal will not load. The server is running, but it is flooded with requests from thousands of home routers and cameras around the world.</p></div>
+    <div class="card"><p class="t">09:30</p><p>A teacher gets an email "from IT": <em>your password expires today, click here to keep your account</em>. She clicks and types her password.</p></div>
+    <div class="card"><p class="t">11:00</p><p>Every file on the shared drive is renamed <span class="mono">.locked</span>. A note demands payment. It started on a laptop that had skipped updates for a year.</p></div>
+    <div class="card"><p class="t">13:15</p><p>The school's online shop lists every parent's name and address when someone types a strange line into the search box.</p></div>
+  </div>
+  <p class="big" style="margin-top:.8em;font-size:1.2em">In pairs: what do you think happened each time? We name all four at the end of the lesson.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Words we need, 3 minutes</div>
+  <h2>Vulnerability, attack, and what gets damaged</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>Vulnerability</h3><p>A weakness in hardware, software, configuration or human behavior that an attacker can exploit.</p></div>
+    <div class="card"><h3>Exploit</h3><p>To use the weakness, for example to get in without permission, steal data or stop a service.</p></div>
+    <div class="card"><h3>Attack vector</h3><p>The route the attacker uses: an email, a web form, the Wi-Fi, an old program.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin:.9em 0 .3em">The CIA triad: the three things an attack can damage</h3>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>Confidentiality</h3><p>Only the right people can <strong>read</strong> the data.</p></div>
+    <div class="card"><h3>Integrity</h3><p>Nobody can <strong>change</strong> the data without permission.</p></div>
+    <div class="card"><h3>Availability</h3><p>The system <strong>works</strong> when people need it.</p></div>
+  </div>
+  <p class="prose">Every vulnerability today is labeled with what it damages most: C, I or A. Many attacks hit more than one.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Weak point 1 of 5: availability</div>
+  <h2>DDoS: distributed denial of service <span class="cia">A</span></h2>
+  <div class="cols c2">
+    <div class="side">
+      <p><strong>What it is:</strong> many devices flood a server or network with traffic at the same time, so it runs out of capacity and <strong>real users cannot get service</strong>.</p>
+      <p><strong>How:</strong> the attacker controls a <strong>botnet</strong>: thousands of infected devices (computers, routers, cameras, even rented cloud servers) whose owners do not know.</p>
+      <p><strong>Distributed</strong> = from many sources. A plain DoS comes from one machine.</p>
+      <div class="card reveal" style="margin-top:.5em"><h3>Real case</h3><p class="hid">February 2023: Cloudflare stopped an attack peaking at 71 million requests per second, from over 30,000 IP addresses of hijacked cloud servers.</p></div>
+    </div>
+    <div class="card" id="ddos">
+      <h3>Flood the school web server</h3>
+      <label class="legend">Infected devices in the botnet: <b id="botv">0</b></label>
+      <input id="botsl" type="range" min="0" max="2000" step="20" value="0">
+      <div class="meter"><div class="r" id="ddbarR"></div><div class="b" id="ddbar"></div><div id="ddcap"></div></div>
+      <div class="legend">green: real users (300 requests/s) &nbsp; red: botnet (5 requests/s per device) &nbsp; dashed line: what the server can answer (1,000/s)</div>
+      <div class="readout"><span>Real requests answered</span><b id="ddout">100%</b><em id="ddnote"></em></div>
+      <div class="ctl"><button id="ddblock">Block one attacking address</button><button id="ddreset">Reset</button></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Weak point 2 of 5: data on the move</div>
+  <h2>Insecure protocols and man-in-the-middle <span class="cia">C</span><span class="cia">I</span></h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Insecure network protocols</h3><p>Older protocols send everything, including passwords, as <strong>plain text</strong>, with no encryption. Anyone who captures the packets can read them.</p>
+      <p class="mono" style="font-size:.8em">Telnet (remote control of a computer) &rarr; SSH<br>FTP (file transfer) &rarr; SFTP<br>HTTP (web pages) &rarr; HTTPS</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Man-in-the-middle (MitM)</h3><p>The attacker secretly sits <strong>between two devices</strong> and relays their messages. Both think they are talking directly. The attacker can <strong>read</strong> and <strong>change</strong> what passes through.</p>
+      <p style="font-size:.85em">Typical route: a fake Wi-Fi hotspot called "Cafe_Free_WiFi", or a badly secured public network.</p></div>
+    </div>
+    <div class="card" id="wire">
+      <h3>You log in and pay on café Wi-Fi. The attacker in the middle sees:</h3>
+      <div class="ctl"><button data-w="http">Site uses HTTP</button><button data-w="https">Site uses HTTPS</button><button id="walter">Attacker changes the payment</button></div>
+      <div id="wpane"></div>
+      <p id="wres"></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Weak point 3 of 5: people and passwords</div>
+  <h2>Phishing and weak authentication <span class="cia">C</span></h2>
+  <div class="cols c2">
+    <div>
+      <div class="mail">
+        <div class="hd">From: IT Support &lt;helpdesk@schooI-it-support.com&gt;<br>Subject: URGENT: your password expires today</div>
+        <p>Dear user,</p>
+        <p>Your account will be <u>closed in 2 hours</u>. To keep your files, confirm your password now:</p>
+        <p><u>https://school-login.account-check.net</u></p>
+        <p>IT Team</p>
+      </div>
+      <div class="cols flags" style="margin-top:.5em">
+        <div class="card reveal"><h3>Sender</h3><p class="hid">"schooI" with a capital I, not the school's real domain.</p></div>
+        <div class="card reveal"><h3>Pressure</h3><p class="hid">"Urgent", "2 hours": rushing you so you do not check.</p></div>
+        <div class="card reveal"><h3>Link</h3><p class="hid">The real domain is account-check.net, not the school.</p></div>
+        <div class="card reveal"><h3>Request</h3><p class="hid">Real IT never asks you to type your password through a link.</p></div>
+      </div>
+    </div>
+    <div class="side">
+      <div class="card"><h3>Phishing</h3><p>A message that <strong>pretends to be from someone trusted</strong> (bank, school, delivery company) to trick a person into giving away passwords or payment details, or into opening malware. It attacks <strong>people</strong>, not machines: <em>social engineering</em>.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Weak authentication</h3><p>Easy-to-guess, reused or <strong>default</strong> passwords (admin / admin on a router or camera), and no second check such as a phone code.</p>
+      <p style="font-size:.88em">Exploited by <strong>brute force</strong> (try every option), <strong>dictionary attacks</strong> (try common passwords) and <strong>credential stuffing</strong> (try passwords leaked from another site).</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Weak point 4 of 5: software, part 1</div>
+  <h2>Malware: malicious software <span class="cia">C</span><span class="cia">I</span><span class="cia">A</span></h2>
+  <div class="cols c2">
+    <table style="font-size:.85em">
+      <tr><th>Type</th><th>What it does</th></tr>
+      <tr><td><strong>Virus</strong></td><td>attaches to a file or program; spreads when that is run</td></tr>
+      <tr><td><strong>Worm</strong></td><td>copies itself across the network with no user action</td></tr>
+      <tr><td><strong>Trojan</strong></td><td>pretends to be useful software</td></tr>
+      <tr><td><strong>Ransomware</strong></td><td>encrypts your files and demands payment</td></tr>
+      <tr><td><strong>Spyware</strong></td><td>secretly records what you do, e.g. keystrokes</td></tr>
+    </table>
+    <div class="side">
+      <p><strong>How it arrives:</strong> phishing attachments, infected downloads and websites, USB drives, and flaws in software.</p>
+      <div class="card reveal" style="margin-top:.5em"><h3>"invoice.pdf.exe" arrives by email. Which type?</h3><p class="hid">A trojan: it pretends to be a document but is a program.</p></div>
+      <div class="card reveal" style="margin-top:.5em"><h3>It infects one laptop, then every computer on the school network within an hour, with nobody clicking anything. Which type?</h3><p class="hid">A worm: it spreads by itself.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Weak point 4 of 5: software, part 2</div>
+  <h2>Unpatched software and zero-day exploits <span class="cia">C</span><span class="cia">I</span><span class="cia">A</span></h2>
+  <p>A <strong>patch</strong> is an update that fixes a flaw. Follow one flaw through its life:</p>
+  <div class="tl">
+    <div class="zd"><b>Zero-day</b>Attackers find the flaw. The developer does not know. <strong>No patch exists.</strong></div>
+    <div><b>Patch released</b>The developer learns of it and publishes a fix.</div>
+    <div class="up"><b>Unpatched</b>The fix exists, but the device has not installed it. The flaw is now <strong>public</strong>.</div>
+  </div>
+  <div class="cols c3" style="flex:0;margin-top:.5em;gap:.6em">
+    <div class="card reveal"><h3>Why are zero-days so dangerous?</h3><p class="hid">Nobody can install a fix that does not exist, and antivirus may not recognize the attack yet.</p></div>
+    <div class="card reveal"><h3>Why is an unpatched device in more danger after the patch is released?</h3><p class="hid">The patch shows everyone where the flaw is. Attackers scan the internet for devices that have not updated.</p></div>
+    <div class="card reveal"><h3>Real case: WannaCry, May 2017</h3><p class="hid">A ransomware worm used a Windows flaw Microsoft had patched two months earlier. Unpatched computers, including many in the UK's NHS, were locked.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Weak point 5 of 5: web applications that trust what users type</div>
+  <h2>SQL injection and cross-site scripting <span class="cia">C</span><span class="cia">I</span></h2>
+  <div class="cols c2">
+    <div class="card" id="sqli">
+      <h3>Try to log in to the bookshop</h3>
+      <div class="form"><label>username</label><input id="qu" value="maya"><label>password</label><input id="qp" value="Sunshine2009"></div>
+      <div class="ctl" style="margin-top:.4em"><button id="qgo">Log in</button></div>
+      <p class="legend" style="margin:.2em 0 0">The program pastes what you type (amber) straight into this query:</p>
+      <div id="qsql"></div>
+      <p id="qout"></p>
+      <div class="tries"><button data-try="maya|guess">wrong password</button><button data-try="admin'--|anything">username: admin'--</button><button data-try="x|' OR '1'='1">password: ' OR '1'='1</button><button data-try="maya'|x">a single quote</button></div>
+    </div>
+    <div class="side">
+      <div class="card"><h3>SQL injection</h3><p>The attacker types <strong>SQL code</strong> into an input (login form, search box). Because the program builds its query by joining text, the input <strong>changes the meaning of the query</strong>. The database can then reveal, change or delete data.</p>
+      <p style="font-size:.85em"><span class="mono">--</span> starts a comment in SQL: the rest of the line is ignored. <span class="mono">'1'='1'</span> is always true.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Cross-site scripting (XSS)</h3><p>The attacker posts a <strong>script</strong> into a page other people view (a comment, a review). The site shows it without checking, so it <strong>runs in every visitor's browser</strong>, for example to steal their session cookie.</p>
+      <p class="mono" style="font-size:.72em">Comment: Great post! &lt;script&gt;send(document.cookie)&lt;/script&gt;</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">The ten on one page</div>
+  <h2>Where the weak point is</h2>
+  <table class="ten">
+    <tr><th>Vulnerability</th><th>What it is, in one line</th><th>Weak point</th><th>Damages</th></tr>
+    <tr><td>DDoS</td><td>A botnet floods a target with traffic so real users get no service</td><td>Server or network capacity</td><td>A</td></tr>
+    <tr><td>Insecure protocols</td><td>Telnet, FTP, HTTP send data, including passwords, as plain text</td><td>Data on the move</td><td>C, I</td></tr>
+    <tr><td>Man-in-the-middle</td><td>An attacker secretly relays, reads and changes traffic between two devices</td><td>Data on the move</td><td>C, I</td></tr>
+    <tr><td>Phishing</td><td>A fake trusted message tricks a person into giving details or opening malware</td><td>People</td><td>C</td></tr>
+    <tr><td>Weak authentication</td><td>Guessable, reused or default passwords, no second factor</td><td>Accounts</td><td>C</td></tr>
+    <tr><td>Malware</td><td>Viruses, worms, trojans, ransomware, spyware</td><td>Devices and software</td><td>C, I, A</td></tr>
+    <tr><td>Unpatched software</td><td>A known, already fixed flaw left open because updates were not installed</td><td>Software</td><td>C, I, A</td></tr>
+    <tr><td>Zero-day exploit</td><td>An attack on a flaw the developer does not know about, so no patch exists</td><td>Software</td><td>C, I, A</td></tr>
+    <tr><td>SQL injection</td><td>SQL typed into an input changes the program's database query</td><td>Web application and database</td><td>C, I (and A)</td></tr>
+    <tr><td>Cross-site scripting</td><td>A script posted into a page runs in other visitors' browsers</td><td>Web application and its users</td><td>C, I</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Spot the difference, 4 minutes</div>
+  <h2>Four pairs students mix up</h2>
+  <div class="cols diff">
+    <div class="card reveal"><h3>Virus or worm?</h3><p class="hid">A virus needs a person to run the infected file. A worm spreads across the network by itself.</p></div>
+    <div class="card reveal"><h3>Unpatched software or zero-day?</h3><p class="hid">Unpatched: a fix exists but was not installed. Zero-day: no fix exists yet; the developer may not even know.</p></div>
+    <div class="card reveal"><h3>Phishing or man-in-the-middle?</h3><p class="hid">Phishing tricks the person into handing data over. MitM captures data in transit; the person does nothing wrong.</p></div>
+    <div class="card reveal"><h3>SQL injection or XSS?</h3><p class="hid">Both abuse user input. SQL injection attacks the database on the server; XSS runs code in other users' browsers.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Incident room, 14 minutes, in pairs</div>
+  <h2>Name the vulnerability, the weak point, and C, I or A</h2>
+  <div class="cols inc">
+    <div class="card reveal"><h3>1</h3><p>Every evening at 19:00 a game's login servers stop responding. Logs show requests from 40,000 home routers in 60 countries.</p><p class="hid">DDoS (botnet). Server capacity. A.</p></div>
+    <div class="card reveal"><h3>2</h3><p>A hotel guest joins "Hotel_Free_WiFi", set up by another guest. Their login to an HTTP site is captured.</p><p class="hid">MitM through a fake hotspot, plus an insecure protocol (HTTP). Data on the move. C.</p></div>
+    <div class="card reveal"><h3>3</h3><p>The finance office gets an email that looks like it is from the head of school, asking for an urgent bank transfer.</p><p class="hid">Phishing (targeted at one person). People. C and money.</p></div>
+    <div class="card reveal"><h3>4</h3><p>A hospital's systems are locked by ransomware that spread through a Windows flaw fixed two months earlier.</p><p class="hid">Malware (ransomware worm) through unpatched software. Software. A (and C).</p></div>
+    <div class="card reveal"><h3>5</h3><p>Typing <span class="mono">' OR '1'='1</span> into an online shop's search box lists every customer's address.</p><p class="hid">SQL injection. Web application and database. C.</p></div>
+    <div class="card reveal"><h3>6</h3><p>A forum post hides a script. Everyone who opens the thread is logged out, and their accounts start posting spam.</p><p class="hid">XSS: the script stole their session cookies. Web application and its users. C, I.</p></div>
+    <div class="card reveal"><h3>7</h3><p>An attacker watches a family's baby monitor after logging in with username <span class="mono">admin</span>, password <span class="mono">admin</span>.</p><p class="hid">Weak authentication (default password). Accounts. C.</p></div>
+    <div class="card reveal"><h3>8</h3><p>Attackers use a browser flaw that the browser's developer did not know about. No update exists yet.</p><p class="hid">Zero-day exploit. Software. C, I, A.</p></div>
+  </div>
+  <div class="timer sm" data-min="12"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exam technique, 3 minutes</div>
+  <h2>Naming is not describing</h2>
+  <div class="card" style="flex:0"><p><strong>Describe how SQL injection could affect an online shop. [3]</strong></p></div>
+  <div class="cols c2 ex" style="margin-top:.6em">
+    <div class="card weak"><h3>Answer A</h3><p>"SQL injection is when hackers attack the database and steal data."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>1 mark at most:</strong> it names the effect but never says how.</span></p></div>
+    <div class="card strong"><h3>Answer B</h3><p>"The attacker types SQL code into an input such as the search box. The shop builds its query from that input, so the code changes what the query does. The attacker can then read every customer's details, which breaks confidentiality."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>3 marks:</strong> what it is, how it is exploited, what it damages, all in the shop's context.</span></p></div>
+  </div>
+  <p class="big" style="font-size:1.1em;margin-top:.6em">What it is. How it is exploited. What it damages.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exit ticket, 12 minutes, on your own, on paper</div>
+  <h2>Check your learning</h2>
+  <div class="card" style="flex:0;font-size:.86em">
+    <p><strong>1.</strong> State two examples of common network vulnerabilities. [2]</p>
+    <p><strong>2.</strong> Describe how a man-in-the-middle attack could happen on a public Wi-Fi network. [3]</p>
+    <p><strong>3.</strong> A school's web server stops responding on exam results day. Explain why blocking the IP address of one attacking device does not stop a DDoS attack. [2]</p>
+    <p><strong>4.</strong> Distinguish between unpatched software and a zero-day exploit. [3]</p>
+  </div>
+  <div class="timer sm" data-min="12"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Wrap-up and homework, 5 minutes</div>
+  <h2>Back to Monday at the school</h2>
+  <div class="cols c4" style="flex:0;gap:.6em">
+    <div class="card reveal"><h3>08:10 website down</h3><p class="hid">DDoS by a botnet of routers and cameras. A.</p></div>
+    <div class="card reveal"><h3>09:30 "IT" email</h3><p class="hid">Phishing. C.</p></div>
+    <div class="card reveal"><h3>11:00 files locked</h3><p class="hid">Ransomware (malware) through unpatched software. A.</p></div>
+    <div class="card reveal"><h3>13:15 shop leaks addresses</h3><p class="hid">SQL injection. C.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:.5em;flex:0">
+    <div class="due"><strong>Homework, due Wed 4 Nov, 12:45 (start of the lesson):</strong> read the InThinking eBook page "A 2.4.2 Network Vulnerabilities" and do its 10-question quiz. Bring your score.<br><strong>First priority this week:</strong> IA Criteria A, B and C revised, due Fri 30 Oct, 12:25.</div>
+    <div class="card"><h3>Next HL lesson: A2.4.3 countermeasures</h3><p>For each of today's ten: how do you stop it? Start thinking about one defense for each.</p></div>
+  </div>
+</section>
+
+<footer><span id="pos"></span><span class="keys">arrows: move &nbsp; click a card to reveal it</span></footer>
+<div id="notes" hidden><div id="ntext"></div></div><span id="bstate" hidden></span>
+<script>
+// Three interactives: DDoS flood, what the attacker sees on the wire, SQL injection login
+(function(){
+  // ---------- DDoS ----------
+  const dd=document.getElementById('ddos');
+  if(dd){
+    const CAP=1000, REAL=300, PER=5;           // server handles 1000 req/s; real users send 300 req/s; each bot 5 req/s
+    let bots=0, blocked=0;
+    const sl=dd.querySelector('#botsl'), bv=dd.querySelector('#botv');
+    const out=dd.querySelector('#ddout'), bar=dd.querySelector('#ddbar'), barR=dd.querySelector('#ddbarR'), note=dd.querySelector('#ddnote');
+    const paint=()=>{
+      const live=Math.max(0,bots-blocked), bad=live*PER, total=REAL+bad;
+      const served=Math.min(1,CAP/total);
+      bv.textContent=bots.toLocaleString('en-US');
+      out.textContent=Math.round(served*100)+'%';
+      out.classList.toggle('never',served<.5);
+      const scale=Math.max(total,CAP);
+      barR.style.width=(REAL/scale*100)+'%';
+      bar.style.width=(bad/scale*100)+'%';
+      dd.querySelector('#ddcap').style.left=(CAP/scale*100)+'%';
+      note.textContent= bots===0?'Normal day: the server has spare capacity.'
+        : served>=1?'Busy, but every real request still gets an answer.'
+        : 'Overloaded: '+(total).toLocaleString('en-US')+' requests per second arrive, the server can answer '+CAP.toLocaleString('en-US')+'. Real users are timed out.'+(blocked?' You blocked '+blocked+' address'+(blocked>1?'es':'')+'.':'');
+    };
+    sl.oninput=()=>{bots=Number(sl.value);blocked=Math.min(blocked,bots);paint()};
+    dd.querySelector('#ddblock').onclick=()=>{if(blocked<bots)blocked++;paint()};
+    dd.querySelector('#ddreset').onclick=()=>{bots=0;blocked=0;sl.value=0;paint()};
+    paint();
+  }
+
+  // ---------- What the attacker sees ----------
+  const w=document.getElementById('wire');
+  if(w){
+    let mode='http', altered=false;
+    const pane=w.querySelector('#wpane'), res=w.querySelector('#wres');
+    const hex=n=>{let s='';for(let i=0;i<n;i++){s+=('0'+Math.floor(Math.random()*256).toString(16)).slice(-2)+(i%16===15?'\n':' ')}return s};
+    const garbage=hex(64);
+    const paint=()=>{
+      w.querySelectorAll('[data-w]').forEach(b=>b.classList.toggle('on',b.dataset.w===mode));
+      if(mode==='http'){
+        pane.textContent='POST /login HTTP/1.1\nHost: bookshop.example\n\nuser=maya.k&pass=Sunshine2009\n\nPOST /pay HTTP/1.1\namount='+(altered?'2000':'20')+'&to='+(altered?'ATTACKER-ACCT':'bookshop');
+        res.textContent=altered?'The attacker changed the payment on its way. The server cannot tell. (integrity)':'The attacker reads the password as plain text. (confidentiality)';
+      }else{
+        pane.textContent='TLS 1.3  Application Data\n'+garbage;
+        res.textContent=altered?'Changing encrypted bytes breaks the message: the server rejects it. The attack fails.':'The attacker sees only that you talked to bookshop.example. The content is unreadable.';
+      }
+      res.className=(mode==='http')?'bad':'good';
+    };
+    w.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{mode=b.dataset.w;altered=false;paint()});
+    w.querySelector('#walter').onclick=()=>{altered=!altered;paint()};
+    paint();
+  }
+
+  // ---------- SQL injection ----------
+  const q=document.getElementById('sqli');
+  if(q){
+    const ROWS=[{username:'admin',password:'Xk9#pL2q'},{username:'maya',password:'Sunshine2009'},{username:'leo',password:'goal!goal'}];
+    const U=q.querySelector('#qu'), P=q.querySelector('#qp'), sqlv=q.querySelector('#qsql'), outv=q.querySelector('#qout');
+    // tiny evaluator for: comparisons of username/password/'literal', AND, OR, parentheses, -- comments
+    function tokens(s){
+      const t=[];let i=0;
+      while(i<s.length){
+        const c=s[i];
+        if(/\s/.test(c)){i++;continue}
+        if(s.startsWith('--',i))break;
+        if(c==="'"){let j=i+1,v='';while(j<s.length&&s[j]!=="'"){v+=s[j];j++}if(j>=s.length)throw 'unclosed quote';t.push({k:'str',v});i=j+1;continue}
+        if(c==='='||c==='('||c===')'){t.push({k:c});i++;continue}
+        const m=/^[A-Za-z_][A-Za-z_0-9]*|^[0-9]+/.exec(s.slice(i));
+        if(m){const w=m[0].toUpperCase();
+          if(w==='AND'||w==='OR')t.push({k:w});
+          else if(/^[0-9]+$/.test(m[0]))t.push({k:'str',v:m[0]});
+          else t.push({k:'col',v:m[0].toLowerCase()});
+          i+=m[0].length;continue}
+        throw 'unexpected "'+c+'"';
+      }
+      return t;
+    }
+    function parse(t){
+      let p=0;
+      const val=row=>{const x=t[p++];if(!x)throw 'query ends too early';
+        if(x.k==='str')return x.v; if(x.k==='col'){if(!(x.v in row))throw 'no column '+x.v;return row[x.v]} throw 'syntax error'};
+      const cmp=row=>{if(t[p]&&t[p].k==='('){p++;const r=or(row);if(!t[p]||t[p].k!==')')throw 'missing )';p++;return r}
+        const a=val(row);if(!t[p]||t[p].k!=='=')throw 'syntax error near the end';p++;const b=val(row);return a===b};
+      const and=row=>{let r=cmp(row);while(t[p]&&t[p].k==='AND'){p++;const s=cmp(row);r=r&&s}return r};
+      const or=row=>{let r=and(row);while(t[p]&&t[p].k==='OR'){p++;const s=and(row);r=r||s}return r};
+      return row=>{p=0;const r=or(row);if(p<t.length)throw 'syntax error';return r};
+    }
+    const run=()=>{
+      const where="username = '"+U.value+"' AND password = '"+P.value+"'";
+      sqlv.innerHTML='';
+      const pre=document.createElement('span');pre.textContent="SELECT * FROM users WHERE username = '";
+      const add=(txt,cls)=>{const s=document.createElement('span');s.textContent=txt;if(cls)s.className=cls;sqlv.appendChild(s)};
+      sqlv.appendChild(pre);add(U.value,'inp');add("' AND password = '");add(P.value,'inp');add("'");
+      try{
+        const f=parse(tokens(where));
+        const hits=ROWS.filter(f);
+        if(hits.length===0){outv.textContent='Login failed: no matching user.';outv.className='good'}
+        else if(hits.length===1&&hits[0].username===U.value&&hits[0].password===P.value){outv.textContent='Logged in as '+hits[0].username+' (correct password).';outv.className='good'}
+        else{outv.textContent='Logged in as '+hits[0].username+' WITHOUT the right password. The query returned '+hits.length+' row'+(hits.length>1?'s':'')+'.';outv.className='bad'}
+      }catch(e){outv.textContent='Database error: '+e+'. (Error messages like this tell an attacker the input reaches the query.)';outv.className='warn'}
+    };
+    q.querySelector('#qgo').onclick=run;
+    q.querySelectorAll('[data-try]').forEach(b=>b.onclick=()=>{const [u,p]=b.dataset.try.split('|');U.value=u;P.value=p;run()});
+    run();
+  }
+})();
+
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('cur',k===cur));
+  document.getElementById('pos').textContent='A2.4.2  '+(cur+1)+' / '+slides.length;
+  const n=slides[cur].querySelector('aside.tn');document.getElementById('ntext').textContent=n?n.textContent:'';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+function board(){document.getElementById('bstate').textContent=document.body.classList.contains('board')?'(ON)':'(off)'}
+document.addEventListener('click',e=>{const r=e.target.closest('.reveal');if(r)r.classList.toggle('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(false){document.body.classList.toggle('board');board()}
+  else if(false){document.getElementById('notes').classList.toggle('show');document.body.classList.toggle('notes')}
+  else if(k==='r')slides[cur].querySelectorAll('.reveal').forEach(x=>x.classList.add('open'))
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+});
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=Number(t.dataset.min)*60;let left=total,iv=null;
+  t.innerHTML='<span class="clock"></span><button class="go">Start</button><button class="rs">Reset</button>';
+  const c=t.querySelector('.clock'),go=t.querySelector('.go');
+  const paint=()=>{c.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');c.classList.toggle('out',left===0)};
+  const stop=()=>{clearInterval(iv);iv=null;go.textContent='Start'};
+  go.onclick=()=>{if(iv){stop();return}if(left===0)left=total;go.textContent='Pause';
+    iv=setInterval(()=>{left=Math.max(0,left-1);paint();if(left===0)stop()},1000)};
+  t.querySelector('.rs').onclick=()=>{stop();left=total;paint()};
+  paint();
+});
+board();show((parseInt(location.hash.slice(1))||1)-1);
+
+</script>
+</body>
+</html>
