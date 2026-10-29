@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.2.4 Walls inside the network</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+
+:root{--paper:#F4F6F9;--card:#FFFFFF;--ink:#1B2A3A;--muted:#5B6B7E;--line:#C6D2E0;--blue:#2B5CAD;--blue-deep:#1E3F76;--blue-wash:#E3EAF6;--amber:#B97A14;--amber-wash:#F7EDD9;--good:#2F7D52;--good-wash:#E1F0E7;--bad:#B54434;--bad-wash:#F6E4E0;--display:"Bricolage Grotesque",Verdana,sans-serif;--body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;--mono:"IBM Plex Mono","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.75vw,30px);line-height:1.4;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;padding:4.2vh 5vw 9vh;flex-direction:column;overflow:auto}
+.slide.cur{display:flex}
+.slide.title{background:var(--blue-deep);color:#fff;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.62em;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.title .eyebrow{color:#F3C56B}
+h1{font-family:var(--display);font-weight:800;font-size:3.1em;line-height:1.02;margin:.15em 0 .25em}
+h2{font-family:var(--display);font-weight:800;font-size:1.85em;line-height:1.08;margin:.1em 0 .45em}
+p{margin:.35em 0}
+.prose{color:var(--muted);max-width:60em}
+body.board .prose{display:none}
+.cols{display:grid;gap:1.2em;flex:1;align-items:start}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.8em .9em}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.12em;margin-bottom:.25em}
+.reveal{cursor:pointer;position:relative}
+.reveal .hid{visibility:hidden}
+.reveal.open .hid{visibility:visible}
+.reveal:not(.open)::after{content:"click to reveal";position:absolute;right:.7em;bottom:.5em;font-family:var(--mono);font-size:.55em;color:var(--amber)}
+.reveal.open{border-color:var(--good);background:var(--good-wash)}
+.big{font-family:var(--display);font-weight:800;font-size:1.5em}
+.mono{font-family:var(--mono)}
+svg.t{width:100%;height:auto;max-height:30vh;display:block}
+svg.t line{stroke:var(--blue);stroke-width:4;stroke-linecap:round}
+svg.t circle{fill:#fff;stroke:var(--blue-deep);stroke-width:3.5}
+svg.t rect{fill:var(--blue-wash);stroke:var(--blue-deep);stroke-width:3.5}
+.timer{display:flex;align-items:center;gap:.6em;margin:.5em 0}
+.timer .clock{font-family:var(--mono);font-weight:600;font-size:2.6em;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.05em .4em;min-width:4.2em;text-align:center}
+.timer .clock.out{background:var(--bad)}
+button{font-family:var(--mono);font-size:.62em;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.45em .9em}
+ol,ul{margin:.3em 0 .3em 1.2em;padding:0}li{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:.78em}
+th,td{border:2px solid var(--line);padding:.35em .5em;text-align:left;vertical-align:top;background:var(--card)}
+th{background:var(--blue-wash);font-family:var(--display)}
+td.reveal:not(.open)::after{content:"?";right:.5em;bottom:.2em;font-size:1em}
+.weak{border-color:var(--bad);background:var(--bad-wash)}.strong{border-color:var(--good);background:var(--good-wash)}
+.due{background:var(--amber-wash);border:2px solid var(--amber);border-radius:14px;padding:.6em .9em;margin-top:.6em}
+footer{position:fixed;left:0;right:0;bottom:0;height:6.5vh;display:flex;align-items:center;justify-content:space-between;padding:0 2vw;background:var(--card);border-top:2px solid var(--line);font-family:var(--mono);font-size:.55em;z-index:5}
+footer .keys{color:var(--muted)}
+#notes{position:fixed;right:0;top:0;bottom:6.5vh;width:min(34vw,520px);background:#FFFDF6;border-left:3px solid var(--amber);padding:1em 1.1em;overflow:auto;font-size:.62em;line-height:1.45;display:none;z-index:6}
+#notes.show{display:block}
+#notes h4{font-family:var(--display);font-size:1.25em;margin-bottom:.4em;color:var(--amber)}
+aside.tn{display:none}
+body.notes .slide{right:min(34vw,520px)}
+.ret{grid-template-columns:repeat(3,1fr);gap:.5em;flex:0}
+.ret .card{font-size:.8em;padding:.45em .65em}.ret .card h3{font-size:.98em}
+.ctl{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;margin:.3em 0}
+.ctl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.segsim{flex:0}
+.bld{display:flex;flex-direction:column;gap:.3em;margin:.4em 0}
+.floor{display:flex;align-items:center;gap:.35em;padding:.3em .5em;border:2px solid var(--line);border-radius:10px;background:var(--card)}
+.floor .fl{font-family:var(--mono);font-size:.5em;color:var(--muted);width:7.5em;flex:0 0 auto}
+.dev{font-family:var(--mono);font-weight:600;font-size:.6em;width:2.6em;height:2.6em;border-radius:8px;border:3px solid var(--line);background:#fff;color:var(--ink);padding:0;cursor:pointer;transition:background .15s,transform .15s}
+.segsim.seg .dev{border-color:var(--gc);color:var(--gc)}
+.dev.src{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep);transform:scale(1.12)}
+.dev.hit{background:var(--amber-wash);border-color:var(--amber)}
+.segsim.seg .dev.hit{background:var(--gc);color:#fff}
+.dev.bad{background:var(--bad);color:#fff;border-color:var(--bad)}
+.dev.safe{outline:3px solid var(--good);outline-offset:1px}
+.sbar{display:flex;gap:.8em;align-items:center;flex-wrap:wrap}
+.sread{font-family:var(--mono);font-size:1.3em;font-weight:600;color:var(--blue-deep);min-width:7em}
+.snote{font-size:.68em;flex:1}
+.key{display:flex;gap:.8em;flex-wrap:wrap;font-family:var(--mono);font-size:.5em;color:var(--muted);margin-top:.2em}
+.key i{display:inline-block;width:.9em;height:.9em;border-radius:3px;vertical-align:-.1em;margin-right:.3em}
+.ip{font-family:var(--mono);font-size:1.5em;font-weight:600;margin:.2em 0 .3em}
+.ip .np{background:var(--blue-wash);color:var(--blue-deep);border-radius:6px;padding:0 .2em}
+.ip .hp{background:var(--amber-wash);color:var(--amber);border-radius:6px;padding:0 .2em}
+.nets{display:grid;grid-template-columns:1fr auto 1fr;gap:.6em;align-items:center;flex:0;margin:.4em 0}
+.net{border:2px solid var(--line);border-radius:12px;background:var(--card);padding:.45em .7em;font-size:.72em}
+.net h3{font-size:1em;margin-bottom:.2em}
+.net .mono{font-size:.85em}
+.rtr{text-align:center;font-family:var(--mono);font-size:.62em;font-weight:600;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.6em .7em;line-height:1.3}
+.cmp{font-size:.7em}.cmp td,.cmp th{padding:.3em .5em}
+.ex .card{font-size:.8em}
+.ms .card{font-size:.68em;padding:.45em .65em}
+.timer.sm{margin:.3em 0}.timer.sm .clock{font-size:1.6em}
+.wb{font-size:.82em}
+.url{font-family:var(--mono);font-size:.8em;word-break:break-all;background:var(--blue-wash);border-radius:8px;padding:.3em .5em;display:inline-block}
+.banner{background:var(--amber-wash);border:2px solid var(--amber);border-radius:12px;padding:.4em .8em;font-size:.8em;flex:0;margin-bottom:.6em}
+.dev{font-size:.72em;width:2.7em;height:2.1em}
+.floor{padding:.15em .5em}.bld{gap:.25em;margin:.3em 0}
+.sm2 .card{font-size:.8em;padding:.45em .7em}
+.ret .card{font-size:.76em}
+.banner{margin-bottom:.3em;padding:.3em .8em}
+.kq li{margin:.1em 0}
+.due{font-size:.8em}
+
+</style>
+</head>
+<body class="">
+<section class="slide title">
+  <div class="eyebrow">IB Computer Science SL + HL, A2.2.4 Network segmentation</div>
+  <h1>Walls inside the network</h1>
+  <p class="big" style="font-weight:500">Why big networks are split into parts, and the tools that split them.</p>
+  <p class="prose" style="color:#C9D6EC">Friday 30 October. Today you learn what network segmentation is, why it improves both performance and security, and the roles of segmenting, subnetting and VLANs. This completes A2.2 Network architecture.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Start of the lesson: IA hand-in, then today's learning objectives</div>
+  <div class="banner"><strong>Due now (12:25):</strong> IA Criteria A, B and C revised, on Classroom. Not in yet? Tell me now.</div>
+  <h2>By the end of the lesson you can...</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>1. Define</h3><p>network segmentation and say what it is for.</p></div>
+    <div class="card"><h3>2. Explain</h3><p>how segmentation improves performance, security and management, with the reason for each.</p></div>
+    <div class="card"><h3>3. Distinguish</h3><p>the roles of segmenting, subnetting and VLANs, and apply them to a real building.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin-top:.6em">Key questions</h3>
+  <ul class="kq">
+    <li>Why are networks divided into segments?</li>
+    <li>How does segmentation reduce congestion, and how does it improve security?</li>
+    <li>What are the roles of segmenting, subnetting and VLANs?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Retrieval, no notes: what you need for today</div>
+  <h2>Switches, routers, broadcasts</h2>
+  <div class="cols ret">
+    <div class="card reveal"><h3>Switch or router: forwards data between devices on the same LAN</h3><p class="hid"><strong>Switch</strong> (network interface layer, MAC addresses).</p></div>
+    <div class="card reveal"><h3>Switch or router: forwards packets between different networks, using IP addresses</h3><p class="hid"><strong>Router</strong> (internet layer).</p></div>
+    <div class="card reveal"><h3>What does a hardware firewall do?</h3><p class="hid">Checks traffic against <strong>rules</strong> and blocks what is not allowed.</p></div>
+    <div class="card reveal"><h3>A laptop joins the Wi-Fi and sends a DHCP Discover. Who receives it?</h3><p class="hid"><strong>Every device on the network</strong>: it is a broadcast. Only the DHCP server answers.</p></div>
+    <div class="card reveal"><h3>Tuesday: in which model does a central server control access to shared files?</h3><p class="hid"><strong>Client-server.</strong></p></div>
+    <div class="card reveal"><h3>Tuesday: name one weakness of that model</h3><p class="hid">The server is a <strong>single point of failure</strong> / a bottleneck under load.</p></div>
+  </div>
+  <div class="card reveal" style="margin-top:.6em;flex:0"><h3>Bridge: every broadcast reaches every device. What happens as a school grows from 50 devices to 1,000?</h3><p class="hid">Every device receives more and more messages that are not for it, so the network and the devices waste time on them: congestion. Today: how to stop that.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Hook: one flat network</div>
+  <h2>One building, 24 devices, one network</h2>
+  <div class="segsim" data-mode="flat">
+    <div class="ctl"><button data-m="flat">Flat network</button><button data-m="seg">Segmented: five VLANs</button><button class="sinfect">Infect a visitor's phone</button><button class="sreset">Reset</button></div>
+    <div class="bld"></div>
+    <div class="sbar"><span class="sread">-</span><span class="snote"></span></div>
+    <div class="key"><span><i style="background:#2F6FB5"></i>Sf Staff</span><span><i style="background:#3F8F5A"></i>St Students</span><span><i style="background:#8A4FB0"></i>Fi Finance</span><span><i style="background:#B7791F"></i>Ca Cameras</span><span><i style="background:#C2410C"></i>Gu Guests</span></div>
+  </div>
+  <div class="cols c2 sm2" style="flex:0;margin-top:.3em">
+    <div class="card reveal"><h3>What went wrong with the broadcast?</h3><p class="hid">All 23 other devices received it. On a flat network the whole building is <strong>one broadcast domain</strong>.</p></div>
+    <div class="card reveal"><h3>What went wrong with the infection?</h3><p class="hid">It moved from device to device until it reached finance: <strong>lateral movement</strong>. Nothing stood in the way.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Direct instruction with questioning: what segmentation is</div>
+  <h2>Network segmentation</h2>
+  <div class="card" style="flex:0"><p class="big" style="font-size:.95em"><strong>Dividing one network into smaller, separate parts (segments)</strong>, so that traffic stays inside its segment and anything that crosses between segments passes a <strong>boundary device</strong> (router, Layer 3 switch or firewall) where it can be checked or blocked.</p></div>
+  <div class="cols c3 sm2" style="flex:0;margin-top:.5em">
+    <div class="card reveal"><h3>Performance, because...</h3><p class="hid">each segment is a <strong>smaller broadcast domain</strong>: a broadcast stays inside its own segment, so each device receives less traffic and congestion falls.</p></div>
+    <div class="card reveal"><h3>Security, because...</h3><p class="hid">a breach is <strong>contained</strong> in one segment; access to a sensitive segment is restricted; an attacker cannot move freely, so the attack surface is smaller.</p></div>
+    <div class="card reveal"><h3>Management, because...</h3><p class="hid">each group gets its own <strong>rules</strong>, and a fault is found and fixed inside one segment, not the whole building.</p></div>
+  </div>
+  <p class="prose" style="margin-top:.4em">Common exam mistake: giving only the security reason.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Toolkit, 4 minutes: what is inside an IP address</div>
+  <h2>A network part and a host part</h2>
+  <div class="cols c2" style="flex:0">
+    <div class="card">
+      <p class="ip"><span class="np">10.20.30</span>.<span class="hp">15</span></p>
+      <p><strong>Network part</strong>: which network (subnet) the device is on. Like the street name.</p>
+      <p><strong>Host part</strong>: which device inside it. Like the house number.</p>
+      <p class="prose">The subnet mask tells a device where the network part ends. You do not calculate it.</p>
+    </div>
+    <div class="card">
+      <h3>A subnet = one range of addresses</h3>
+      <p class="mono" style="font-size:.85em"><span class="np">10.20.30</span>.1 to <span class="np">10.20.30</span>.254 &nbsp;Staff<br><span class="np">10.20.40</span>.1 to <span class="np">10.20.40</span>.254 &nbsp;Students</p>
+      <p>Same network part: same subnet. Different network part: different subnet.</p>
+    </div>
+  </div>
+  <div class="cols c2 sm2" style="flex:0;margin-top:.5em">
+    <div class="card reveal"><h3>Are 10.20.30.15 and 10.20.30.200 in the same subnet?</h3><p class="hid">Yes: same network part, 10.20.30.</p></div>
+    <div class="card reveal"><h3>Are 10.20.30.15 and 10.20.40.15 in the same subnet?</h3><p class="hid">No: the host parts match, but the network parts differ.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Direct instruction with questioning: subnetting</div>
+  <h2>Subnetting divides the network by IP address</h2>
+  <div class="nets">
+    <div class="net"><h3>Staff subnet</h3><p class="mono">10.20.30.x</p><p>PCs, printers. Talk to each other directly through the switch.</p></div>
+    <div class="rtr">ROUTER<br>+ firewall rules<br><span style="font-weight:400">forwards between subnets<br>does not forward broadcasts</span></div>
+    <div class="net"><h3>Students subnet</h3><p class="mono">10.20.40.x</p><p>Laptops. Talk to each other directly through the switch.</p></div>
+  </div>
+  <div class="cols c3" style="flex:0">
+    <div class="card reveal"><h3>A student laptop sends a broadcast. Who receives it?</h3><p class="hid">Only the student subnet. The router stops it: <strong>each subnet is its own broadcast domain</strong>.</p></div>
+    <div class="card reveal"><h3>A student laptop tries to open a staff PC. What happens?</h3><p class="hid">It must go through the router, where a firewall rule can <strong>block</strong> it.</p></div>
+    <div class="card reveal"><h3>Why put all the cameras in one subnet?</h3><p class="hid">One rule for the whole group, their video stays local, and the address space stays <strong>organized</strong>.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Direct instruction with questioning: VLANs</div>
+  <h2>A VLAN groups devices by function, not by floor</h2>
+  <div class="segsim" data-mode="seg">
+    <div class="ctl"><button data-m="flat">Flat network</button><button data-m="seg">Segmented: five VLANs</button><button class="sinfect">Infect a visitor's phone</button><button class="sreset">Reset</button></div>
+    <div class="bld"></div>
+    <div class="sbar"><span class="sread">-</span><span class="snote"></span></div>
+
+    <div class="key"><span><i style="background:#2F6FB5"></i>Sf Staff</span><span><i style="background:#3F8F5A"></i>St Students</span><span><i style="background:#8A4FB0"></i>Fi Finance</span><span><i style="background:#B7791F"></i>Ca Cameras</span><span><i style="background:#C2410C"></i>Gu Guests</span></div>
+  </div>
+  <div class="cols c3 sm2" style="flex:0;margin-top:.3em">
+    <div class="card reveal"><h3>Finance is on floors 2 and 3. How is it one network?</h3><p class="hid">Their switch ports are set to the <strong>same VLAN</strong>. The link between switches carries a <strong>VLAN tag</strong> on each frame.</p></div>
+    <div class="card reveal"><h3>A guest and a staff PC share a switch. Can they talk?</h3><p class="hid">Not directly: different VLANs. Only through the <strong>router or Layer 3 switch</strong>, where the firewall decides.</p></div>
+    <div class="card reveal"><h3>A teacher moves to floor 3. What changes?</h3><p class="hid">One <strong>port setting</strong> on the switch. No new cable.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Spot the difference: subnetting or VLAN?</div>
+  <h2>Two tools, same goal, different layers</h2>
+  <table class="cmp">
+    <tr><th></th><th>Subnetting</th><th>VLAN</th></tr>
+    <tr><td>Divides the network by</td><td>IP address range</td><td>Function, on the switches, wherever the device is</td></tr>
+    <tr><td>TCP/IP layer</td><td>Internet layer (packets)</td><td>Network interface layer (frames)</td></tr>
+    <tr><td>Set up on</td><td>Routers and Layer 3 switches</td><td>Managed switches, in software</td></tr>
+    <tr><td>Crossing between two of them</td><td colspan="2">Always through a router or Layer 3 switch, where firewall rules apply</td></tr>
+    <tr><td>In a real network</td><td colspan="2">Used together: each VLAN gets its own subnet. <strong>Segmenting</strong> is the overall strategy that decides where the boundaries go.</td></tr>
+  </table>
+  <div class="card reveal" style="flex:0;margin-top:.6em"><h3>So is segmenting always worth it? What does it cost?</h3><p class="hid"><strong>Complexity</strong>: every switch, VLAN and firewall rule must be configured by someone skilled. <strong>Mistakes</strong> block legitimate traffic (the teacher who cannot reach the printer). <strong>Maintenance</strong>: every new department or device type means updating the design.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Independent practice in pairs: the segmentation workbench</div>
+  <h2>Your turn: Westbridge Council</h2>
+  <div class="cols c2 wb" style="flex:0">
+    <div class="card">
+      <h3>Open the workbench</h3>
+      <p>Classroom, or <span class="url">mtzanis.github.io/ibcs-2026-27/a2-2-4-segmentation-workbench</span></p>
+      <ul>
+        <li>Part 1: why segment</li>
+        <li>Part 2: subnetting, the idea</li>
+        <li>Part 3: VLANs</li>
+        <li>Part 4: the Westbridge Council building</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>How to work</h3>
+      <ul>
+        <li>Each on your own laptop, side by side.</li>
+        <li>Talk it through, then <strong>type your own words</strong>.</li>
+        <li>Written answers lock when you submit: no markscheme before your answer.</li>
+        <li>Aim: Parts 1 to 3 done, Part 4 started.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="timer sm" data-min="30"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exam technique, 4 minutes: explain means "because"</div>
+  <h2>Explain how network segmentation improves security. [4]</h2>
+  <div class="cols c2 ex">
+    <div class="card weak"><h3>Answer A</h3><p>"Segmentation makes the network more secure because it splits it up, so hackers find it harder and data is safer."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>1 mark at most:</strong> it says the network is split, but never how that stops an attacker.</span></p></div>
+    <div class="card strong"><h3>Answer B</h3><p>"Segmentation isolates parts of the network from each other, so if one segment is compromised the router or firewall at the boundary stops the attack spreading and the damage is contained. Access to a sensitive segment, such as finance, can be limited to authorized devices. Because an attacker cannot move freely across the whole network, the attack surface is smaller."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>4 marks:</strong> isolation, containment at the boundary, restricted access, smaller attack surface.</span></p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exit ticket, 12 minutes, on your own, on paper</div>
+  <h2>Check your learning</h2>
+  <div class="card" style="flex:0;font-size:.8em">
+    <p><strong>1.</strong> Define network segmentation. [2]</p>
+    <p><strong>2.</strong> Explain how network segmentation reduces congestion. [4]</p>
+    <p><strong>3.</strong> Describe one practical application of network segmentation in a school. [2]</p>
+    <p><strong>4.</strong> A visitor's phone on the guest VLAN tries to reach the staff file server, which is plugged into the same switch but is on the staff VLAN. State the device the traffic must pass through, and explain why this matters. [2]</p>
+  </div>
+  <div class="timer sm" data-min="12"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Plenary and homework</div>
+  <h2>Back to the building</h2>
+  <div class="cols c3 sm2" style="flex:0">
+    <div class="card reveal"><h3>Why did the finance broadcast reach only 3 devices once segmented?</h3><p class="hid">Each VLAN is its own broadcast domain, and the router does not forward broadcasts.</p></div>
+    <div class="card reveal"><h3>Why did the infection stop at the guests?</h3><p class="hid">Every crossing to another VLAN goes through the router, and the firewall blocked it.</p></div>
+    <div class="card reveal"><h3>Segmenting, subnetting, VLANs: one line each</h3><p class="hid">The strategy; dividing by IP address; grouping by function on the switches.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:.6em;flex:0">
+    <div class="due"><strong>Homework, due Tue 3 Nov, 13:55 (start of the lesson):</strong> finish Part 4 of the workbench, save it as PDF and upload it to Classroom ("A2.2.4 workbench"). Then do the 10-question quiz on the InThinking eBook page "A 2.2.4 Network Segmentation".</div>
+    <div class="card"><h3>Next: A2.3 Data transmission</h3><p>Tuesday: IP addresses properly, including the network part and host part you met today.</p></div>
+  </div>
+</section>
+
+<footer><span id="pos"></span><span class="keys">arrows: move &nbsp; click a card to reveal it</span></footer>
+<div id="notes" hidden><div id="ntext"></div></div><span id="bstate" hidden></span>
+<script>
+// Segmentation simulator: one building, 24 devices, flat or segmented into five VLANs.
+// Click a device to send a broadcast; "Infect a visitor's phone" shows lateral movement.
+(function(){
+  const G={S:{n:'Staff',a:'Sf',c:'#2F6FB5'},P:{n:'Students',a:'St',c:'#3F8F5A'},F:{n:'Finance',a:'Fi',c:'#8A4FB0'},C:{n:'Cameras',a:'Ca',c:'#B7791F'},V:{n:'Guests',a:'Gu',c:'#C2410C'}};
+  const FLOORS=[['Floor 3','F','F','S','S','C','P','P','F'],['Floor 2','S','S','P','P','P','C','V','F'],['Ground floor','V','V','V','C','S','P','P','C']];
+  document.querySelectorAll('.segsim').forEach(box=>{
+    let mode=box.dataset.mode||'flat', busy=false, timers=[];
+    const grid=box.querySelector('.bld'), read=box.querySelector('.sread'), note=box.querySelector('.snote');
+    const devs=[];
+    FLOORS.forEach(f=>{
+      const row=document.createElement('div');row.className='floor';
+      row.innerHTML='<span class="fl">'+f[0]+'</span>';
+      f.slice(1).forEach(g=>{const d=document.createElement('button');d.className='dev';d.dataset.g=g;d.textContent=G[g].a;
+        d.style.setProperty('--gc',G[g].c);d.title=G[g].n;row.appendChild(d);devs.push(d)});
+      grid.appendChild(row);
+    });
+    const clear=()=>{timers.forEach(clearTimeout);timers=[];busy=false;devs.forEach(d=>d.classList.remove('hit','src','bad','safe'))};
+    const paintMode=()=>{
+      box.classList.toggle('seg',mode==='seg');
+      box.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+      read.textContent='-';
+      note.textContent=mode==='flat'?'Flat: one network, one broadcast domain. Click any device to send a broadcast.'
+        :'Segmented: five VLANs, colored by group, each with its own subnet. Between them sits the router with the firewall. Click any device.';
+    };
+    devs.forEach(d=>d.onclick=()=>{
+      if(busy)return;clear();d.classList.add('src');
+      const reach=devs.filter(x=>x!==d&&(mode==='flat'||x.dataset.g===d.dataset.g));
+      reach.forEach((x,i)=>timers.push(setTimeout(()=>x.classList.add('hit'),60+i*35)));
+      read.textContent=reach.length+' of '+(devs.length-1);
+      note.textContent=mode==='flat'
+        ?'Every other device received it and had to process it, though only the DHCP server needed it.'
+        :'Only the other '+G[d.dataset.g].n+' devices received it, on every floor. The router does not forward broadcasts.';
+    });
+    box.querySelector('.sinfect').onclick=()=>{
+      clear();busy=true;
+      const first=devs.filter(x=>x.dataset.g==='V')[1]; // ground floor, reception
+      first.classList.add('bad');
+      const order=devs.filter(x=>x!==first);let n=1;
+      order.forEach((x,i)=>timers.push(setTimeout(()=>{
+        if(mode==='flat'||x.dataset.g==='V'){x.classList.add('bad');n++}else x.classList.add('safe');
+        read.textContent=n+' of '+devs.length+' infected';
+        if(i===order.length-1){busy=false;note.textContent=mode==='flat'
+          ?'Lateral movement: the malware reached every device, including the finance PCs.'
+          :'Contained: it reached only the guest devices. Every attempt to cross into another VLAN hit the firewall and was blocked.'}
+      },120+i*90)));
+      note.textContent='A visitor’s phone on the ground floor is infected and starts scanning the network...';
+    };
+    box.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;clear();paintMode()});
+    box.querySelector('.sreset').onclick=()=>{clear();paintMode()};
+    paintMode();
+  });
+})();
+
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('cur',k===cur));
+  document.getElementById('pos').textContent='A2.2.4  '+(cur+1)+' / '+slides.length;
+  const n=slides[cur].querySelector('aside.tn');document.getElementById('ntext').textContent=n?n.textContent:'';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+function board(){document.getElementById('bstate').textContent=document.body.classList.contains('board')?'(ON)':'(off)'}
+document.addEventListener('click',e=>{const r=e.target.closest('.reveal');if(r)r.classList.toggle('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(false){document.body.classList.toggle('board');board()}
+  else if(false){document.getElementById('notes').classList.toggle('show');document.body.classList.toggle('notes')}
+  else if(k==='r')slides[cur].querySelectorAll('.reveal').forEach(x=>x.classList.add('open'))
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+});
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=Number(t.dataset.min)*60;let left=total,iv=null;
+  t.innerHTML='<span class="clock"></span><button class="go">Start</button><button class="rs">Reset</button>';
+  const c=t.querySelector('.clock'),go=t.querySelector('.go');
+  const paint=()=>{c.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');c.classList.toggle('out',left===0)};
+  const stop=()=>{clearInterval(iv);iv=null;go.textContent='Start'};
+  go.onclick=()=>{if(iv){stop();return}if(left===0)left=total;go.textContent='Pause';
+    iv=setInterval(()=>{left=Math.max(0,left-1);paint();if(left===0)stop()},1000)};
+  t.querySelector('.rs').onclick=()=>{stop();left=total;paint()};
+  paint();
+});
+board();show((parseInt(location.hash.slice(1))||1)-1);
+
+</script>
+</body>
+</html>

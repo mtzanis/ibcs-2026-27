@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.2.4 Segmentation Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root{
+    color-scheme:light;
+    --paper:#F4F6F9; --card:#FFFFFF; --ink:#1B2A3A; --muted:#5B6B7E;
+    --blue:#2B5CAD; --blue-deep:#1E3F76; --blue-wash:#E3EAF6;
+    --amber:#B97A14; --amber-wash:#F7EDD9;
+    --good:#2F7D52; --good-wash:#E1F0E7; --bad:#B54434; --bad-wash:#F6E4E0;
+    --line:#C6D2E0;
+    --display:"Bricolage Grotesque",Verdana,sans-serif;
+    --body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;
+    --mono:"IBM Plex Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-bottom:5rem}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  .wrap{max-width:60rem;margin:0 auto;padding:0 1.2rem}
+  header{background:var(--blue-deep);color:#EEF3FB;padding:1.6rem 0 1.3rem}
+  header h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.4rem);line-height:1.08;margin-bottom:.4rem}
+  header p{max-width:60ch;opacity:.92}
+  .kicker{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#F0C878;margin-bottom:.4rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1.5px solid var(--line);padding:.55rem 0}
+  .bar .wrap{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:.8rem;background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:.3rem .7rem}
+  .chip b{color:var(--blue-deep)}
+  .lvl button{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:.3rem .8rem;margin-right:.3rem;font-family:var(--mono);font-size:.78rem}
+  .lvl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+  .bar .right{margin-left:auto;display:flex;gap:.4rem}
+  .bar .right button{background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:.3rem .7rem;font-size:.85rem}
+
+  section{margin-top:2.2rem}
+  h2{font-family:var(--display);font-weight:800;font-size:clamp(1.3rem,2.6vw,1.8rem);margin-bottom:.3rem}
+  h2 .n{font-family:var(--mono);font-size:.8rem;letter-spacing:.12em;color:var(--amber);display:block;margin-bottom:.2rem}
+  .lead{color:var(--muted);margin-bottom:1rem;max-width:70ch}
+  .howto{background:var(--amber-wash);border:1.5px solid var(--amber);border-radius:8px;padding:.9rem 1.1rem;margin:.8rem 0 1.2rem}
+  .howto ol{padding-left:1.2rem}
+  .howto li{margin-bottom:.25rem}
+
+  .q{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.8rem}
+  .qh{font-weight:700;margin-bottom:.55rem}
+  .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;background:var(--blue-wash);color:var(--blue-deep);border-radius:999px;padding:.1rem .5rem;margin-right:.35rem}
+  .marks{font-family:var(--mono);font-size:.8rem;color:var(--amber)}
+  .opts{display:flex;flex-wrap:wrap;gap:.4rem}
+  .opts button{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:.32rem .75rem;text-align:left}
+  .opts button:hover{border-color:var(--blue)}
+  .q.answered .opts button{pointer-events:none}
+  .q.answered .opts button.faded{opacity:.45}
+  .opts button.right{background:var(--good-wash);border-color:var(--good);color:var(--good);font-weight:700}
+  .opts button.wrong{background:var(--bad-wash);border-color:var(--bad);color:var(--bad)}
+  .why{display:none;margin-top:.5rem;font-size:.92em;color:var(--muted);border-left:3px solid var(--blue);padding-left:.7rem}
+  .q.answered .why{display:block}
+
+  textarea{width:100%;min-height:6.5rem;font-family:var(--body);font-size:.97em;line-height:1.5;padding:.6rem .8rem;border:1.5px solid var(--line);border-left:4px solid var(--blue);border-radius:6px;background:var(--paper);color:var(--ink);resize:vertical}
+  textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-wash)}
+  textarea[readonly]{background:#F8FAFC;color:var(--muted)}
+  .row{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.5rem}
+  .submit{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.45rem 1rem;font-weight:700}
+  .submit:disabled{background:var(--good-wash);color:var(--good);font-weight:700}
+  .hint{font-size:.82em;color:var(--muted)}
+  .hint.warn{color:var(--bad);font-weight:700}
+  .ms{display:none;margin-top:.8rem;border-top:1.5px dashed var(--line);padding-top:.7rem}
+  .q.shown .ms{display:block}
+  .mst{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.35rem}
+  .ms ul{padding-left:1.1rem;margin-bottom:.5rem}
+  .ms li{margin-bottom:.2rem}
+  .fullans{background:var(--good-wash);border-radius:6px;padding:.5rem .7rem;margin-bottom:.5rem;font-size:.95em}
+  .note{background:var(--bad-wash);border-radius:6px;padding:.5rem .7rem;font-size:.9em;margin-bottom:.6rem}
+  .selfmark{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-size:.92em}
+  .mk{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;width:2.1rem;height:2.1rem;font-family:var(--mono)}
+  .mk.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+  .of{font-family:var(--mono);color:var(--muted)}
+  .src{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.5rem}
+
+  table.dt{border-collapse:collapse;width:100%;background:var(--card);font-size:.92em}
+  table.dt th,table.dt td{border:1px solid var(--line);padding:.45rem .7rem;text-align:left}
+  table.dt th{background:var(--blue-wash);color:var(--blue-deep)}
+  td.num{font-family:var(--mono);white-space:nowrap}
+  tr.good td:first-child{border-left:4px solid var(--good)}
+  tr.ok td:first-child{border-left:4px solid var(--amber)}
+  tr.weak td:first-child{border-left:4px solid var(--bad)}
+  .muted{color:var(--muted)}
+  .foot{margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem;font-size:.9em;color:var(--muted)}
+  #hlnote{background:var(--blue-wash);border:1.5px solid var(--blue);border-radius:8px;padding:.8rem 1rem}
+  @media print{
+    .bar,.howto,#printbtn,#resetbtn,header p{display:none}
+    body{background:#fff;font-size:11pt}
+    .q{break-inside:avoid;border-color:#999}
+    textarea{min-height:0;height:auto;border:none;padding:0;background:#fff;color:#000}
+  }
+  .teach{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--amber);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem}
+  .teach h3{font-family:var(--display);font-size:1.1rem;color:var(--blue-deep);margin:.2rem 0 .5rem}
+  .teach h3+p,.teach p{margin-bottom:.5rem}
+  .teach ul{padding-left:1.2rem;margin-bottom:.5rem}
+  .teach li{margin-bottom:.3rem}
+  .teach code{font-family:var(--mono);background:var(--blue-wash);padding:.05rem .3rem;border-radius:4px;font-size:.92em}
+  .teach table.dt{margin:.5rem 0}
+  .teach.scen{border-left-color:var(--blue)}
+  .bits{display:flex;gap:.3rem;margin:.4rem 0 .6rem}
+  .bits span{font-family:var(--mono);background:var(--blue-deep);color:#fff;border-radius:5px;padding:.25rem 0;width:3.2rem;text-align:center;font-weight:600}
+  .stepper .step{display:none;background:var(--paper);border-radius:6px;padding:.6rem .8rem;margin-bottom:.4rem;border-left:3px solid var(--blue)}
+  .stepper .step.on{display:block}
+  .explorer input[type=range]{width:min(100%,24rem);accent-color:var(--blue)}
+  .lab input.ans{font-family:var(--mono);font-size:1em;padding:.4rem .6rem;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);min-width:14rem}
+  .lab input.ans:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-wash)}
+  .lab input.ans.right{background:var(--good-wash);border-color:var(--good);color:var(--good);font-weight:600}
+  .lab input.ans.wrong{background:var(--bad-wash);border-color:var(--bad);color:var(--bad)}
+  .lab .lbl{font-family:var(--mono);font-size:.85rem;color:var(--muted);min-width:9rem}
+  .q.lab.answered .why{display:block}
+  @media print{.teach,.explorer,#stepper{display:none}.q.lab input.ans{border:none;background:#fff}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="kicker">IB DP Computer Science · Y2 · A2.2.4 · Fri 30 Oct · SL + HL</p>
+    <h1>Segmentation Workbench: segments, subnets and VLANs</h1>
+    <p>Work in pairs after the introduction on the board. Talk each question through with your partner, then each of you types your own answer on your own laptop. The page checks the quick questions; you mark your own written answers against the markscheme. Nothing is sent anywhere: your answers stay in this browser until you print them.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <span class="chip">Checked by the page: <b id="autoscore">0 / 0</b></span>
+    <span class="chip">Marked by you: <b id="writtenscore">0 / 0</b></span>
+    <span class="chip" id="clockchip">Timer: <b id="clock">00:00</b></span>
+    <span class="right"><button id="printbtn">Print / save as PDF</button><button id="resetbtn">Start over</button></span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="n">How this works</span>Four parts, in pairs</h2>
+    <div class="howto">
+      <ol>
+        <li><b>Part 1, why segment.</b> One card, four quick questions.</li>
+        <li><b>Part 2, subnetting: the idea.</b> One card, three quick questions. You do not calculate subnet masks in this course: the exam asks what subnetting is for, not how to work out an address range.</li>
+        <li><b>Part 3, VLANs.</b> Two cards, four quick questions, three written answers you mark yourself.</li>
+        <li><b>Part 4, the Westbridge Council scenario.</b> A real building to segment. Five written answers, like Section B of a paper.</li>
+      </ol>
+      <p style="margin-top:.5rem"><b>In class:</b> aim to finish Parts 1 to 3 and start Part 4. Whatever is left of Part 4 is the homework (see the bottom of the page).</p>
+      <p style="margin-top:.4rem"><b>Rules:</b> read the card before the questions, not after. No markscheme before your own answer. Once you submit a written answer you cannot edit it, and that is the point. Discuss with your partner, but type your own words.</p>
+    </div>
+  </section>
+
+  <!-- ================= PART 1 ================= -->
+  <section>
+    <h2><span class="n">Part 1</span>Why cut a network into pieces?</h2>
+    <div class="teach">
+      <h3>One flat network, one big room</h3>
+      <p>Picture a school where every device, 600 student laptops, the staff PCs, the finance server, the CCTV cameras and the visitors' phones, all sit on <b>one network</b>. Three things go wrong:</p>
+      <ul>
+        <li><b>Performance.</b> A flat network is one <b>broadcast domain</b>: the group of devices that receive a broadcast. When a device sends a message to everyone (a DHCP Discover, "I need an IP address", or an ARP request, "who has 10.0.0.5?"), all 700 devices receive it and must process it, even though it is irrelevant to almost all of them. With hundreds of devices doing this, the network fills with traffic nobody needs.</li>
+        <li><b>Security.</b> Any device can reach any other. A visitor's infected laptop can reach the finance server, and malware can move from device to device across the whole network (<b>lateral movement</b>). One breach spreads everywhere.</li>
+        <li><b>Management.</b> You cannot give the cameras different rules from the laptops, one problem affects everyone, and finding a faulty device means searching the whole building.</li>
+      </ul>
+      <h3>Segmentation</h3>
+      <p><b>Network segmentation</b> is dividing one network into smaller, separate parts called segments, so that traffic stays inside its own segment and anything that crosses between segments passes through a boundary device (a router, Layer 3 switch or firewall) where it can be checked or blocked.</p>
+      <p>The syllabus names three mechanisms:</p>
+      <table class="dt">
+        <tr><th></th><th>Segmenting</th><th>Subnetting</th><th>VLANs</th></tr>
+        <tr><td><b>What it is</b></td><td>The overall strategy: deciding where the boundaries go</td><td>Dividing the network into smaller subnetworks by IP address range</td><td>Grouping devices into separate logical LANs on the switches, by function, regardless of location</td></tr>
+        <tr><td><b>Done with</b></td><td>Routers, switches and firewalls at the boundaries</td><td>Routers (and Layer 3 switches) between the subnets</td><td>Managed switches, in software</td></tr>
+        <tr><td><b>TCP/IP layer</b></td><td>Wherever the boundary device works</td><td>Internet layer (IP packets)</td><td>Network interface layer (frames)</td></tr>
+      </table>
+      <p class="muted" style="margin-top:.5rem">One division gives two things: smaller segments carry less broadcast traffic, so congestion falls, and segments are walled off from each other, so a breach in one cannot reach the rest. Segmentation is not only a security measure.</p>
+    </div>
+    <p class="lead">Four quick checks. Say the reason out loud to your partner before you click.</p>
+    <div id="mcq1"></div>
+  </section>
+
+  <!-- ================= PART 2 ================= -->
+  <section>
+    <h2><span class="n">Part 2</span>Subnetting: the idea</h2>
+
+    <div class="teach">
+      <h3>Card A · An IP address has a network part and a host part</h3>
+      <p>Every device on a network has an <b>IP address</b>, written as four numbers from 0 to 255, for example <code>10.20.30.15</code>. The address has two parts, like a street name and a house number:</p>
+      <ul>
+        <li>the <b>network part</b> (here <code>10.20.30</code>) says which network, or subnet, the device is on;</li>
+        <li>the <b>host part</b> (here <code>.15</code>) says which device it is inside that subnet.</li>
+      </ul>
+      <p>A <b>subnet</b> is one range of addresses that share the same network part: <code>10.20.30.1</code> to <code>10.20.30.254</code> is one subnet, <code>10.20.40.1</code> to <code>10.20.40.254</code> is another. A setting called the <b>subnet mask</b> tells each device where the network part ends. You need to know it exists; you do not calculate it.</p>
+    </div>
+
+    <div class="teach">
+      <h3>Card B · What subnetting does</h3>
+      <ul>
+        <li>Devices in the <b>same subnet</b> talk directly, through the switch.</li>
+        <li>To reach a <b>different subnet</b>, traffic must go to a <b>router</b> (or a Layer 3 switch). The router forwards it only towards the right subnet, and it can filter it on the way: this is where firewall rules sit.</li>
+        <li>A router does <b>not</b> forward broadcasts. So a broadcast stays inside its own subnet: each subnet is its own broadcast domain.</li>
+        <li>Devices with similar needs (all the servers, all the cameras) are put in the same subnet, which keeps the address space organized and lets the technician write one rule for the whole group.</li>
+      </ul>
+      <p>Choosing a size: a subnet must be big enough for every device in the group, with room to grow, but not so big that most of its addresses are wasted.</p>
+    </div>
+
+    <p class="lead">Three quick checks.</p>
+    <div id="mcq2"></div>
+  </section>
+
+  <!-- ================= PART 3 ================= -->
+  <section>
+    <h2><span class="n">Part 3</span>VLANs: one switch, several networks</h2>
+
+    <div class="teach">
+      <h3>Card C · What a VLAN is</h3>
+      <p>A normal switch puts every port in one broadcast domain. A <b>VLAN (virtual LAN)</b> is a logical group of switch ports that behaves as its own separate LAN, with its own broadcast domain, <b>regardless of where the devices physically are</b>. Each VLAN has a number, the VLAN ID, and normally its own subnet. VLANs are set up in software on managed switches: no new hardware is needed.</p>
+      <ul>
+        <li>Ports 1 to 12 in VLAN 10 (Staff) and ports 13 to 24 in VLAN 30 (Students): a broadcast sent from port 3 only reaches ports 1 to 12, even though it is one physical box.</li>
+        <li>A VLAN can span several switches on several floors. A finance PC on floor 2 and the payroll server on floor 3 can be in the same VLAN 20.</li>
+        <li>The link between two switches (a <b>trunk</b>) carries all the VLANs at once. Each frame on it carries a small <b>VLAN tag</b> that says which VLAN it belongs to, so the far switch delivers it only to ports in that VLAN.</li>
+        <li>Devices in different VLANs <b>cannot talk directly</b>, even on the same switch. Their traffic must go through a <b>router or a Layer 3 switch</b> (inter-VLAN routing), and that is exactly where firewall rules decide what is allowed: Students may reach the printer VLAN but not Finance.</li>
+      </ul>
+    </div>
+
+    <div class="teach">
+      <h3>Card D · Why VLANs, how they differ from subnets, and the costs</h3>
+      <ul>
+        <li><b>Security:</b> sensitive devices are isolated; a compromised device in VLAN 30 cannot even see frames in VLAN 20; every crossing is a checkpoint.</li>
+        <li><b>Performance:</b> broadcasts stay inside their VLAN, so each device receives far fewer of them.</li>
+        <li><b>Management:</b> moving a user from Students to Staff is a port setting, not a new cable; groups are organized by role rather than by floor; a problem is contained to one VLAN.</li>
+      </ul>
+      <p><b>Subnet vs VLAN in one line:</b> subnetting divides the <i>IP addresses</i> and is enforced by routers at the internet layer; a VLAN divides the <i>switches</i> and is enforced by the switch at the network interface layer. Real networks use both: each VLAN gets its own subnet, and the router between them applies the rules.</p>
+      <p><b>The costs of segmenting.</b> It adds complexity: every switch, router and firewall rule must be configured correctly, which needs skilled staff. A mistake can block legitimate traffic (a teacher who suddenly cannot reach the printer). And it needs ongoing maintenance: every new department or new type of device means updating the design.</p>
+    </div>
+
+    <p class="lead">Four quick checks, then three written answers you mark yourself.</p>
+    <div id="mcq3"></div>
+    <div id="written3"></div>
+  </section>
+
+  <!-- ================= PART 4 ================= -->
+  <section>
+    <h2><span class="n">Part 4</span>Scenario: Westbridge Council offices</h2>
+    <div class="teach scen">
+      <p>Westbridge Council is moving into a three-floor office building and has one IT technician. The building will hold:</p>
+      <ul>
+        <li><b>120 staff PCs</b> spread over all three floors, plus 10 shared printers.</li>
+        <li><b>The finance team:</b> 15 PCs on floor 2, a payroll server on floor 3, and one printer. Payroll data is confidential.</li>
+        <li><b>40 IP CCTV cameras</b> around the building, sending video all day to one recording server.</li>
+        <li><b>Public Wi-Fi</b> in the ground-floor reception for visitors, up to 100 devices at a time.</li>
+        <li><b>Two public-facing servers</b> (the council website and the online forms system) that people on the internet connect to.</li>
+      </ul>
+      <p>All floors are cabled to managed switches that support VLANs, and the building has one router with a firewall.</p>
+    </div>
+    <p class="lead">Five written answers. Write as you would on paper, then mark yourself against the markscheme.</p>
+    <div id="scen"></div>
+  </section>
+
+  <section>
+    <h2><span class="n">Your diagnosis</span>What to go back to</h2>
+    <p class="lead">Built from the page's checks and the marks you gave yourself. Anything under 60% is the card to read again tonight.</p>
+    <div id="diag"></div>
+    <div class="howto" style="margin-top:1rem">
+      <p><b>Homework, due Tuesday 3 November, 13:55 (start of the lesson):</b></p>
+      <ol>
+        <li>Finish Part 4 if you did not finish it in class. Then click <b>Print / save as PDF</b> at the top and upload the PDF to the Classroom assignment <b>"A2.2.4 workbench"</b>.</li>
+        <li>Do the 10-question quiz on the InThinking eBook page <b>"A 2.2.4 Network Segmentation"</b>. Bring your score.</li>
+      </ol>
+    </div>
+    <p class="foot">Nothing you type here leaves your laptop; it is saved in this browser only. If the page is reloaded your answers are still here. "Start over" wipes them.</p>
+  </section>
+
+</div>
+
+<script>
+/* ---------- MCQ sets (auto-marked) ---------- */
+const MCQ1 = [
+  {t:"Why segment", q:"A flat network with 700 devices is slow mainly because…", o:["Cables are longer","Every broadcast reaches all 700 devices, which must all process it","IP addresses run out","Switches cannot handle 700 ports"], a:1, why:"One broadcast domain: every ARP or DHCP broadcast is received and processed by every device."},
+  {t:"Why segment", q:"Segmentation improves security because…", o:["It encrypts all traffic","Traffic between segments must pass a router or firewall where it can be blocked","It hides the devices from the internet","Each segment has its own internet connection"], a:1, why:"The boundary device between segments is where rules are enforced. Inside one flat network there is no such point, so an attacker can move freely."},
+  {t:"Why segment", q:"\"Segmentation improves security but has no effect on performance.\" This is…", o:["True","False: smaller segments are smaller broadcast domains, so congestion falls"], a:1, why:"The most common exam mistake: giving only the security reason. Performance is half the point."},
+  {t:"Why segment", q:"Which is a MANAGEMENT benefit of segmentation?", o:["Fewer collisions on Wi-Fi","Rules can be set per group, and a fault is contained to one segment","Faster internet download speed","No need for DHCP"], a:1, why:"Different rules for cameras, staff and guests, and troubleshooting one segment instead of the whole building."}
+];
+const MCQ2 = [
+  {t:"Subnetting", q:"Subnetting divides a network…", o:["into virtual switches","into smaller subnetworks by IP address range","into encrypted channels","into separate cables"], a:1, why:"Subnets are about addresses (internet layer). VLANs are about the switches (network interface layer)."},
+  {t:"Subnetting", q:"Two laptops have the addresses 10.20.30.15 and 10.20.40.15, where the first three numbers are the network part. To send data between them…", o:["they talk directly through the switch","the traffic must go through a router, because they are in different subnets","they need the same host part","it is impossible"], a:1, why:"Different network part = different subnet. Crossing between subnets always goes through a router, which can filter it."},
+  {t:"Subnetting", q:"Why does dividing a network into subnets reduce broadcast traffic?", o:["Routers do not forward broadcasts, so each broadcast stays inside its own subnet","Subnets compress the data","Each subnet has a faster cable","Broadcasts are encrypted between subnets"], a:0, why:"Each subnet is its own broadcast domain. A broadcast in the camera subnet never reaches the staff PCs."}
+];
+const MCQ3 = [
+  {t:"VLANs", q:"A VLAN is…", o:["A VPN for a LAN","A logical group of switch ports that forms its own broadcast domain","A type of IP address","A wireless network"], a:1, why:"Virtual LAN: the switch is divided logically; where the devices physically are does not matter."},
+  {t:"VLANs", q:"Two PCs in different VLANs on the same switch want to exchange data. What is needed?", o:["Nothing, same switch","A router or Layer 3 switch to route between the VLANs","A longer cable","A second network card in each PC"], a:1, why:"Inter-VLAN routing. That crossing is where the firewall rules are applied."},
+  {t:"VLANs", q:"The VLAN tag on a frame travelling between two switches…", o:["is a password for the VLAN","says which VLAN the frame belongs to, so the far switch delivers it only to that VLAN's ports","is the device's IP address","encrypts the frame"], a:1, why:"One trunk link carries all the VLANs; the tag keeps them apart."},
+  {t:"VLANs", q:"A teacher moves office from floor 1 to floor 3 and must stay on the Staff network. With VLANs the technician…", o:["Runs a new cable to floor 1","Sets the floor-3 port to the Staff VLAN","Gives the PC a public IP address","Replaces the switch"], a:1, why:"Management benefit: grouping by role, not location. A port setting instead of a cabling job."}
+];
+
+/* No typed calculations in this version: the A2.2.4 statement asks what subnetting is for, not how to calculate it. */
+const LAB1 = [];
+
+/* ---------- Written items (self-marked) ---------- */
+const WRITTEN3 = [
+  {t:"VLANs", id:"w1", marks:2, q:"<b>State</b> one advantage and one disadvantage of using VLANs for segmentation. [2]",
+   ms:["Advantage: improved security (devices isolated) / reduced broadcast traffic / easier management, e.g. moving a user is a port setting;","Disadvantage: needs careful configuration and skilled management / a mistake can block legitimate traffic / needs managed switches and ongoing maintenance;"],
+   full:"VLANs improve security by isolating groups of devices from each other, but they must be configured carefully by a skilled technician, and a misconfigured VLAN can stop users reaching resources they need.",
+   note:"Award 1 if only the advantage or only the disadvantage is stated. 'It is expensive' alone is weak: VLANs need no new hardware if the switches are managed.", src:"Growhall A2.2.4 practice question"},
+  {t:"VLANs", id:"w2", marks:2, q:"<b>Explain</b> why putting the finance PCs in their own VLAN improves security. [2]",
+   ms:["Devices in other VLANs cannot see finance frames or broadcasts / cannot reach the finance devices directly;","any traffic into the finance VLAN must pass through the router or Layer 3 switch, where firewall rules can block it;"],
+   full:"A VLAN is its own broadcast domain, so a student or visitor device on another VLAN cannot see finance traffic or contact the finance PCs directly. Anything that does try must be routed between VLANs, and the router's firewall rules can allow only the permitted traffic, so a compromised device elsewhere cannot spread to payroll.",
+   note:"'Explain' needs the mechanism (isolation + the checkpoint), not just 'it is more secure'. The word 'because' belongs in the answer.", src:"A2.2.4 VLAN security"},
+  {t:"VLANs", id:"w3", marks:4, q:"<b>Distinguish</b> between subnetting and VLANs. [4]",
+   ms:["Subnetting divides the network by IP address range;","it works at the internet layer and is enforced by routers / Layer 3 switches;","a VLAN groups switch ports into separate logical LANs / broadcast domains, by function regardless of location;","it works at the network interface layer and is set up on managed switches;","(accept) in practice each VLAN is paired with its own subnet;"],
+   full:"Subnetting splits the network into smaller subnetworks, each with its own range of IP addresses; routers use it at the internet layer to forward and filter traffic between subnets. A VLAN splits the switches into separate logical LANs by assigning ports to VLAN IDs, grouping devices by function wherever they are, so each VLAN is its own broadcast domain at the network interface layer. The two are usually combined: each VLAN is given its own subnet so the router can carry traffic between them.",
+   note:"'Distinguish' means both sides, in parallel. Two points about one technique and nothing about the other caps at 2.", src:"A2.2.4 subnetting vs VLANs"}
+];
+
+const SCEN = [
+  {t:"Scenario", id:"s1", marks:4, kind:"w", q:"<b>Outline</b> four segments the technician should create for the building, giving a reason for each. [4]",
+   ms:["Staff: general office PCs and printers, normal access;","Finance: PCs, payroll server and printer isolated because payroll data is confidential;","CCTV: cameras and recording server separated so their constant video traffic does not slow others / so a hacked camera cannot reach PCs;","Guest Wi-Fi: visitors' devices isolated from everything internal, internet only;","Public servers: the website and forms servers separated because they accept connections from the internet;","[1] per segment with a valid reason, [4 max]"],
+   full:"(1) Staff VLAN for the 120 PCs and printers. (2) Finance VLAN for the 15 PCs, payroll server and printer, so confidential payroll data is reachable only through firewall rules. (3) CCTV VLAN so 40 cameras' continuous video stays off the staff network and a compromised camera cannot reach PCs. (4) Guest VLAN so visitors get internet only and cannot see any council device. (A fifth, for the two public servers, is also correct.)",
+   note:"A segment without a reason earns nothing. 'Because it is safer' is not a reason; say what is kept away from what.", src:"A2.2.4 segmentation design"},
+  {t:"Scenario", id:"s6", marks:3, kind:"w", q:"<b>Explain</b> how VLANs let the finance PCs on floor 2 and the payroll server on floor 3 share one segment, while a visitor on floor 2 is kept out. [3]",
+   ms:["The switch ports used by the finance PCs and the server are all assigned to the same VLAN (for example VLAN 20), even on different switches / floors;","the trunk links between the floor switches carry VLAN 20 frames with VLAN tags, so the VLAN spans the building;","the visitor's device is on a different VLAN (Guest), so it cannot see finance frames or broadcasts / can only reach Finance through the router, where the firewall blocks it;"],
+   full:"The technician puts the finance PCs' ports on floor 2 and the server's port on floor 3 into the same VLAN 20. The trunk links between the floor switches tag frames with the VLAN ID, so VLAN 20 behaves as one LAN across the building. The visitor's device on floor 2 is in the Guest VLAN: it is a separate broadcast domain, so it cannot see finance traffic, and any attempt to reach the finance devices must go through the router, where the firewall denies it.",
+   note:"Three marks, three ideas: same VLAN across floors, trunk tagging, a different VLAN for the visitor plus the checkpoint.", src:"A2.2.4 VLANs across switches"},
+  {t:"Scenario", id:"s7", marks:3, kind:"w", q:"A visitor's laptop on the Guest Wi-Fi is infected with malware that scans the network for other devices. <b>Explain</b> how the segmentation limits the damage. [3]",
+   ms:["The laptop can only see / broadcast to devices in the Guest segment;","to reach Staff, Finance or CCTV the traffic must be routed through the router / firewall;","firewall rules allow Guest only to the internet, so the scan and any attack are blocked / contained to the Guest segment (no lateral movement);"],
+   full:"The malware's scans and broadcasts stay inside the Guest segment, so the only devices it can discover are other visitors' devices. Any packet aimed at the staff, finance or camera segments must pass through the router, and the firewall rule for Guest allows traffic to the internet only, so the scan is dropped. The infection is contained to one segment and cannot move laterally.",
+   note:"Say where the traffic is stopped and by what. 'It cannot spread' with no mechanism is one mark at most.", src:"A2.2.4 containment"},
+  {t:"Scenario", id:"s8", marks:2, kind:"w", q:"<b>Explain</b> why the two public-facing servers should be in their own segment rather than on the Staff network. [2]",
+   ms:["They accept connections from the internet, so they are the most likely to be attacked / compromised;","keeping them in a separate segment means a compromised server cannot reach the internal segments directly, as the firewall controls the crossing;"],
+   full:"The website and forms servers must accept connections from anyone on the internet, so they are the most exposed devices the council owns. Placing them in their own segment means that if one is compromised the attacker is still separated from the staff and finance segments by the firewall, which allows only the specific traffic those servers need.",
+   note:"Links to A2.2.2: a web server's role explains its exposure. Name the exposure and the containment.", src:"A2.2.4 / A2.2.2 web server"},
+  {t:"Scenario", id:"s9", marks:2, kind:"w", q:"The council's manager says: \"One flat network would be simpler for our one technician.\" <b>Outline</b> two drawbacks of segmenting the network that support the manager's point. [2]",
+   ms:["More complex to set up: every switch port, VLAN, router and firewall rule must be configured;","a configuration mistake can block legitimate traffic (e.g. staff cannot reach a printer);","ongoing maintenance: every new department or device type means changing the design;","needs skills / training the one technician may not have;","[1] each, [2 max]"],
+   full:"Segmenting means the one technician must configure the VLANs on every switch and the firewall rules between them, and a single mistake can stop staff reaching something they need, such as a printer. It also has to be maintained: each new team or new type of device, like more cameras, means updating the VLANs and rules.",
+   note:"Drawbacks are about complexity, mistakes and maintenance. 'It costs more' needs a reason to earn the mark.", src:"Growhall A2.2.4 drawbacks"}
+];
+
+const EXIT = [];
+</script>
+<script>
+(function(){
+  const KEY='a224wb-30oct';
+  let state={mcq:{},lab:{},written:{},started:null};
+  try{const raw=localStorage.getItem(KEY); if(raw)state=JSON.parse(raw);}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  function startClock(){ if(!state.started){state.started=Date.now();save();} }
+  setInterval(()=>{ if(!state.started)return; const s=Math.floor((Date.now()-state.started)/1000);
+    document.getElementById('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },1000);
+
+  /* ---------- MCQ ---------- */
+  function renderMCQ(list,box,prefix){
+    list.forEach((item,i)=>{
+      const key=prefix+i;
+      const d=document.createElement('div'); d.className='q rapid';
+      d.innerHTML='<p class="qh"><span class="tag">'+item.t+'</span> '+(i+1)+'. '+item.q+'</p>'+
+        '<div class="opts">'+item.o.map((o,j)=>'<button data-j="'+j+'">'+o+'</button>').join('')+'</div>'+
+        '<p class="why">'+item.why+'</p>';
+      box.appendChild(d);
+      d.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>{
+        if(d.classList.contains('answered'))return; startClock();
+        const j=+b.dataset.j, ok=(j===item.a);
+        d.classList.add('answered'); b.classList.add(ok?'right':'wrong');
+        if(!ok)d.querySelector('[data-j="'+item.a+'"]').classList.add('right');
+        state.mcq[key]={ok:ok?1:0,t:item.t};save();tally();
+      }));
+      const done=state.mcq[key];
+      if(done){ d.classList.add('answered'); d.querySelector('[data-j="'+item.a+'"]').classList.add('right');
+        if(!done.ok)d.querySelectorAll('.opts button').forEach(b=>{if(+b.dataset.j!==item.a)b.classList.add('faded');}); }
+    });
+  }
+  renderMCQ(MCQ1,document.getElementById('mcq1'),'m1');
+  renderMCQ(MCQ2,document.getElementById('mcq2'),'m2');
+  renderMCQ(MCQ3,document.getElementById('mcq3'),'m3');
+
+  /* ---------- Lab (typed, auto-checked) ---------- */
+  const norm=s=>String(s||'').trim().toLowerCase().replace(/\s+/g,'').replace(/^\//,'');
+  function renderLab(item,box,n){
+    const parts=item.parts||[{label:'',ans:item.ans}];
+    const d=document.createElement('div'); d.className='q lab';
+    d.innerHTML='<p class="qh"><span class="tag">'+item.t+'</span> '+(n?n+'. ':'')+item.q+(item.parts?'':' <span class="marks">[1]</span>')+'</p>'+
+      parts.map((p,k)=>'<div class="row"><label class="lbl">'+p.label+'</label><input class="ans" data-k="'+k+'" placeholder="Type your answer" autocomplete="off"></div>').join('')+
+      '<div class="row"><button class="submit check">Check</button><span class="hint">One attempt. Write the working on paper first.</span></div>'+
+      '<p class="why">'+item.why+'</p>';
+    box.appendChild(d);
+    const inputs=[...d.querySelectorAll('input.ans')], btn=d.querySelector('.check');
+    function lock(res){ d.classList.add('answered'); btn.disabled=true; btn.textContent='Checked';
+      inputs.forEach((inp,k)=>{inp.readOnly=true; inp.classList.add(res[k]?'right':'wrong'); if(!res[k])inp.value=(inp.value?inp.value+'  ':'')+'→ '+parts[k].ans[0];}); }
+    btn.addEventListener('click',()=>{
+      if(inputs.some(i=>!i.value.trim())){d.querySelector('.hint').classList.add('warn');return;} startClock();
+      const res=inputs.map((inp,k)=>parts[k].ans.map(norm).includes(norm(inp.value))?1:0);
+      state.lab[item.id]={vals:inputs.map(i=>i.value),res:res,t:item.t};save();lock(res);tally();
+    });
+    const sv=state.lab[item.id]; if(sv){inputs.forEach((inp,k)=>inp.value=sv.vals[k]);lock(sv.res);}
+  }
+  LAB1.forEach((it,i)=>renderLab(it,document.getElementById('lab1'),i+1));
+
+  /* ---------- Written (self-marked) ---------- */
+  function renderWritten(item,box,n){
+    const saved=state.written[item.id]||{};
+    const d=document.createElement('div'); d.className='q written';
+    d.innerHTML='<p class="qh"><span class="tag">'+item.t+'</span> '+(n?n+'. ':'')+item.q+(/\[\d\]/.test(item.q)?'':' <span class="marks">['+item.marks+']</span>')+'</p>'+
+      '<textarea placeholder="Write your full answer here, as you would on paper…">'+(saved.text||'')+'</textarea>'+
+      '<div class="row"><button class="submit">Submit answer &amp; see markscheme</button><span class="hint">Write at least a sentence first. Once you submit, you cannot edit it.</span></div>'+
+      '<div class="ms"><p class="mst">Markscheme</p><ul>'+item.ms.map(m=>'<li>'+m+'</li>').join('')+'</ul>'+
+        '<p class="fullans"><b>A full-mark answer:</b> '+item.full+'</p><p class="note"><b>Examiner note:</b> '+item.note+'</p>'+
+        '<div class="selfmark"><span>Marks you would award yourself:</span> '+Array.from({length:item.marks+1},(_,k)=>'<button class="mk" data-m="'+k+'">'+k+'</button>').join('')+' <span class="of">/ '+item.marks+'</span></div>'+
+        '<p class="src">Source: '+item.src+'</p></div>';
+    box.appendChild(d);
+    const ta=d.querySelector('textarea'), sub=d.querySelector('.submit');
+    function reveal(){ d.classList.add('shown');ta.readOnly=true;sub.disabled=true;sub.textContent='Answer submitted';
+      const h=d.querySelector('.hint');h.classList.remove('warn');h.textContent='Compare with the markscheme, then award yourself the marks.'; }
+    sub.addEventListener('click',()=>{ if(ta.value.trim().length<15){d.querySelector('.hint').classList.add('warn');ta.focus();return;} startClock();
+      state.written[item.id]={text:ta.value,mark:(state.written[item.id]||{}).mark,marks:item.marks,t:item.t,sub:1};save();reveal(); });
+    ta.addEventListener('input',()=>{const s=state.written[item.id]||{};s.text=ta.value;state.written[item.id]=s;save();});
+    d.querySelectorAll('.mk').forEach(b=>b.addEventListener('click',()=>{ if(!d.classList.contains('shown'))return;
+      d.querySelectorAll('.mk').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+      const s=state.written[item.id]||{};s.mark=+b.dataset.m;s.marks=item.marks;s.t=item.t;state.written[item.id]=s;save();tally(); }));
+    if(saved.sub)reveal();
+    if(saved.mark!==undefined){const b=d.querySelector('.mk[data-m="'+saved.mark+'"]');if(b)b.classList.add('on');}
+  }
+  WRITTEN3.forEach((it,i)=>renderWritten(it,document.getElementById('written3'),i+1));
+  SCEN.forEach((it,i)=>{ const box=document.getElementById('scen'); (it.kind==='lab')?renderLab(it,box,i+1):renderWritten(it,box,i+1); });
+  EXIT.forEach((it,i)=>{ const box=document.getElementById('exit'); (it.kind==='lab3')?renderLab(it,box,i+1):renderWritten(it,box,i+1); });
+
+  /* ---------- Stepper ---------- */
+  const steps=[...document.querySelectorAll('#stepper .step')]; let si=0;
+  if(steps.length)document.getElementById('stepnext').addEventListener('click',()=>{ if(si<steps.length-1){si++;steps[si].classList.add('on');}
+    document.getElementById('stepcount').textContent=(si+1)+' / '+steps.length; if(si===steps.length-1)document.getElementById('stepnext').disabled=true; });
+
+  /* ---------- Explorer ---------- */
+  const sl=document.getElementById('cidr');
+  function ex(){ const n=+sl.value, h=32-n; document.getElementById('cidrv').textContent=n;
+    const bits='1'.repeat(n)+'0'.repeat(h); const oct=[0,8,16,24].map(i=>bits.slice(i,i+8));
+    document.getElementById('exmask').textContent=oct.map(b=>parseInt(b,2)).join('.');
+    document.getElementById('exbin').textContent=oct.join('.');
+    document.getElementById('exh').textContent=h;
+    document.getElementById('exaddr').textContent=(2**h).toLocaleString();
+    document.getElementById('exuse').textContent=(2**h-2).toLocaleString();
+    document.getElementById('exfirst').textContent='172.16.0.0/'+n+'  (172.16.0.0 to '+addr(2**h-1)+')';
+    document.getElementById('exsecond').textContent=addr(2**h);
+    document.getElementById('excount').textContent=(2**(n-16)).toLocaleString(); }
+  function addr(off){ const base=(172<<24>>>0)+(16<<16); const v=(base+off)>>>0; return [v>>>24,(v>>16)&255,(v>>8)&255,v&255].join('.'); }
+  if(sl){sl.addEventListener('input',ex); ex();}
+
+  /* ---------- Tally + diagnosis ---------- */
+  const NAMES={"Why segment":"Part 1: why segment a network","Subnetting":"Part 2: subnetting, the idea","VLANs":"Part 3: VLANs","Scenario":"Part 4: Westbridge scenario"};
+  function tally(){
+    let ag=0,ap=0,wg=0,wp=0; const by={};
+    const add=(t,g,p)=>{by[t]=by[t]||{g:0,p:0};by[t].g+=g;by[t].p+=p;};
+    Object.values(state.mcq).forEach(m=>{ag+=m.ok;ap+=1;add(m.t,m.ok,1);});
+    Object.values(state.lab).forEach(l=>{const g=l.res.reduce((a,b)=>a+b,0);ag+=g;ap+=l.res.length;add(l.t,g,l.res.length);});
+    Object.values(state.written).forEach(w=>{if(w.mark===undefined)return;wg+=w.mark;wp+=w.marks;add(w.t,w.mark,w.marks);});
+    document.getElementById('autoscore').textContent=ag+' / '+ap;
+    document.getElementById('writtenscore').textContent=wg+' / '+wp;
+    const rows=Object.keys(NAMES).filter(k=>by[k]).map(k=>{const o=by[k],pc=Math.round(100*o.g/o.p);
+      const cls=pc>=80?'good':(pc>=60?'ok':'weak'); const v=pc>=80?'solid':(pc>=60?'nearly there':'go back to this card');
+      return '<tr class="'+cls+'"><td>'+NAMES[k]+'</td><td class="num">'+o.g+' / '+o.p+'</td><td class="num">'+pc+'%</td><td>'+v+'</td></tr>';}).join('');
+    document.getElementById('diag').innerHTML=rows?'<table class="dt"><tr><th>Part</th><th>Your score</th><th>%</th><th>Verdict</th></tr>'+rows+'</table>':'<p class="muted">Answer some questions; your weak spots will appear here.</p>';
+  }
+  document.getElementById('printbtn').addEventListener('click',()=>window.print());
+  document.getElementById('resetbtn').addEventListener('click',()=>{ if(confirm('Clear all your answers and scores on this device?')){try{localStorage.removeItem(KEY);}catch(e){}location.reload();} });
+  tally();
+})();
+
+</script>
+</body>
+</html>
