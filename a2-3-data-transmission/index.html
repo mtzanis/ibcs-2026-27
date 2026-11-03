@@ -113,6 +113,8 @@ tr.reveal.open td:first-child::after{content:""}
 tr.reveal:not(.open)::after{content:none}
 tr.reveal.open td{background:var(--good-wash)}
 .ms .card{font-size:.62em;padding:.4em .6em}
+.cls{grid-template-columns:repeat(6,1fr)}
+.cls .card{font-size:.7em}
 
 </style>
 </head>
@@ -160,7 +162,7 @@ tr.reveal.open td{background:var(--good-wash)}
     <div class="card"><h3>IPv6: 128 bits</h3><p class="ipf">2001:0db8:85a3:0000:0000:8a2e:0370:7334</p><p>Eight groups of <strong>hexadecimal</strong> digits (0 to 9, a to f), separated by colons.</p><p>About <strong>3.4 &times; 10<sup>38</sup></strong> addresses.</p></div>
   </div>
   <div class="cols c2 sm2" style="flex:0;margin-top:.6em">
-    <div class="card reveal"><h3>Why was IPv6 introduced?</h3><p class="hid">IPv4 <strong>ran out of addresses</strong> once phones, laptops and smart devices came online. Not for speed, not for security.</p></div>
+    <div class="card reveal"><h3>Why was IPv6 introduced?</h3><p class="hid">IPv4 <strong>ran out of addresses</strong>: the last blocks were handed out in 2011, once phones, laptops and smart devices came online. IPv6 brings extras too, but address space is the reason to write.</p></div>
     <div class="card reveal"><h3>About how many people are there per IPv4 address?</h3><p class="hid">About 8 billion people, 4.3 billion addresses: fewer than one address each, before counting a single phone or laptop.</p></div>
   </div>
 </section>
@@ -180,6 +182,7 @@ tr.reveal.open td{background:var(--good-wash)}
     <div class="card reveal"><h3>10.20.30.15</h3><p class="hid">Private</p></div>
     <div class="card reveal"><h3>School web server</h3><p class="hid">Static: must be found at the same address</p></div>
     <div class="card reveal"><h3>Your phone</h3><p class="hid">Dynamic, from DHCP</p></div>
+    <div class="card reveal"><h3>Your home router, internet side</h3><p class="hid">Public and dynamic: the ISP can change it</p></div>
   </div>
 </section>
 
@@ -198,7 +201,7 @@ tr.reveal.open td{background:var(--good-wash)}
     <p id="nattx"></p>
     <div class="ctl"><button id="natb">Back</button><button id="natn">Next</button><span class="mono" id="natct" style="font-size:.6em"></span></div>
   </div>
-  <div class="card reveal" style="flex:0;margin-top:.3em"><h3>"NAT is a security feature." True?</h3><p class="hid">No. Its job is <strong>addressing</strong>: it minimizes the public addresses needed and lets private devices reach the internet. Outsiders seeing only the public address is a side effect, not a firewall.</p></div>
+  <div class="card reveal" style="flex:0;margin-top:.3em"><h3>NAT's job: addressing or security?</h3><p class="hid"><strong>Addressing</strong>: it minimizes the public addresses needed and lets private devices reach the internet. Hiding the inside addresses is a useful side effect, but NAT is not a firewall.</p></div>
 </section>
 
 <section class="slide">
@@ -226,6 +229,20 @@ tr.reveal.open td{background:var(--good-wash)}
 </section>
 
 <section class="slide">
+  <div class="eyebrow">A2.3.3 Packet switching: why cut the message up at all?</div>
+  <h2>Why packet switching is efficient</h2>
+  <div class="cols c2 sm2" style="flex:0">
+    <div class="card"><h3>Circuit switching (old telephone network)</h3><p>A whole path is <strong>reserved</strong> for one call from start to end, even during the silences. Nobody else can use it.</p></div>
+    <div class="card"><h3>Packet switching (the internet)</h3><p>No path is reserved. Packets from <strong>many users share the same links</strong>, taking turns, and a link is used only while there is data to send.</p></div>
+  </div>
+  <div class="cols c3 sm2" style="flex:0;margin-top:.6em">
+    <div class="card reveal"><h3>Why do shared links make the network more efficient?</h3><p class="hid">No capacity sits idle: while one device is quiet, other devices' packets use the link.</p></div>
+    <div class="card reveal"><h3>Why are packets kept small?</h3><p class="hid">A lost or damaged packet means resending only a <strong>small piece</strong>, and small packets let other traffic slot in between.</p></div>
+    <div class="card reveal"><h3>What happens if a link fails?</h3><p class="hid">Routers send the next packets <strong>another way</strong>. A reserved circuit would simply drop.</p></div>
+  </div>
+</section>
+
+<section class="slide">
   <div class="eyebrow">A2.3.3 Packet switching: who moves the packets</div>
   <h2>Switch and router, two different jobs</h2>
   <table class="cmp" style="font-size:.78em">
@@ -249,9 +266,10 @@ tr.reveal.open td{background:var(--good-wash)}
     <div class="card"><h3>Twisted pair</h3><p><strong>Electrical signals</strong> on pairs of copper wires. The twisting cancels out much of the interference. Most Ethernet cabling.</p></div>
     <div class="card"><h3>Wireless</h3><p><strong>Radio waves</strong> through the air. No cable, so devices can move, but the air is shared with everything nearby.</p></div>
   </div>
-  <div class="cols c2 sm2" style="flex:0;margin-top:.6em">
+  <div class="cols c3 sm2" style="flex:0;margin-top:.6em">
     <div class="card"><h3>Attenuation</h3><p>The signal <strong>weakening</strong> as it travels along the medium.</p></div>
     <div class="card"><h3>Interference</h3><p>An <strong>outside signal</strong> disrupting it, such as motors, other cables or other Wi-Fi.</p></div>
+    <div class="card"><h3>Bandwidth vs throughput</h3><p><strong>Bandwidth</strong>: the most a link could carry. <strong>Throughput</strong>: what actually gets through, lower when busy or noisy.</p></div>
   </div>
   <p class="prose" style="margin-top:.4em">Not the same thing: a cable can have low attenuation and still pick up interference.</p>
 </section>
@@ -262,7 +280,7 @@ tr.reveal.open td{background:var(--good-wash)}
   <table class="cmp">
     <tr><th>Factor</th><th>Fiber optic</th><th>Twisted pair</th><th>Wireless</th></tr>
     <tr class="reveal"><td>Bandwidth</td><td><span class="hid">Very high</span></td><td><span class="hid">Moderate</span></td><td><span class="hid">Low to moderate, varies</span></td></tr>
-    <tr class="reveal"><td>Range</td><td><span class="hid">Long: tens of km</span></td><td><span class="hid">Short: about 100 m per run</span></td><td><span class="hid">Short to medium, varies</span></td></tr>
+    <tr class="reveal"><td>Range</td><td><span class="hid">Long: tens of km</span></td><td><span class="hid">Short: about 100 m, then a switch or repeater</span></td><td><span class="hid">Short to medium, varies</span></td></tr>
     <tr class="reveal"><td>Attenuation</td><td><span class="hid">Very low</span></td><td><span class="hid">Moderate to high</span></td><td><span class="hid">High</span></td></tr>
     <tr class="reveal"><td>Interference</td><td><span class="hid">Very low: light ignores it</span></td><td><span class="hid">Moderate</span></td><td><span class="hid">High: open air</span></td></tr>
     <tr class="reveal"><td>Reliability</td><td><span class="hid">High</span></td><td><span class="hid">Moderate to high</span></td><td><span class="hid">Variable</span></td></tr>
@@ -282,7 +300,7 @@ tr.reveal.open td{background:var(--good-wash)}
     <div class="card reveal"><h3>Visitors' phones in the school theater</h3><p class="hid"><strong>Wireless:</strong> mobility, no cabling; encrypt it, and keep it on its own segment (Friday).</p></div>
     <div class="card reveal"><h3>A factory floor beside heavy electric motors</h3><p class="hid"><strong>Fiber optic:</strong> interference. Light is not affected by electromagnetic interference; copper and radio are.</p></div>
   </div>
-  <div class="timer sm" data-min="5"></div>
+  <div class="timer sm" data-min="4"></div>
 </section>
 
 <section class="slide">
