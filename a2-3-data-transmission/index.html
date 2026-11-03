@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.3 Address, packet, wire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+
+:root{--paper:#F4F6F9;--card:#FFFFFF;--ink:#1B2A3A;--muted:#5B6B7E;--line:#C6D2E0;--blue:#2B5CAD;--blue-deep:#1E3F76;--blue-wash:#E3EAF6;--amber:#B97A14;--amber-wash:#F7EDD9;--good:#2F7D52;--good-wash:#E1F0E7;--bad:#B54434;--bad-wash:#F6E4E0;--display:"Bricolage Grotesque",Verdana,sans-serif;--body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;--mono:"IBM Plex Mono","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.75vw,30px);line-height:1.4;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;padding:4.2vh 5vw 9vh;flex-direction:column;overflow:auto}
+.slide.cur{display:flex}
+.slide.title{background:var(--blue-deep);color:#fff;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.62em;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.title .eyebrow{color:#F3C56B}
+h1{font-family:var(--display);font-weight:800;font-size:3.1em;line-height:1.02;margin:.15em 0 .25em}
+h2{font-family:var(--display);font-weight:800;font-size:1.85em;line-height:1.08;margin:.1em 0 .45em}
+p{margin:.35em 0}
+.prose{color:var(--muted);max-width:60em}
+body.board .prose{display:none}
+.cols{display:grid;gap:1.2em;flex:1;align-items:start}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.8em .9em}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.12em;margin-bottom:.25em}
+.reveal{cursor:pointer;position:relative}
+.reveal .hid{visibility:hidden}
+.reveal.open .hid{visibility:visible}
+.reveal:not(.open)::after{content:"click to reveal";position:absolute;right:.7em;bottom:.5em;font-family:var(--mono);font-size:.55em;color:var(--amber)}
+.reveal.open{border-color:var(--good);background:var(--good-wash)}
+.big{font-family:var(--display);font-weight:800;font-size:1.5em}
+.mono{font-family:var(--mono)}
+svg.t{width:100%;height:auto;max-height:30vh;display:block}
+svg.t line{stroke:var(--blue);stroke-width:4;stroke-linecap:round}
+svg.t circle{fill:#fff;stroke:var(--blue-deep);stroke-width:3.5}
+svg.t rect{fill:var(--blue-wash);stroke:var(--blue-deep);stroke-width:3.5}
+.timer{display:flex;align-items:center;gap:.6em;margin:.5em 0}
+.timer .clock{font-family:var(--mono);font-weight:600;font-size:2.6em;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.05em .4em;min-width:4.2em;text-align:center}
+.timer .clock.out{background:var(--bad)}
+button{font-family:var(--mono);font-size:.62em;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.45em .9em}
+ol,ul{margin:.3em 0 .3em 1.2em;padding:0}li{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:.78em}
+th,td{border:2px solid var(--line);padding:.35em .5em;text-align:left;vertical-align:top;background:var(--card)}
+th{background:var(--blue-wash);font-family:var(--display)}
+td.reveal:not(.open)::after{content:"?";right:.5em;bottom:.2em;font-size:1em}
+.weak{border-color:var(--bad);background:var(--bad-wash)}.strong{border-color:var(--good);background:var(--good-wash)}
+.due{background:var(--amber-wash);border:2px solid var(--amber);border-radius:14px;padding:.6em .9em;margin-top:.6em}
+footer{position:fixed;left:0;right:0;bottom:0;height:6.5vh;display:flex;align-items:center;justify-content:space-between;padding:0 2vw;background:var(--card);border-top:2px solid var(--line);font-family:var(--mono);font-size:.55em;z-index:5}
+footer .keys{color:var(--muted)}
+#notes{position:fixed;right:0;top:0;bottom:6.5vh;width:min(34vw,520px);background:#FFFDF6;border-left:3px solid var(--amber);padding:1em 1.1em;overflow:auto;font-size:.62em;line-height:1.45;display:none;z-index:6}
+#notes.show{display:block}
+#notes h4{font-family:var(--display);font-size:1.25em;margin-bottom:.4em;color:var(--amber)}
+aside.tn{display:none}
+body.notes .slide{right:min(34vw,520px)}
+.ret{grid-template-columns:repeat(2,1fr);gap:.5em;flex:0}
+.ret .card{font-size:.8em;padding:.45em .65em}.ret .card h3{font-size:.98em}
+.banner{background:var(--amber-wash);border:2px solid var(--amber);border-radius:12px;padding:.3em .8em;font-size:.8em;flex:0;margin-bottom:.3em}
+.kq li{margin:.1em 0}
+.ctl{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;margin:.3em 0}
+.ctl button.on{background:var(--bad);color:#fff;border-color:var(--bad)}
+.ipf{font-family:var(--mono);font-size:.95em;font-weight:600;color:var(--blue-deep);background:var(--blue-wash);border-radius:8px;padding:.25em .5em;display:inline-block;margin:.2em 0;word-break:break-all}
+.cmp{font-size:.68em}.cmp td,.cmp th{padding:.28em .5em}
+.sm2 .card{font-size:.8em;padding:.45em .7em}
+.cls{grid-template-columns:repeat(5,1fr);gap:.45em;flex:0}
+.cls .card{font-size:.74em;padding:.4em .55em}.cls .card h3{font-family:var(--mono);font-size:.95em}
+/* NAT */
+.natw{display:grid;grid-template-columns:1.1fr .3fr 1.2fr .3fr 1fr;gap:.4em;align-items:stretch;flex:0;font-size:.72em}
+.nbox{border:2px solid var(--line);border-radius:12px;background:var(--card);padding:.4em .6em;transition:all .2s}
+.nbox.here{border-color:var(--amber);background:var(--amber-wash);box-shadow:0 0 0 3px var(--amber-wash)}
+.nbox h3{font-size:1em;margin-bottom:.2em}.nbox .mono{font-size:.9em}
+.narr{display:flex;align-items:center;justify-content:center;font-size:1.6em;color:var(--muted)}
+#natpk{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:.2em .6em;align-items:center;font-size:.72em;background:#14202E;color:#D9E4F2;border-radius:10px;padding:.5em .8em;margin:.5em 0 .3em;flex:0}
+#natpk span{color:#8FA3BC;font-family:var(--mono);font-size:.85em}#natpk b{font-family:var(--mono);color:#FFE2A8}
+#nattx{font-size:.78em;min-height:2.6em;flex:0}
+#nattab{font-size:.8em;margin-top:.2em}#nattab td,#nattab th{padding:.15em .4em}
+.mt{color:var(--muted);font-style:italic}
+/* packet */
+.hdr{display:flex;font-family:var(--mono);font-size:.68em;flex:0;margin:.3em 0 .5em}
+.hdr div{border:2px solid var(--blue-deep);padding:.45em .6em;background:var(--blue-wash);text-align:center}
+.hdr div+div{border-left:none}
+.hdr .pay{flex:1;background:var(--amber-wash);border-color:var(--amber)}
+.hdr small{display:block;color:var(--muted);font-size:.8em}
+#psim{flex:0}
+#psim svg{width:100%;height:auto;max-height:42vh;display:block;background:var(--card);border:2px solid var(--line);border-radius:12px}
+#psim .lk{stroke:#C9D3E0;stroke-width:4}
+#psim .lk.used{stroke:#7FA3CF}
+#psim .lk.cut{stroke:var(--bad);stroke-dasharray:8 6}
+#psim .rtrn{fill:#fff;stroke:var(--blue-deep);stroke-width:3}
+#psim .hostn{fill:var(--blue-deep)}
+#psim .rtrt{font-family:var(--mono);font-size:13px;font-weight:600;fill:var(--blue-deep)}
+#psim .hostt{font-family:var(--mono);font-size:13px;font-weight:600;fill:#fff}
+#psim .pk text{font-family:var(--mono);font-size:14px;font-weight:700;fill:#fff}
+.prow{display:flex;gap:1.2em;align-items:center;flex-wrap:wrap;font-size:.72em;margin-top:.3em}
+.prow b{font-family:var(--mono);font-size:.85em;color:var(--muted);font-weight:600}
+.pa,.slot{display:inline-block;font-family:var(--mono);font-weight:700;border-radius:6px;padding:.1em .45em;margin-right:.2em;color:#fff;background:var(--pc)}
+.pa.bad{background:var(--bad)}
+.slot{background:#fff;color:var(--muted);border:2px dashed var(--line)}
+.slot.in{background:var(--pc);color:#fff;border:2px solid var(--pc)}
+#pnote{font-size:.66em;margin-top:.25em;min-height:2.4em}
+/* media */
+.med .card{font-size:.8em}
+tr.reveal{cursor:pointer}tr.reveal .hid{visibility:hidden}tr.reveal.open .hid{visibility:visible}
+tr.reveal td:first-child::after{content:"  \25B8";color:var(--amber);font-size:.8em}
+tr.reveal.open td:first-child::after{content:""}
+.ex .card{font-size:.78em}
+.ms .card{font-size:.68em;padding:.45em .65em}
+.timer.sm{margin:.3em 0}.timer.sm .clock{font-size:1.6em}
+.due{font-size:.8em}
+tr.reveal:not(.open)::after{content:none}
+tr.reveal.open td{background:var(--good-wash)}
+.ms .card{font-size:.62em;padding:.4em .6em}
+
+</style>
+</head>
+<body class="">
+<section class="slide title">
+  <div class="eyebrow">IB Computer Science SL + HL, A2.3 Data transmission</div>
+  <h1>Address, packet, wire</h1>
+  <p class="big" style="font-weight:500">How a message finds its way: who it is for, how it is cut up, and what it travels along.</p>
+  <p class="prose" style="color:#C9D6EC">Tuesday 3 November. Today covers the three shared A2.3 statements: A2.3.1 types of IP addressing, A2.3.3 packet switching and A2.3.2 transmission media. HL students meet A2.3.4 routing in a Wednesday lesson.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Start of the lesson: homework in, then today's learning objectives</div>
+  <div class="banner"><strong>Due now (13:55):</strong> the A2.2.4 workbench PDF on Classroom, and your score on the A2.2.4 eBook quiz.</div>
+  <h2>By the end of the lesson you can...</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>1. Describe</h3><p>the types of IP addressing: IPv4 and IPv6, public and private, static and dynamic, and the role of NAT.</p></div>
+    <div class="card"><h3>2. Explain</h3><p>how packet switching sends a message across a network, and why each header field is there.</p></div>
+    <div class="card"><h3>3. Compare</h3><p>fiber optic, twisted pair and wireless media, factor by factor.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin-top:.6em">Key questions</h3>
+  <ul class="kq">
+    <li>Why does IPv6 exist, and what does NAT let a home network do?</li>
+    <li>How does a message arrive whole when its packets take different routes?</li>
+    <li>Which medium wins on which factor, and what does it cost?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Retrieval, no notes: A2.2.4 segmentation and earlier</div>
+  <h2>Four quick ones</h2>
+  <div class="cols ret">
+    <div class="card reveal"><h3>Why does segmenting a network reduce congestion?</h3><p class="hid">Each segment is a smaller broadcast domain, so a broadcast stays in its segment and each device receives less traffic.</p></div>
+    <div class="card reveal"><h3>Friday: 10.20.30.15 and 10.20.40.15. Same subnet?</h3><p class="hid">No: different network part (10.20.30 vs 10.20.40).</p></div>
+    <div class="card reveal"><h3>Which server gives a laptop its IP address when it joins?</h3><p class="hid">The DHCP server (often built into the router).</p></div>
+    <div class="card reveal"><h3>Switch or router: which uses IP addresses to forward between networks?</h3><p class="hid">The router. A switch forwards within one LAN using MAC addresses.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.1 IP addressing: IPv4 and IPv6</div>
+  <h2>Two address formats</h2>
+  <div class="cols c2" style="flex:0">
+    <div class="card"><h3>IPv4: 32 bits</h3><p class="ipf">192.168.1.10</p><p>Four numbers, each 0 to 255 (8 bits), separated by dots: <strong>dotted decimal</strong>.</p><p>About <strong>4.3 billion</strong> addresses.</p></div>
+    <div class="card"><h3>IPv6: 128 bits</h3><p class="ipf">2001:0db8:85a3:0000:0000:8a2e:0370:7334</p><p>Eight groups of <strong>hexadecimal</strong> digits (0 to 9, a to f), separated by colons.</p><p>About <strong>3.4 &times; 10<sup>38</sup></strong> addresses.</p></div>
+  </div>
+  <div class="cols c2 sm2" style="flex:0;margin-top:.6em">
+    <div class="card reveal"><h3>Why was IPv6 introduced?</h3><p class="hid">IPv4 <strong>ran out of addresses</strong> once phones, laptops and smart devices came online. Not for speed, not for security.</p></div>
+    <div class="card reveal"><h3>About how many people are there per IPv4 address?</h3><p class="hid">About 8 billion people, 4.3 billion addresses: fewer than one address each, before counting a single phone or laptop.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.1 IP addressing: public and private, static and dynamic</div>
+  <h2>Where an address works, and who sets it</h2>
+  <div class="cols c2 sm2" style="flex:0">
+    <div class="card"><h3>Public</h3><p>Unique across the whole internet, assigned by the <strong>ISP</strong>, reachable from anywhere. Your home router has one.</p></div>
+    <div class="card"><h3>Private</h3><p>Used only inside a local network, <strong>not routable</strong> on the internet, so the same one is reused in millions of homes. Ranges: <span class="mono">10.x.x.x</span>, <span class="mono">172.16.x.x to 172.31.x.x</span>, <span class="mono">192.168.x.x</span>.</p></div>
+    <div class="card"><h3>Static</h3><p><strong>Set by hand</strong>, never changes. For devices others must always find: web and mail servers, network printers.</p></div>
+    <div class="card"><h3>Dynamic</h3><p><strong>Lent by DHCP</strong> from a pool, may change next time. For everyday devices: phones, laptops, consoles.</p></div>
+  </div>
+  <div class="cols cls" style="margin-top:.5em">
+    <div class="card reveal"><h3>8.8.8.8</h3><p class="hid">Public</p></div>
+    <div class="card reveal"><h3>192.168.1.10</h3><p class="hid">Private</p></div>
+    <div class="card reveal"><h3>10.20.30.15</h3><p class="hid">Private</p></div>
+    <div class="card reveal"><h3>School web server</h3><p class="hid">Static: must be found at the same address</p></div>
+    <div class="card reveal"><h3>Your phone</h3><p class="hid">Dynamic, from DHCP</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.1 IP addressing: network address translation (NAT)</div>
+  <h2>One public address, a whole home network</h2>
+  <div id="nat">
+    <div class="natw">
+      <div class="nbox" data-at="lap"><h3>Home network</h3><p>Laptop <span class="mono">192.168.1.10</span><br>Phone <span class="mono">192.168.1.11</span></p></div>
+      <div class="narr">&#8644;</div>
+      <div class="nbox" data-at="rtr"><h3>Router (NAT)</h3><p>Public address <span class="mono">81.2.69.160</span></p><table id="nattab"></table></div>
+      <div class="narr">&#8644;</div>
+      <div class="nbox" data-at="srv"><h3>Web server</h3><p>On the internet<br><span class="mono">151.101.0.81</span></p></div>
+    </div>
+    <div id="natpk"></div>
+    <p id="nattx"></p>
+    <div class="ctl"><button id="natb">Back</button><button id="natn">Next</button><span class="mono" id="natct" style="font-size:.6em"></span></div>
+  </div>
+  <div class="card reveal" style="flex:0;margin-top:.3em"><h3>"NAT is a security feature." True?</h3><p class="hid">No. Its job is <strong>addressing</strong>: it minimizes the public addresses needed and lets private devices reach the internet. Outsiders seeing only the public address is a side effect, not a firewall.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.3 Packet switching: what is in a packet</div>
+  <h2>A payload wrapped in a header</h2>
+  <div class="hdr"><div>Source address<small>81.2.69.160</small></div><div>Destination address<small>151.101.0.81</small></div><div>Sequence number<small>3 of 4</small></div><div>Error check<small>a value worked out from the data</small></div><div class="pay">Payload<small>one piece of the message</small></div></div>
+  <p>The message is <strong>segmented</strong> into packets. Each header field is there <strong>because</strong> of something that can happen on the way.</p>
+  <div class="cols c2 sm2" style="flex:0;margin-top:.4em">
+    <div class="card reveal"><h3>Why a destination address in every packet?</h3><p class="hid">So each packet can be routed <strong>on its own</strong>.</p></div>
+    <div class="card reveal"><h3>Why a source address?</h3><p class="hid">So the receiver knows where it came from, and where to send replies or requests for resends.</p></div>
+    <div class="card reveal"><h3>Why a sequence number?</h3><p class="hid">Because packets can <strong>arrive out of order</strong>: the destination uses it to put them back in order.</p></div>
+    <div class="card reveal"><h3>Why an error check?</h3><p class="hid">Because a packet can be <strong>corrupted</strong> on the way: the destination detects it and asks for that packet again.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.3 Packet switching: independent routes, reassembly</div>
+  <h2>Four packets, many routes</h2>
+  <div id="psim">
+    <div class="ctl"><button id="psend">Send message</button><button id="pcut">Cut a link</button><button id="pbad">Damage packet 3</button><button id="preset">Reset</button></div>
+    <svg viewBox="0 0 760 300" aria-label="A network of seven routers between Host A and Host B"></svg>
+    <div class="prow"><span><b>Arrived:</b> <span id="parr"></span></span><span><b>Host B rebuilds:</b> <span id="pmsg"></span></span></div>
+    <p id="pnote"></p>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.3 Packet switching: who moves the packets</div>
+  <h2>Switch and router, two different jobs</h2>
+  <table class="cmp" style="font-size:.78em">
+    <tr><th></th><th>Switch</th><th>Router</th></tr>
+    <tr><td>Works</td><td>Within one LAN</td><td>Between networks</td></tr>
+    <tr><td>Reads</td><td>The destination MAC address</td><td>The destination IP address</td></tr>
+    <tr><td>Uses</td><td>A table of which device is on which port</td><td>A routing table, to choose the next hop</td></tr>
+    <tr><td>Job in packet switching</td><td>Delivers the packet to the right device on the local network</td><td>Chooses a route for each packet and forwards it towards the destination network</td></tr>
+  </table>
+  <div class="cols c2 sm2" style="flex:0;margin-top:.6em">
+    <div class="card reveal"><h3>In the simulator, which device decided that packet 2 took a different route from packet 1?</h3><p class="hid">A router: it makes the routing decision for each packet separately.</p></div>
+    <div class="card reveal"><h3>"A switch routes packets across the internet." What is wrong?</h3><p class="hid">A switch only works inside one LAN, by MAC address. Routing between networks is the router's job.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.2 Transmission media: how each one carries data</div>
+  <h2>Light, electricity, radio</h2>
+  <div class="cols c3 med" style="flex:0">
+    <div class="card"><h3>Fiber optic</h3><p><strong>Pulses of light</strong> in a thin glass or plastic core. The cladding around it reflects the light back in, so it stays in the core.</p></div>
+    <div class="card"><h3>Twisted pair</h3><p><strong>Electrical signals</strong> on pairs of copper wires. The twisting cancels out much of the interference. Most Ethernet cabling.</p></div>
+    <div class="card"><h3>Wireless</h3><p><strong>Radio waves</strong> through the air. No cable, so devices can move, but the air is shared with everything nearby.</p></div>
+  </div>
+  <div class="cols c2 sm2" style="flex:0;margin-top:.6em">
+    <div class="card"><h3>Attenuation</h3><p>The signal <strong>weakening</strong> as it travels along the medium.</p></div>
+    <div class="card"><h3>Interference</h3><p>An <strong>outside signal</strong> disrupting it, such as motors, other cables or other Wi-Fi.</p></div>
+  </div>
+  <p class="prose" style="margin-top:.4em">Not the same thing: a cable can have low attenuation and still pick up interference.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.2 Transmission media: the eight factors</div>
+  <h2>Predict each row, then click it</h2>
+  <table class="cmp">
+    <tr><th>Factor</th><th>Fiber optic</th><th>Twisted pair</th><th>Wireless</th></tr>
+    <tr class="reveal"><td>Bandwidth</td><td><span class="hid">Very high</span></td><td><span class="hid">Moderate</span></td><td><span class="hid">Low to moderate, varies</span></td></tr>
+    <tr class="reveal"><td>Range</td><td><span class="hid">Long: tens of km</span></td><td><span class="hid">Short: about 100 m per run</span></td><td><span class="hid">Short to medium, varies</span></td></tr>
+    <tr class="reveal"><td>Attenuation</td><td><span class="hid">Very low</span></td><td><span class="hid">Moderate to high</span></td><td><span class="hid">High</span></td></tr>
+    <tr class="reveal"><td>Interference</td><td><span class="hid">Very low: light ignores it</span></td><td><span class="hid">Moderate</span></td><td><span class="hid">High: open air</span></td></tr>
+    <tr class="reveal"><td>Reliability</td><td><span class="hid">High</span></td><td><span class="hid">Moderate to high</span></td><td><span class="hid">Variable</span></td></tr>
+    <tr class="reveal"><td>Security</td><td><span class="hid">High: hard to tap unnoticed</span></td><td><span class="hid">Moderate</span></td><td><span class="hid">Low unless encrypted</span></td></tr>
+    <tr class="reveal"><td>Cost</td><td><span class="hid">High</span></td><td><span class="hid">Low</span></td><td><span class="hid">Moderate, varies</span></td></tr>
+    <tr class="reveal"><td>Installation</td><td><span class="hid">Complex: specialist skill</span></td><td><span class="hid">Moderate: simple runs</span></td><td><span class="hid">Low to moderate: no cabling</span></td></tr>
+  </table>
+  <div class="card reveal" style="flex:0;margin-top:.4em;font-size:.8em"><h3>The pattern in one line?</h3><p class="hid">Fiber wins on performance and costs the most. Twisted pair is cheap and simple. Wireless gives mobility.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.3.2 Transmission media: choose the medium, in pairs</div>
+  <h2>Which medium, and which factor decided it?</h2>
+  <div class="cols c2 sm2" style="flex:0">
+    <div class="card reveal"><h3>Linking two school buildings 2 km apart</h3><p class="hid"><strong>Fiber optic:</strong> range (twisted pair stops at about 100 m) and bandwidth for everything that crosses between them.</p></div>
+    <div class="card reveal"><h3>Thirty desktop PCs in one computer lab</h3><p class="hid"><strong>Twisted pair:</strong> cheap and simple over short runs, steady and reliable.</p></div>
+    <div class="card reveal"><h3>Visitors' phones in the school theater</h3><p class="hid"><strong>Wireless:</strong> mobility, no cabling; encrypt it, and keep it on its own segment (Friday).</p></div>
+    <div class="card reveal"><h3>A factory floor beside heavy electric motors</h3><p class="hid"><strong>Fiber optic:</strong> interference. Light is not affected by electromagnetic interference; copper and radio are.</p></div>
+  </div>
+  <div class="timer sm" data-min="5"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exam technique, 4 minutes: compare factor by factor</div>
+  <h2>Compare twisted pair and wireless with reference to reliability and security. [4]</h2>
+  <div class="cols c2 ex">
+    <div class="card weak"><h3>Answer A</h3><p>"Twisted pair is a copper cable used in offices. It is reliable and fairly secure. Wireless uses radio waves and lets people move around. It can be hacked."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>1 mark at most:</strong> each medium described on its own; no sentence sets them against each other.</span></p></div>
+    <div class="card strong"><h3>Answer B</h3><p>"Reliability: twisted pair gives a steadier connection because the signal stays inside the cable, while wireless varies with distance, obstacles and interference, so twisted pair is the more reliable. Security: an attacker must physically reach a twisted pair cable, while wireless broadcasts into the air where anyone in range can intercept it, so wireless needs strong encryption to match."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>4 marks:</strong> one factor at a time, both media in every sentence, with the reason.</span></p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exit ticket, 12 minutes, on your own, on paper</div>
+  <h2>Check your learning</h2>
+  <div class="card" style="flex:0;font-size:.82em">
+    <p><strong>1.</strong> State the reason IPv6 was introduced. [1]</p>
+    <p><strong>2.</strong> Describe the role of network address translation (NAT). [3]</p>
+    <p><strong>3.</strong> Explain why each packet needs a sequence number in its header. [2]</p>
+    <p><strong>4.</strong> Compare fiber optic and wireless transmission with reference to bandwidth and security. [4]</p>
+  </div>
+  <div class="timer sm" data-min="12"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Plenary and homework</div>
+  <h2>Address, packet, wire</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card reveal"><h3>Address</h3><p class="hid">IPv4 or IPv6; public or private; static or dynamic; NAT lets a private network share one public address.</p></div>
+    <div class="card reveal"><h3>Packet</h3><p class="hid">Cut into packets, each routed on its own, rebuilt by sequence number, damaged ones resent.</p></div>
+    <div class="card reveal"><h3>Wire</h3><p class="hid">Fiber for performance and distance, twisted pair for cost, wireless for mobility.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:.6em;flex:0">
+    <div class="due"><strong>Homework, due Tue 10 Nov, 13:55 (start of the lesson):</strong> the three 10-question quizzes on the InThinking eBook pages "A 2.3.1 IP Addressing", "A 2.3.2 Transmission Media" and "A 2.3.3 Packet Switching". Bring your three scores.</div>
+    <div class="card"><h3>This Friday</h3><p>IA lesson. Your product should be working by Friday.</p></div>
+  </div>
+</section>
+
+<footer><span id="pos"></span><span class="keys">arrows: move &nbsp; click a card to reveal it</span></footer>
+<div id="notes" hidden><div id="ntext"></div></div><span id="bstate" hidden></span>
+<script>
+// Two interactives: NAT stepper (A2.3.1) and packet switching network (A2.3.3)
+(function(){
+  // ---------- NAT stepper ----------
+  const nat=document.getElementById('nat');
+  if(nat){
+    const PUB='81.2.69.160', SRV='151.101.0.81', LAP='192.168.1.10', PHN='192.168.1.11';
+    const S=[
+      {at:'lap',src:LAP,dst:SRV,tab:[],t:'The laptop asks the web server for a page. Its packet carries its PRIVATE address as the source.'},
+      {at:'rtr',src:PUB,dst:SRV,tab:[[LAP,SRV]],t:'At the router, NAT swaps the private source address for the router’s one PUBLIC address, and writes the swap in its translation table.'},
+      {at:'srv',src:PUB,dst:SRV,tab:[[LAP,SRV]],t:'The packet crosses the internet. The web server only ever sees 81.2.69.160. The private address never leaves the home network.'},
+      {at:'srv',src:SRV,dst:PUB,tab:[[LAP,SRV]],t:'The server replies to the address it saw: the router’s public address.'},
+      {at:'rtr',src:SRV,dst:LAP,tab:[[LAP,SRV]],t:'The router looks up its table, finds which device made this request, and swaps the destination back to the laptop’s private address.'},
+      {at:'lap',src:SRV,dst:LAP,tab:[[LAP,SRV],[PHN,'142.250.180.14']],t:'The laptop gets its page. Meanwhile the phone is doing the same through the same public address: one public address, a whole network of devices.'}
+    ];
+    let i=0;
+    const pk=nat.querySelector('#natpk'), tx=nat.querySelector('#nattx'), tb=nat.querySelector('#nattab'), ct=nat.querySelector('#natct');
+    const paint=()=>{
+      const s=S[i];
+      nat.querySelectorAll('[data-at]').forEach(b=>b.classList.toggle('here',b.dataset.at===s.at));
+      pk.innerHTML='<span>Source</span><b>'+s.src+'</b><span>Destination</span><b>'+s.dst+'</b>';
+      tx.textContent=s.t;
+      tb.innerHTML='<tr><th>Private device</th><th>Talking to</th></tr>'+(s.tab.length?s.tab.map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join(''):'<tr><td colspan="2" class="mt">empty</td></tr>');
+      ct.textContent=(i+1)+' / '+S.length;
+      nat.querySelector('#natb').disabled=i===0; nat.querySelector('#natn').disabled=i===S.length-1;
+    };
+    nat.querySelector('#natn').onclick=()=>{if(i<S.length-1)i++;paint()};
+    nat.querySelector('#natb').onclick=()=>{if(i>0)i--;paint()};
+    paint();
+  }
+
+  // ---------- Packet switching ----------
+  const ps=document.getElementById('psim');
+  if(ps){
+    const NS='http://www.w3.org/2000/svg';
+    const N={A:[50,150],R1:[180,65],R2:[180,235],R3:[380,35],R4:[380,150],R5:[380,265],R6:[580,85],R7:[580,215],B:[710,150]};
+    const E=[['A','R1'],['A','R2'],['R1','R3'],['R1','R4'],['R2','R4'],['R2','R5'],['R3','R6'],['R4','R6'],['R4','R7'],['R5','R7'],['R6','B'],['R7','B']];
+    const MSG=['MEET','AT','THE','GATE'], COL=['#2F6FB5','#3F8F5A','#8A4FB0','#B7791F'];
+    const svg=ps.querySelector('svg'), arr=ps.querySelector('#parr'), msg=ps.querySelector('#pmsg'), note=ps.querySelector('#pnote');
+    const key=(a,b)=>[a,b].sort().join('-');
+    let cut=new Set(), corrupt=false, running=0, timers=[];
+    const lines={};
+    E.forEach(([a,b])=>{const l=document.createElementNS(NS,'line');l.setAttribute('x1',N[a][0]);l.setAttribute('y1',N[a][1]);l.setAttribute('x2',N[b][0]);l.setAttribute('y2',N[b][1]);l.setAttribute('class','lk');svg.appendChild(l);lines[key(a,b)]=l});
+    Object.entries(N).forEach(([n,[x,y]])=>{const g=document.createElementNS(NS,'g');
+      const host=n==='A'||n==='B';
+      const c=document.createElementNS(NS,host?'rect':'circle');
+      if(host){c.setAttribute('x',x-34);c.setAttribute('y',y-20);c.setAttribute('width',68);c.setAttribute('height',40);c.setAttribute('rx',8)}else{c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',19)}
+      c.setAttribute('class',host?'hostn':'rtrn');g.appendChild(c);
+      const t=document.createElementNS(NS,'text');t.setAttribute('x',x);t.setAttribute('y',y+5);t.setAttribute('text-anchor','middle');t.setAttribute('class',host?'hostt':'rtrt');t.textContent=host?'Host '+n:n;g.appendChild(t);svg.appendChild(g)});
+    const adj={};E.forEach(([a,b])=>{(adj[a]=adj[a]||[]).push(b);(adj[b]=adj[b]||[]).push(a)});
+    function paths(){const out=[];(function dfs(n,p){if(n==='B'){out.push(p.slice());return}
+      (adj[n]||[]).forEach(m=>{if(p.includes(m)||cut.has(key(n,m))||N[m][0]<=N[n][0])return;p.push(m);dfs(m,p);p.pop()})})('A',['A']);return out}
+    const len=p=>p.slice(1).reduce((s,n,k)=>s+Math.hypot(N[n][0]-N[p[k]][0],N[n][1]-N[p[k]][1]),0);
+    let got=[];
+    function paint(){
+      arr.innerHTML=got.length?got.map(g=>'<span class="pa'+(g.bad?' bad':'')+'" style="--pc:'+COL[g.s-1]+'">'+g.s+(g.bad?' ✗':'')+'</span>').join(''):'<span class="mt">nothing yet</span>';
+      const ok=new Set(got.filter(g=>!g.bad).map(g=>g.s));
+      msg.innerHTML=MSG.map((w,k)=>'<span class="slot'+(ok.has(k+1)?' in':'')+'" style="--pc:'+COL[k]+'">'+(ok.has(k+1)?w:(k+1))+'</span>').join('');
+    }
+    function fly(s,bad,onDone){
+      const all=paths(); if(!all.length){note.textContent='No route left from A to B: too many links are cut.';return}
+      const p=all[Math.floor(Math.random()*all.length)];
+      p.slice(1).forEach((n,k)=>lines[key(p[k],n)].classList.add('used'));
+      const dot=document.createElementNS(NS,'g');dot.setAttribute('class','pk');
+      const c=document.createElementNS(NS,'circle');c.setAttribute('r',13);c.setAttribute('fill',COL[s-1]);dot.appendChild(c);
+      const t=document.createElementNS(NS,'text');t.setAttribute('text-anchor','middle');t.setAttribute('y',5);t.textContent=s;dot.appendChild(t);svg.appendChild(dot);
+      const L=len(p), dur=L*5+Math.random()*1500, t0=performance.now(); running++;
+      const iv=setInterval(()=>{let f=Math.min(1,(performance.now()-t0)/dur), d=f*L, k=0;
+        while(k<p.length-2){const seg=Math.hypot(N[p[k+1]][0]-N[p[k]][0],N[p[k+1]][1]-N[p[k]][1]);if(d<=seg)break;d-=seg;k++}
+        const a=N[p[k]],b=N[p[k+1]],sl=Math.hypot(b[0]-a[0],b[1]-a[1])||1,r=Math.min(1,d/sl);
+        dot.setAttribute('transform','translate('+(a[0]+(b[0]-a[0])*r)+','+(a[1]+(b[1]-a[1])*r)+')');
+        if(f>=1){clearInterval(iv);dot.remove();running--;onDone(p)}},30);
+      timers.push(iv);
+    }
+    function send(){
+      if(running)return; got=[];paint();Object.values(lines).forEach(l=>l.classList.remove('used'));
+      const badSeq=corrupt?3:0; let routes=[];
+      note.textContent='Four packets leave Host A at almost the same moment. Each router picks the next hop for each packet on its own.';
+      [1,2,3,4].forEach((s,k)=>timers.push(setTimeout(()=>fly(s,s===badSeq,p=>{
+        got.push({s,bad:s===badSeq});routes.push(s+': '+p.join(' → '));paint();
+        if(s===badSeq){note.textContent='Packet 3 failed its error check: its data was damaged on the way. Host B asks for packet 3 only to be sent again.';
+          timers.push(setTimeout(()=>fly(3,false,p2=>{got.push({s:3,bad:false});routes.push('3 again: '+p2.join(' → '));paint();fin()}),600))}
+        else fin();
+        function fin(){if(got.filter(g=>!g.bad).length===4)done(routes)}
+      }),k*150)));
+    }
+    function done(routes){
+      const order=got.filter(g=>!g.bad).map(g=>g.s);
+      const inOrder=order.every((v,k)=>k===0||v>order[k-1]);
+      note.textContent=(got.some(g=>g.bad)?'Only packet 3 was sent again, not the whole message. ':'')+(inOrder?'This time they arrived in order. Send again: the order changes.':'They arrived as '+order.join(', ')+', not in order.')+' Host B used the sequence numbers to rebuild the message. Routes: '+routes.join('; ');
+    }
+    ps.querySelector('#psend').onclick=send;
+    ps.querySelector('#pcut').onclick=()=>{if(running)return;
+      const busy=['R4-R6','R1-R4','R4-R7','R2-R4'].find(k=>!cut.has(k));
+      if(!busy)return; cut.add(busy);lines[busy].classList.add('cut');
+      note.textContent='Link '+busy.replace('-',' to ')+' has failed. Routers will send the next packets another way.'};
+    ps.querySelector('#pbad').onclick=e=>{corrupt=!corrupt;e.target.classList.toggle('on',corrupt);
+      note.textContent=corrupt?'Next send: packet 3 will be damaged on the way.':'Packets will arrive undamaged.'};
+    ps.querySelector('#preset').onclick=()=>{timers.forEach(x=>{clearInterval(x);clearTimeout(x)});timers=[];running=0;
+      svg.querySelectorAll('.pk').forEach(d=>d.remove());cut.clear();corrupt=false;ps.querySelector('#pbad').classList.remove('on');
+      Object.values(lines).forEach(l=>l.classList.remove('used','cut'));got=[];paint();note.textContent='Click Send message.'};
+    paint();note.textContent='Click Send message.';
+  }
+})();
+
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('cur',k===cur));
+  document.getElementById('pos').textContent='A2.3  '+(cur+1)+' / '+slides.length;
+  const n=slides[cur].querySelector('aside.tn');document.getElementById('ntext').textContent=n?n.textContent:'';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+function board(){document.getElementById('bstate').textContent=document.body.classList.contains('board')?'(ON)':'(off)'}
+document.addEventListener('click',e=>{const r=e.target.closest('.reveal');if(r)r.classList.toggle('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(false){document.body.classList.toggle('board');board()}
+  else if(false){document.getElementById('notes').classList.toggle('show');document.body.classList.toggle('notes')}
+  else if(k==='r')slides[cur].querySelectorAll('.reveal').forEach(x=>x.classList.add('open'))
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+});
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=Number(t.dataset.min)*60;let left=total,iv=null;
+  t.innerHTML='<span class="clock"></span><button class="go">Start</button><button class="rs">Reset</button>';
+  const c=t.querySelector('.clock'),go=t.querySelector('.go');
+  const paint=()=>{c.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');c.classList.toggle('out',left===0)};
+  const stop=()=>{clearInterval(iv);iv=null;go.textContent='Start'};
+  go.onclick=()=>{if(iv){stop();return}if(left===0)left=total;go.textContent='Pause';
+    iv=setInterval(()=>{left=Math.max(0,left-1);paint();if(left===0)stop()},1000)};
+  t.querySelector('.rs').onclick=()=>{stop();left=total;paint()};
+  paint();
+});
+board();show((parseInt(location.hash.slice(1))||1)-1);
+
+</script>
+</body>
+</html>
