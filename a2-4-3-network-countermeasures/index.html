@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.4.3 Layers of defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+
+:root{--paper:#F4F6F9;--card:#FFFFFF;--ink:#1B2A3A;--muted:#5B6B7E;--line:#C6D2E0;--blue:#2B5CAD;--blue-deep:#1E3F76;--blue-wash:#E3EAF6;--amber:#B97A14;--amber-wash:#F7EDD9;--good:#2F7D52;--good-wash:#E1F0E7;--bad:#B54434;--bad-wash:#F6E4E0;--display:"Bricolage Grotesque",Verdana,sans-serif;--body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;--mono:"IBM Plex Mono","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.75vw,30px);line-height:1.4;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;padding:4.2vh 5vw 9vh;flex-direction:column;overflow:auto}
+.slide.cur{display:flex}
+.slide.title{background:var(--blue-deep);color:#fff;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.62em;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.title .eyebrow{color:#F3C56B}
+h1{font-family:var(--display);font-weight:800;font-size:3.1em;line-height:1.02;margin:.15em 0 .25em}
+h2{font-family:var(--display);font-weight:800;font-size:1.85em;line-height:1.08;margin:.1em 0 .45em}
+p{margin:.35em 0}
+.prose{color:var(--muted);max-width:60em}
+.cols{display:grid;gap:1.2em;flex:1;align-items:start}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.8em .9em}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.12em;margin-bottom:.25em}
+.reveal{cursor:pointer;position:relative}
+.reveal .hid{visibility:hidden}
+.reveal.open .hid{visibility:visible}
+.reveal:not(.open)::after{content:"click to reveal";position:absolute;right:.7em;bottom:.5em;font-family:var(--mono);font-size:.55em;color:var(--amber)}
+.reveal.open{border-color:var(--good);background:var(--good-wash)}
+.big{font-family:var(--display);font-weight:800;font-size:1.5em}
+.mono{font-family:var(--mono)}
+.timer{display:flex;align-items:center;gap:.6em;margin:.5em 0}
+.timer .clock{font-family:var(--mono);font-weight:600;font-size:2.6em;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.05em .4em;min-width:4.2em;text-align:center}
+.timer .clock.out{background:var(--bad)}
+.timer.sm{margin:.3em 0}.timer.sm .clock{font-size:1.6em}
+button{font-family:var(--mono);font-size:.62em;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.45em .9em}
+ol,ul{margin:.3em 0 .3em 1.2em;padding:0}li{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:.78em}
+th,td{border:2px solid var(--line);padding:.35em .5em;text-align:left;vertical-align:top;background:var(--card)}
+th{background:var(--blue-wash);font-family:var(--display)}
+td.reveal:not(.open)::after{content:"?";right:.5em;bottom:.2em;font-size:1em}
+td.reveal.open{background:var(--good-wash)}
+.weak{border-color:var(--bad);background:var(--bad-wash)}.strong{border-color:var(--good);background:var(--good-wash)}
+.due{background:var(--amber-wash);border:2px solid var(--amber);border-radius:14px;padding:.6em .9em;margin-top:.6em}
+.banner{background:var(--amber-wash);border:2px solid var(--amber);border-radius:12px;padding:.3em .8em;font-size:.8em;flex:0;margin-bottom:.3em}
+.kq li{margin:.1em 0}
+footer{position:fixed;left:0;right:0;bottom:0;height:6.5vh;display:flex;align-items:center;justify-content:space-between;padding:0 2vw;background:var(--card);border-top:2px solid var(--line);font-family:var(--mono);font-size:.55em;z-index:5}
+footer .keys{color:var(--muted)}
+.ret{grid-template-columns:repeat(3,1fr);gap:.5em;flex:0}
+.ret .card{font-size:.82em;padding:.45em .65em}
+.ret .card h3{font-size:.98em}
+.side{font-size:.84em}.side .card{padding:.45em .7em}.side .card h3{font-size:1em}
+.tag{display:inline-block;font-family:var(--mono);font-size:.62em;font-weight:600;border-radius:99px;padding:.1em .6em;margin-left:.25em;background:var(--blue-wash);color:var(--blue-deep);vertical-align:middle}
+.ctl{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;margin:.3em 0}
+.ctl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.ctl label{font-size:.72em;display:flex;align-items:center;gap:.25em;cursor:pointer}
+.legend{font-family:var(--mono);font-size:.55em;color:var(--muted)}
+.readout{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.5em .8em;margin-top:.4em}
+.readout span{display:block;font-size:.68em;color:var(--muted)}
+.readout b{font-family:var(--mono);font-size:1.6em;color:var(--good)}
+.readout b.never{color:var(--bad)}
+.readout em{display:block;font-size:.66em;font-style:normal}
+.bad{background:var(--bad-wash);color:var(--bad)}.good{background:var(--good-wash);color:var(--good)}.warn{background:var(--amber-wash);color:var(--amber)}
+.res{font-size:.75em;font-weight:700;border-radius:8px;padding:.35em .6em}
+.term{font-family:var(--mono);font-size:.62em;white-space:pre-wrap;background:#14202E;color:#D9E4F2;border-radius:10px;padding:.6em .9em;margin:.4em 0}
+.term .k{color:#F3C56B}
+.layers{display:flex;flex-direction:column;gap:.3em;flex:0}
+.layer{display:grid;grid-template-columns:9em 1fr;gap:.6em;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:.3em .7em;font-size:.72em}
+.layer b{font-family:var(--display)}
+.layer.hit{border-color:var(--good);background:var(--good-wash)}
+.layer.miss{opacity:.55}
+.chk{list-style:none;margin:.3em 0;padding:0;font-size:.74em}
+.chk li{padding:.25em .5em;border-radius:6px;margin:.2em 0;background:var(--paper)}
+.chk li.y::before{content:"\2713  ";color:var(--good);font-weight:700}
+.chk li.n::before{content:"\2717  ";color:var(--bad);font-weight:700}
+.chk li.n{background:var(--bad-wash)}
+.addr{display:flex;align-items:center;gap:.5em;font-family:var(--mono);font-size:.7em;background:var(--paper);border:2px solid var(--line);border-radius:99px;padding:.3em .8em;margin:.3em 0}
+.addr .lock{font-weight:700}
+.rlist{font-family:var(--mono);font-size:.6em;margin:.3em 0}
+.rlist div{display:grid;grid-template-columns:1fr 6.5em;gap:.5em;padding:.25em .5em;border:2px solid var(--line);border-radius:6px;margin:.2em 0;background:var(--card)}
+.rlist div.blk{border-color:var(--good);background:var(--good-wash)}
+.rlist div.run.evil{border-color:var(--bad);background:var(--bad-wash)}
+.rlist .st{font-weight:600;text-align:right}
+.ev{font-size:.62em}.ev td,.ev th{padding:.25em .45em}
+.ev td.o{font-weight:700}
+.map{font-size:.6em}.map td,.map th{padding:.22em .45em}
+.diff{grid-template-columns:repeat(3,1fr);gap:.5em;flex:0}
+.diff .card{font-size:.76em;padding:.5em .7em}
+.ex .card{font-size:.84em}
+.stage{font-size:.66em}.stage td,.stage th{padding:.3em .5em}
+.fac{grid-template-columns:repeat(3,1fr);gap:.5em;flex:0}
+.fac .card{font-size:.8em;padding:.45em .65em}
+.small{font-size:.8em}
+.dm table{font-size:.66em}.dm td,.dm th{padding:.25em .45em}
+.dm2 .card{font-size:.76em;padding:.45em .65em}
+
+</style>
+</head>
+<body class="">
+<section class="slide title">
+  <div class="eyebrow">IB Computer Science HL, A2.4.3 Network countermeasures</div>
+  <h1>Layers of defense</h1>
+  <p class="big" style="font-weight:500">Last week: ten ways in. Today: what closes each one, and what it does not close.</p>
+  <p class="prose" style="color:#C9D6EC">Wednesday 4 November. Today you learn the common network countermeasures in the guide, which vulnerability each one targets, how it works, and its limits. Next HL lesson: A2.4.4 encryption and digital certificates.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Start of the lesson: homework in, then today's learning objectives</div>
+  <div class="banner"><strong>Due now (12:45):</strong> your score on the InThinking quiz "A 2.4.2 Network Vulnerabilities".</div>
+  <h2>By the end of the lesson you can...</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>1. Describe</h3><p>each countermeasure in the guide: what it is and how it works.</p></div>
+    <div class="card"><h3>2. Match</h3><p>each countermeasure to the vulnerability it addresses, and say what it does <strong>not</strong> protect against.</p></div>
+    <div class="card"><h3>3. Justify</h3><p>a combination of countermeasures for a real organization: defense in depth.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin-top:.6em">Key questions</h3>
+  <ul class="kq">
+    <li>How do different countermeasures complement each other in layered security?</li>
+    <li>Why is input validation fundamental to every web application?</li>
+    <li>How do TLS certificates and VPNs differ in their role and scope?</li>
+    <li>What are the trade-offs between IDS and IPS?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Retrieval, 6 minutes, no notes: A2.4.2 vulnerabilities</div>
+  <h2>Name the way in</h2>
+  <div class="cols ret">
+    <div class="card reveal"><h3>Thousands of hijacked routers send requests until the school website stops answering</h3><p class="hid"><strong>DDoS</strong> (botnet). Damages availability.</p></div>
+    <div class="card reveal"><h3>A fake "Cafe_Free_WiFi" hotspot reads and changes your traffic</h3><p class="hid"><strong>Man-in-the-middle</strong>, made easy by insecure protocols (HTTP).</p></div>
+    <div class="card reveal"><h3><span class="mono">' OR '1'='1</span> typed into a login box logs you in</h3><p class="hid"><strong>SQL injection</strong>: input changes the meaning of the query.</p></div>
+    <div class="card reveal"><h3>A script hidden in a forum comment steals every reader's session cookie</h3><p class="hid"><strong>Cross-site scripting (XSS)</strong>.</p></div>
+    <div class="card reveal"><h3>Ransomware gets in through a flaw that was fixed two months ago</h3><p class="hid"><strong>Unpatched software</strong> (WannaCry, 2017).</p></div>
+    <div class="card reveal"><h3>A webcam still uses <span class="mono">admin / admin</span></h3><p class="hid"><strong>Weak authentication</strong> (default password).</p></div>
+  </div>
+  <div class="card reveal" style="margin-top:.6em;flex:0"><h3>Bridge: is there one tool that would have stopped all six?</h3><p class="hid">No. Each attack uses a different weak point, so each needs its own defense. That is today's lesson.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">The big idea, 4 minutes</div>
+  <h2>Defense in depth</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Countermeasure</h3><p>A hardware, software, policy or training measure that <strong>reduces a specific vulnerability</strong>.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Defense in depth</h3><p>Several layers of countermeasures, so that <strong>if one layer fails, the next one still stops the attack</strong>. No single countermeasure covers every vulnerability.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>The question to ask every time</h3><p>Not only "what does it protect against?" but <strong>"what does it NOT protect against?"</strong></p><p class="small">MFA stops stolen passwords, but does nothing against SQL injection. Input validation stops SQL injection, but does nothing against DDoS.</p></div>
+    </div>
+    <div class="card" id="did">
+      <h3>Send an attack through the layers</h3>
+      <div class="ctl" id="didbtn"><button data-a="phish">Phishing email</button><button data-a="sqli">SQL injection</button><button data-a="pw">Stolen password</button><button data-a="mitm">Café Wi-Fi MitM</button></div>
+      <div class="layers" id="didl"></div>
+      <p class="res" id="didr" style="margin-top:.4em"></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Data on the move 1 of 2: against man-in-the-middle and insecure protocols</div>
+  <h2>Encrypted protocols and SSL/TLS certificates</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Encrypted protocols</h3><p>Encrypt the data <strong>in transit</strong>, so an attacker who captures the packets sees only ciphertext.</p><p class="mono" style="font-size:.8em">HTTP &rarr; HTTPS &nbsp; Telnet &rarr; SSH &nbsp; FTP &rarr; SFTP / FTPS</p></div>
+      <div class="card" style="margin-top:.5em"><h3>SSL/TLS certificate</h3><p>A digital document that binds a website's <strong>public key</strong> to its <strong>domain name</strong>, signed by a trusted <strong>Certificate Authority (CA)</strong>. It proves the browser is talking to the real server, not an attacker in the middle.</p><p class="small">SSL is the old, broken protocol. TLS replaced it. People still say "SSL certificate".</p></div>
+      <div class="card" style="margin-top:.5em"><h3>The browser checks three things</h3><p class="small">1. Signed by a CA it trusts? &nbsp;2. Not expired? &nbsp;3. Domain name matches the one you typed? Any fail: a security warning.</p></div>
+    </div>
+    <div class="card" id="cert" style="font-size:.92em">
+      <h3>Be the browser: you typed bookshop.example</h3>
+      <div class="ctl"><button data-c="0">Normal day</button><button data-c="1">Café attacker</button><button data-c="2">Forgot to renew</button><button data-c="3">Stolen cert, wrong site</button><button data-c="4">Lookalike link</button></div>
+      <div class="addr"><span class="lock" id="clock"></span><span id="curl"></span></div>
+      <div class="term" id="cinfo"></div>
+      <ul class="chk" id="cchk"></ul>
+      <p class="res" id="cres"></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Data on the move 2 of 2: against eavesdropping on public networks</div>
+  <h2>VPNs: an encrypted tunnel</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Virtual private network (VPN)</h3><p>Creates an <strong>encrypted tunnel</strong> between your device and a VPN server (for example, the school network) across a public network. <strong>All</strong> your traffic goes through it, whatever the app.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Used for</h3><p>Secure remote access to an organization's internal network; protecting traffic on public Wi-Fi.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Limits</h3><p>Slower (extra encryption and a longer route); a badly configured VPN is itself a way in; you must trust whoever runs the VPN server; it does nothing against phishing or malware you download.</p></div>
+    </div>
+    <div class="side">
+      <div class="card reveal"><h3>TLS and a VPN both encrypt. How do they differ in <em>scope</em>?</h3><p class="hid"><strong>TLS:</strong> protects one connection between your browser and one website, and proves that website's identity. <strong>VPN:</strong> protects all traffic between your device and one network, for every app, and gives you access to that network's internal resources.</p></div>
+      <div class="card reveal" style="margin-top:.6em"><h3>A teacher marks work at an airport café. The school grading system is not on the internet at all. Which one does she need?</h3><p class="hid">A VPN: it puts her laptop "inside" the school network through the tunnel. TLS alone cannot reach an internal-only server.</p></div>
+      <div class="card reveal" style="margin-top:.6em"><h3>Colonial Pipeline, 2021: attackers logged in to the company VPN. What went wrong?</h3><p class="hid">The VPN account used a leaked password and had <strong>no MFA</strong>. A VPN is only as strong as the authentication in front of it. Next slide.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Accounts: against weak authentication, phishing and stolen passwords</div>
+  <h2>Complex password policies and MFA</h2>
+  <div class="cols c2">
+    <div class="card" id="pwc">
+      <h3>Password policy calculator</h3>
+      <label class="legend">Length: <b id="pwlv">8</b> characters</label>
+      <input id="pwl" type="range" min="4" max="20" value="8" style="width:100%">
+      <div class="ctl">
+        <label><input type="checkbox" data-s="26" checked> a-z</label>
+        <label><input type="checkbox" data-s="26"> A-Z</label>
+        <label><input type="checkbox" data-s="10"> 0-9</label>
+        <label><input type="checkbox" data-s="32"> symbols</label>
+      </div>
+      <div class="ctl">
+        <label><input type="checkbox" id="pwdict"> it is a common password (on a leaked list)</label>
+        <label><input type="checkbox" id="pwlock"> account lockout after 5 failed tries</label>
+      </div>
+      <div class="readout"><span>Possible passwords</span><b id="pwn" style="font-size:.95em"></b><span style="margin-top:.3em">Time to try them all, offline, at 10 billion guesses per second</span><b id="pwt" style="font-size:1.25em"></b><em id="pwnote"></em></div>
+    </div>
+    <div class="side">
+      <div class="card"><h3>Complex password policy</h3><p>Organization rules: <strong>minimum length</strong> (12+), mix of character types, <strong>no dictionary or leaked passwords</strong>, no reuse, <strong>account lockout</strong> after a few failures. Modern advice (NCSC, NIST): length beats complexity; forced changes every 60 days lead to Password1 &rarr; Password2.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Multi-factor authentication (MFA)</h3><p>Two or more <strong>different kinds</strong> of proof:</p>
+      <div class="cols fac" style="margin:.3em 0"><div class="card"><b>Know</b><br>password, PIN</div><div class="card"><b>Have</b><br>phone code, security key</div><div class="card"><b>Are</b><br>fingerprint, face</div></div>
+      <p class="small">A stolen or phished password alone is no longer enough to log in.</p></div>
+      <div class="card reveal" style="margin-top:.5em"><h3>Password + PIN: is that MFA?</h3><p class="hid">No. Both are something you know. MFA needs factors of different kinds.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Web applications: against SQL injection and XSS</div>
+  <h2>Input validation and content security policies</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Input validation</h3><p>Check that input matches what the system expects <strong>before</strong> it is processed or stored.</p>
+      <p class="small"><strong>Whitelisting:</strong> accept only what matches an expected pattern (a phone field: digits only, 8 to 15 of them). <strong>Filtering:</strong> reject input that breaks the rules (for example, contains <span class="mono">'</span> or <span class="mono">&lt;script&gt;</span>). Whitelisting is stronger: attackers find ways around a list of "bad" characters.</p>
+      <p class="small">Must happen <strong>on the server</strong>: an attacker can skip checks in the browser. Against SQL injection, also use <strong>prepared statements</strong>, which keep input as data, never code.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Content Security Policy (CSP)</h3><p>An HTTP header the server sends that tells the browser <strong>which sources are allowed</strong> to load scripts, styles and images. Injected scripts from anywhere else are refused. A second layer against XSS, not a replacement for validation.</p></div>
+    </div>
+    <div class="card" id="csp">
+      <h3>The forum page loads. What runs in the reader's browser?</h3>
+      <div class="ctl"><button data-p="none">No CSP</button><button data-p="good">Strict CSP</button><button data-p="loose">Badly configured CSP</button></div>
+      <div class="term" id="csph"></div>
+      <div class="rlist" id="cspl"></div>
+      <p class="res" id="cspr"></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Watching the network: against malware, brute force and unknown attacks</div>
+  <h2>IDS and IPS</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Intrusion detection system (IDS)</h3><p>Monitors traffic and <strong>alerts</strong> an administrator. Does not stop anything itself. A security camera.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>Intrusion prevention system (IPS)</h3><p>Monitors traffic and <strong>blocks</strong> it automatically: drops packets, blocks an IP address. A security guard.</p></div>
+      <div class="card" style="margin-top:.5em"><h3>How they spot attacks</h3><p class="small"><strong>Signature-based:</strong> matches known attack patterns. Accurate, but misses new attacks (zero-days). <strong>Anomaly-based:</strong> learns what normal looks like and flags anything unusual. Can catch new attacks, but raises <strong>false positives</strong>.</p></div>
+    </div>
+    <div class="card" id="ids">
+      <h3>A day on the school network</h3>
+      <div class="ctl"><button data-m="off">Nothing installed</button><button data-m="ids">IDS</button><button data-m="ips">IPS</button></div>
+      <table class="ev" id="evt"></table>
+      <p class="res" id="idsr" style="margin-top:.4em"></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Availability and the inbox: against DDoS, phishing and malware attachments</div>
+  <h2>DDoS mitigation tools and email filtering</h2>
+  <div class="cols c2 dm">
+    <table>
+      <tr><th colspan="2">DDoS mitigation tools</th></tr>
+      <tr><td><strong>Rate limiting</strong></td><td>caps requests per second from any one address; excess is dropped</td></tr>
+      <tr><td><strong>Traffic filtering, scrubbing</strong></td><td>removes packets that match attack patterns; clean traffic goes on</td></tr>
+      <tr><td><strong>Load balancing</strong></td><td>spreads requests over many servers, so no single one is the bottleneck</td></tr>
+      <tr><td><strong>CDN, anycast</strong></td><td>copies of the site in many locations; the flood is split between them</td></tr>
+      <tr><td><strong>Cloud DDoS protection</strong></td><td>a provider absorbs the flood before it reaches your network</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="2">Email filtering solutions</th></tr>
+      <tr><td><strong>Spam filtering</strong></td><td>scores each email on sender reputation and content</td></tr>
+      <tr><td><strong>Anti-phishing</strong></td><td>checks the sender really owns the domain (SPF, DKIM, DMARC) and checks links against known phishing sites</td></tr>
+      <tr><td><strong>Attachment sandboxing</strong></td><td>opens attachments in an isolated space and watches what they do</td></tr>
+      <tr><td><strong>Link scanning</strong></td><td>checks the destination again when the user clicks</td></tr>
+      <tr><td><strong>Impersonation detection</strong></td><td>flags lookalike domains, such as schooI-it-support.com</td></tr>
+    </table>
+  </div>
+  <div class="cols c2 dm2" style="flex:0;margin-top:.5em">
+    <div class="card reveal"><h3>Last week's slider: why did blocking one address not help? Which tool fixes that?</h3><p class="hid">The flood comes from thousands of addresses. Scrubbing and cloud protection recognize the pattern across all of them; load balancing and CDNs add capacity. Limit: very large floods, and false positives that block real users.</p></div>
+    <div class="card reveal"><h3>Why can email filtering never be the only defense against phishing?</h3><p class="hid">Filters make false negatives: a well-made phishing email gets through. Then training (spot it) and MFA (a stolen password is not enough) are the next layers.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Software and Wi-Fi: against unpatched software, rogue devices and eavesdropping</div>
+  <h2>Software updates and wireless security</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Update software (patch management)</h3><p>Install the vendor's fixes for known flaws: operating systems, applications, firmware on routers and cameras. Organizations watch vulnerability lists (CVE), <strong>prioritize</strong> critical, internet-facing systems, test, then deploy; automatic updates where possible.</p>
+      <p class="small"><strong>Equifax, 2017:</strong> a web software flaw was patched in March. Equifax did not install it. Attackers used it from May; 147 million people's data was exposed.</p>
+      <p class="small"><strong>Limit:</strong> no help against a zero-day: there is no patch yet.</p></div>
+      <div class="card reveal" style="margin-top:.5em"><h3>The big limitation of MAC filtering?</h3><p class="hid"><strong>MAC spoofing:</strong> an attacker sees the MAC addresses of connected devices in the air and copies one. So it is an extra layer, never the main one.</p></div>
+    </div>
+    <div class="side" style="font-size:.8em">
+      <div class="card"><h3>Wireless security measures</h3>
+      <p><strong>WPA3 encryption</strong> of all Wi-Fi traffic (WEP and WPA2 are weaker). A strong Wi-Fi password. A separate <strong>guest network</strong> with no access to internal servers. <strong>Rogue access point detection</strong> finds fake hotspots.</p>
+      <p><strong>MAC address filtering:</strong> the access point checks each device's hardware (MAC) address.</p>
+      <table style="font-size:.95em"><tr><th></th><th>Whitelist</th><th>Blacklist</th></tr>
+      <tr><td>Rule</td><td>only listed devices may join</td><td>listed devices are blocked, all others may join</td></tr>
+      <tr><td>Strength</td><td>unknown devices cannot join, even with the password</td><td>quick to block one stolen or misused device</td></tr>
+      <tr><td>Weakness</td><td>every new device must be added by hand</td><td>any device not on the list still gets in</td></tr></table></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">People and testing: the layers that check all the others</div>
+  <h2>Employee training and regular security testing</h2>
+  <div class="cols c2">
+    <div class="side">
+      <div class="card"><h3>Security awareness training</h3><p>Most serious incidents involve a person: a clicked link, a reused password. Training covers spotting phishing, password managers, checking requests by phone, reporting incidents fast.</p>
+      <p class="small"><strong>Simulated phishing:</strong> the organization sends fake phishing emails; whoever clicks gets training on the spot. Click rates fall, and the organization can measure it.</p></div>
+    </div>
+    <div class="side">
+      <table style="font-size:.95em">
+        <tr><th>Security testing</th><th>What it does</th></tr>
+        <tr><td><strong>Vulnerability scanning</strong></td><td>automated tools look for known flaws and misconfigurations; weekly or continuous</td></tr>
+        <tr><td><strong>Penetration testing</strong></td><td>authorized ethical hackers try to break in, like a real attacker; yearly or after big changes</td></tr>
+        <tr><td><strong>Security audit</strong></td><td>reviews policies, settings, accounts and logs against the rules</td></tr>
+        <tr><td><strong>Bug bounty</strong></td><td>outside researchers are paid to report flaws they find</td></tr>
+      </table>
+      <div class="card reveal" style="margin-top:.5em"><h3>Why test regularly, not once?</h3><p class="hid">New flaws are found in existing software, the network changes, people change. Testing finds weaknesses before attackers do, and checks the real security matches what IT believes it is.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">The map, 4 minutes: predict each row, then click it</div>
+  <h2>Which countermeasures close which way in?</h2>
+  <table class="map">
+    <tr><th style="width:22%">Vulnerability (A2.4.2)</th><th>Main countermeasures (A2.4.3)</th></tr>
+    <tr><td>DDoS</td><td class="reveal"><span class="hid">DDoS mitigation tools (scrubbing, rate limiting, load balancing, CDN, cloud protection), IPS</span></td></tr>
+    <tr><td>Insecure protocols</td><td class="reveal"><span class="hid">Encrypted protocols (HTTPS, SSH, SFTP), SSL/TLS certificates</span></td></tr>
+    <tr><td>Man-in-the-middle</td><td class="reveal"><span class="hid">TLS certificates, encrypted protocols, VPN, WPA3, rogue access point detection</span></td></tr>
+    <tr><td>Phishing</td><td class="reveal"><span class="hid">Email filtering, employee training, MFA</span></td></tr>
+    <tr><td>Weak authentication</td><td class="reveal"><span class="hid">Complex password policy, account lockout, MFA</span></td></tr>
+    <tr><td>Malware</td><td class="reveal"><span class="hid">Email filtering (attachments), software updates, IDS/IPS, antivirus</span></td></tr>
+    <tr><td>Unpatched software</td><td class="reveal"><span class="hid">Software updates (patch management), vulnerability scanning</span></td></tr>
+    <tr><td>Zero-day exploit</td><td class="reveal"><span class="hid">Anomaly-based IDS/IPS, security testing, layers that limit the damage (segmentation)</span></td></tr>
+    <tr><td>SQL injection</td><td class="reveal"><span class="hid">Input validation (whitelisting), prepared statements, IPS</span></td></tr>
+    <tr><td>Cross-site scripting</td><td class="reveal"><span class="hid">Content security policy, input validation</span></td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Spot the difference, 4 minutes</div>
+  <h2>Six pairs students mix up</h2>
+  <div class="cols diff">
+    <div class="card reveal"><h3>IDS or IPS?</h3><p class="hid">IDS detects and alerts; a person must act. IPS detects and blocks automatically, so a false positive blocks real users.</p></div>
+    <div class="card reveal"><h3>TLS certificate or VPN?</h3><p class="hid">TLS: one browser-to-website connection, plus proof of the site's identity. VPN: all device traffic into one network.</p></div>
+    <div class="card reveal"><h3>Whitelist or blacklist?</h3><p class="hid">Whitelist: deny by default, allow only listed. Blacklist: allow by default, block only listed.</p></div>
+    <div class="card reveal"><h3>Input validation or CSP?</h3><p class="hid">Validation: the server rejects bad input before using it. CSP: the browser refuses scripts from sources not on the list.</p></div>
+    <div class="card reveal"><h3>Vulnerability scan or penetration test?</h3><p class="hid">Scan: automated search for known flaws. Pen test: people actually try to exploit them, like a real attacker.</p></div>
+    <div class="card reveal"><h3>Signature or anomaly detection?</h3><p class="hid">Signature: matches known attacks, misses new ones. Anomaly: flags unusual behavior, catches new ones, more false positives.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Real case, 5 minutes: Colonial Pipeline, May 2021</div>
+  <h2>Which countermeasure was missing at each stage?</h2>
+  <table class="stage">
+    <tr><th style="width:30%">What happened</th><th>Missing countermeasure, and what it would have done</th></tr>
+    <tr><td>1. The password for an old VPN account had probably leaked in an earlier breach</td><td class="reveal"><span class="hid">Complex password policy with no reuse, and checking passwords against breach lists: the leaked password would not have worked.</span></td></tr>
+    <tr><td>2. The attackers logged in to the company VPN with it</td><td class="reveal"><span class="hid">MFA on the VPN: the password alone would not get them in.</span></td></tr>
+    <tr><td>3. Ransomware spread through the IT network</td><td class="reveal"><span class="hid">IDS/IPS to spot mass file encryption; segmentation to limit how far it spread.</span></td></tr>
+    <tr><td>4. The company shut the pipeline to protect its control systems, and paid $4.4 million</td><td class="reveal"><span class="hid">Tested backups and an incident response plan: recover without paying. (The IT/control system separation is what prevented physical damage.)</span></td></tr>
+  </table>
+  <p class="big" style="font-size:1.05em;margin-top:.6em">One missing layer let them in. Several missing layers let it get this bad.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Design challenge, 12 minutes, in pairs</div>
+  <h2>Secure the community clinic</h2>
+  <div class="cols c2">
+    <div class="card small">
+      <h3>The clinic today</h3>
+      <ul>
+        <li>A charity with a very small IT budget</li>
+        <li>20 staff computers, some not updated</li>
+        <li>A web portal where patients book appointments</li>
+        <li>Staff Wi-Fi: WPA2 with one shared password; no guest network, so patients ask for the staff password</li>
+        <li>Staff use email for everything</li>
+      </ul>
+    </div>
+    <div class="card small">
+      <h3>Your task</h3>
+      <ol>
+        <li>Choose the <strong>three</strong> countermeasures to put in first. For each: the vulnerability it addresses and how it works.</li>
+        <li>Rank them, and give the reason for the order.</li>
+        <li>The manager suggests a MAC address whitelist on staff Wi-Fi. Write one sentence on how it helps and one on its limitation here.</li>
+      </ol>
+      <div class="timer sm" data-min="12"></div>
+    </div>
+  </div>
+  <div class="card reveal" style="flex:0;margin-top:.4em;font-size:.8em"><h3>One strong answer (others can be justified)</h3><p class="hid">1. Software updates on all 20 computers: free, and known flaws are what automated attacks scan for. 2. Input validation and prepared statements on the booking portal: it is on the internet and holds patient data. 3. A guest network and a new staff password with WPA3: patients stop sharing the staff network. Then MFA on email. MAC whitelist: blocks unknown devices even if the password leaks; but MAC addresses can be spoofed, and every new staff device must be added by hand.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exam technique, 3 minutes</div>
+  <h2>Mechanism, then the vulnerability it stops</h2>
+  <div class="card" style="flex:0"><p><strong>Explain how multi-factor authentication strengthens network security. [3]</strong></p></div>
+  <div class="cols c2 ex" style="margin-top:.6em">
+    <div class="card weak"><h3>Answer A</h3><p>"MFA makes accounts much more secure because it adds extra security, so hackers cannot get in."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>1 mark at most:</strong> "more secure" restates the question; no mechanism, no vulnerability.</span></p></div>
+    <div class="card strong"><h3>Answer B</h3><p>"MFA adds a layer beyond the password. The user must give two different types of proof, such as a password they know and a code from a phone they have. So if the password is stolen by phishing or a leak, the attacker still cannot log in without the second factor."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>3 marks:</strong> extra layer; two different factor types, with examples; reduces the risk from stolen passwords.</span></p></div>
+  </div>
+  <p class="big" style="font-size:1.1em;margin-top:.6em">What it does. How it works. Which attack it stops.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exit ticket, 10 minutes, on your own, on paper</div>
+  <h2>Check your learning</h2>
+  <div class="card" style="flex:0;font-size:.86em">
+    <p><strong>1.</strong> State why encryption is considered a network countermeasure. [2]</p>
+    <p><strong>2.</strong> Distinguish between an intrusion detection system (IDS) and an intrusion prevention system (IPS). [2]</p>
+    <p><strong>3.</strong> Explain how input validation can protect an online shop against SQL injection. [3]</p>
+    <p><strong>4.</strong> A school uses a MAC address whitelist on its Wi-Fi. Outline one limitation of this measure. [2]</p>
+  </div>
+  <div class="timer sm" data-min="10"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Wrap-up and homework, 4 minutes</div>
+  <h2>Back to Monday at the school</h2>
+  <p class="small">Last week's four incidents. Which layers would have stopped each one?</p>
+  <div class="cols c4" style="flex:0;gap:.6em;font-size:.88em">
+    <div class="card reveal"><h3>08:10 website down (DDoS)</h3><p class="hid">Cloud DDoS protection or scrubbing, rate limiting, load balancing.</p></div>
+    <div class="card reveal"><h3>09:30 "IT" email (phishing)</h3><p class="hid">Email filtering, staff training, and MFA so the stolen password is useless.</p></div>
+    <div class="card reveal"><h3>11:00 files locked (ransomware, unpatched)</h3><p class="hid">Software updates, IDS/IPS, segmentation, and backups to recover.</p></div>
+    <div class="card reveal"><h3>13:15 shop leaks addresses (SQL injection)</h3><p class="hid">Input validation (whitelisting) and prepared statements.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:.5em;flex:0">
+    <div class="due"><strong>Homework, due Wed 11 Nov, 12:45 (start of the lesson):</strong> read the InThinking eBook page "A 2.4.3 Network countermeasures". Then, for each of the ten A2.4.2 vulnerabilities, write the two countermeasures you would use first and one thing each does <strong>not</strong> protect against. One page, bring it on paper.</div>
+    <div class="card"><h3>Next HL lesson: A2.4.4 encryption and digital certificates</h3><p>Today you used the words "key", "ciphertext" and "certificate". Next week: how they really work.</p></div>
+  </div>
+</section>
+
+<footer><span id="pos"></span><span class="keys">arrows: move &nbsp; click a card to reveal it</span></footer>
+<div id="notes" hidden><div id="ntext"></div></div><span id="bstate" hidden></span>
+<script>
+// Five interactives: defense in depth, certificate checker, password policy, CSP, IDS/IPS
+(function(){
+  const $=(r,s)=>r.querySelector(s);
+  const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e};
+
+  // ---------- Defense in depth ----------
+  const did=document.getElementById('did');
+  if(did){
+    const L=[
+      ['Email filtering','scans every email before it reaches the inbox'],
+      ['Staff training','people who can spot a fake'],
+      ['Encrypted protocols / TLS','traffic is unreadable and the server is verified'],
+      ['MFA','a password alone is not enough'],
+      ['Input validation','the web app rejects unexpected input'],
+      ['IDS / IPS','unusual traffic is flagged or blocked']
+    ];
+    // which layers stop each attack (indexes), and a story
+    const A={
+      phish:{stop:[0,1,3,5],msg:'Filtering catches most. One gets through? Training: the teacher spots it. She clicks anyway? MFA: her password alone is useless. Four layers had a chance.'},
+      sqli:{stop:[4,5],msg:'Only input validation and the IPS have anything to do with this. Email filtering, training, TLS and MFA do not help at all.'},
+      pw:{stop:[3,5],msg:'MFA blocks the login; an IDS/IPS may spot hundreds of attempts. TLS cannot help: the attacker logs in normally.'},
+      mitm:{stop:[2],msg:'Only encryption and certificate checks stop it. MFA does not stop someone reading your traffic.'}
+    };
+    const box=$(did,'#didl'), r=$(did,'#didr');
+    const rows=L.map(([n,d])=>{const x=el('div','layer');x.append(el('b',null,n),el('span',null,d));box.appendChild(x);return x});
+    const paint=k=>{
+      did.querySelectorAll('[data-a]').forEach(b=>b.classList.toggle('on',b.dataset.a===k));
+      rows.forEach((x,i)=>{x.classList.toggle('hit',!!k&&A[k].stop.includes(i));x.classList.toggle('miss',!!k&&!A[k].stop.includes(i))});
+      r.textContent=k?A[k].msg:'Choose an attack. Green layers can stop it; grey ones do nothing against it.';
+      r.className='res '+(k?'good':'warn');
+    };
+    did.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>paint(b.dataset.a));
+    paint(null);
+  }
+
+  // ---------- Certificate checker ----------
+  const cert=document.getElementById('cert');
+  if(cert){
+    const S=[
+      {url:'https://bookshop.example',subj:'bookshop.example',iss:'GlobalTrust TLS CA',trusted:true,exp:'2027-03-14',ok:true,dom:true,
+       res:['good','Padlock. The connection is encrypted and it really is bookshop.example.']},
+      {url:'https://bookshop.example',subj:'bookshop.example',iss:'bookshop.example (signed by itself)',trusted:false,exp:'2027-11-01',ok:true,dom:true,
+       res:['bad','Warning: "Your connection is not private". The attacker can make a certificate with any name, but no trusted CA signed it. The MitM is exposed, unless the user clicks "continue anyway".']},
+      {url:'https://bookshop.example',subj:'bookshop.example',iss:'GlobalTrust TLS CA',trusted:true,exp:'2026-09-30',ok:false,dom:true,
+       res:['warn','Warning: the certificate expired on 30 September. Probably not an attack, but the browser cannot vouch for the site any more.']},
+      {url:'https://bookshop.example',subj:'cheap-gadgets.example',iss:'GlobalTrust TLS CA',trusted:true,exp:'2027-05-02',ok:true,dom:false,
+       res:['bad','Warning: a real, valid certificate, but for a different domain. An attacker cannot reuse another site\'s certificate to pretend to be bookshop.example.']},
+      {url:'https://b00kshop.example',subj:'b00kshop.example',iss:'GlobalTrust TLS CA',trusted:true,exp:'2027-02-20',ok:true,dom:true,
+       res:['bad','Padlock, all checks pass, and it is still a fake. The attacker owns b00kshop.example (zeros) and got a real certificate for it. The padlock proves the domain, not that the site is honest. Next layer: email filtering and training.']}
+    ];
+    const lock=$(cert,'#clock'),url=$(cert,'#curl'),info=$(cert,'#cinfo'),chk=$(cert,'#cchk'),res=$(cert,'#cres');
+    const paint=i=>{
+      const s=S[i];
+      cert.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('on',Number(b.dataset.c)===i));
+      const pass=s.trusted&&s.ok&&s.dom;
+      lock.textContent=pass?'\u{1F512}':'⚠';
+      lock.style.color=pass?'var(--good)':'var(--bad)';
+      url.textContent=s.url;
+      info.textContent='';
+      [['Issued to:  ',s.subj],['Issued by:  ',s.iss],['Valid until:',' '+s.exp],['Public key: ','3082 010a 0282 0101 00c4 ...']].forEach(([k,v])=>{info.appendChild(el('span','k',k));info.appendChild(document.createTextNode(' '+v+'\n'))});
+      chk.textContent='';
+      const host=s.url.replace('https://','');
+      [[s.trusted,'Signed by a CA the browser trusts'],[s.ok,'Not expired (today: 4 Nov 2026)'],[s.dom,'Name matches the address bar ('+host+')']].forEach(([y,t])=>chk.appendChild(el('li',y?'y':'n',t)));
+      res.textContent=s.res[1];res.className='res '+s.res[0];
+    };
+    cert.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>paint(Number(b.dataset.c)));
+    paint(0);
+  }
+
+  // ---------- Password policy ----------
+  const pw=document.getElementById('pwc');
+  if(pw){
+    const len=$(pw,'#pwl'),lv=$(pw,'#pwlv'),n=$(pw,'#pwn'),t=$(pw,'#pwt'),note=$(pw,'#pwnote'),dict=$(pw,'#pwdict'),lock=$(pw,'#pwlock');
+    const sets=[...pw.querySelectorAll('[data-s]')];
+    const RATE=1e10;
+    const human=s=>{
+      if(s<1)return 'under a second';
+      const u=[['seconds',60],['minutes',60],['hours',24],['days',365],['years',1e99]];
+      let v=s;for(const [name,k] of u){if(v<k||name==='years'){
+        if(name==='years'){if(v>=1e9)return (v/1e9).toPrecision(2)+' billion years';if(v>=1e6)return (v/1e6).toPrecision(2)+' million years';if(v>=1e3)return Math.round(v).toLocaleString('en-US')+' years'}
+        return (v<10?v.toFixed(1):Math.round(v))+' '+name}v/=k}
+    };
+    const big=x=>x<1e6?Math.round(x).toLocaleString('en-US'):x.toExponential(1).replace('e+',' x 10^');
+    const paint=()=>{
+      const L=Number(len.value);lv.textContent=L;
+      let pool=sets.filter(c=>c.checked).reduce((a,c)=>a+Number(c.dataset.s),0);
+      if(pool===0){sets[0].checked=true;pool=26}
+      const N=Math.pow(pool,L);
+      n.textContent=pool+' symbols, '+L+' long: '+big(N);
+      if(lock.checked){
+        t.textContent='5 guesses, then locked';t.className='';
+        note.textContent='Lockout stops guessing on the login page. It does not help if the password list itself is stolen and cracked offline, which is why length still matters.';
+        if(dict.checked){note.textContent='Lockout limits guessing, but a password from a leaked list can be tried first, so "123456" may fall in those 5 guesses. Block common passwords too.'}
+        return;
+      }
+      if(dict.checked){t.textContent='instantly';t.className='never';note.textContent='Attackers try leaked and common passwords first. Length and symbols do not matter if the password is "Password123!". A good policy rejects these.';return}
+      const secs=N/RATE/2;
+      t.textContent=human(secs)+' (on average)';
+      t.className=secs<86400*365?'never':'';
+      note.textContent=secs<3600?'Weak: cracked before the lesson ends.':secs<86400*365?'Not good enough: cracked in under a year.':'Strong against brute force. Each extra character multiplies the work by '+pool+'.';
+    };
+    len.oninput=paint;sets.forEach(c=>c.onchange=paint);dict.onchange=paint;lock.onchange=paint;
+    paint();
+  }
+
+  // ---------- Content Security Policy ----------
+  const csp=document.getElementById('csp');
+  if(csp){
+    const R=[
+      {src:"/app.js",from:'self',kind:'script',evil:false,label:'the forum\'s own script'},
+      {src:"https://trusted-cdn.example/chart.js",from:'cdn',kind:'script',evil:false,label:'a library the forum chose'},
+      {src:"/style.css",from:'self',kind:'style',evil:false,label:'the forum\'s styles'},
+      {src:"https://attacker.example/steal.js",from:'other',kind:'script',evil:true,label:'injected in a comment'},
+      {src:"<script>send(document.cookie)<\/script>",from:'inline',kind:'script',evil:true,label:'injected in a comment'}
+    ];
+    const P={
+      none:{h:'(no Content-Security-Policy header)',allow:()=>true},
+      good:{h:"Content-Security-Policy:\n  default-src 'self';\n  script-src 'self' https://trusted-cdn.example",allow:r=>r.from==='self'||(r.from==='cdn'&&r.kind==='script')},
+      loose:{h:"Content-Security-Policy:\n  script-src * 'unsafe-inline'",allow:()=>true}
+    };
+    const head=$(csp,'#csph'),list=$(csp,'#cspl'),res=$(csp,'#cspr');
+    const paint=k=>{
+      csp.querySelectorAll('[data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===k));
+      head.textContent='HTTP/1.1 200 OK\n'+P[k].h;
+      list.textContent='';
+      let evilRan=0;
+      R.forEach(r=>{const ok=P[k].allow(r);if(ok&&r.evil)evilRan++;
+        const row=el('div',(ok?'run':'blk')+(r.evil?' evil':''));
+        const l=el('span');l.textContent=r.src+'  ';const sm=el('span');sm.style.color='var(--muted)';sm.textContent='('+r.label+')';l.appendChild(sm);
+        row.append(l,el('span','st',ok?'runs':'BLOCKED'));list.appendChild(row)});
+      if(k==='none'){res.textContent='Both injected scripts run. Every reader\'s session cookie goes to the attacker.';res.className='res bad'}
+      else if(k==='good'){res.textContent='The browser refuses both injected scripts: attacker.example is not on the list, and inline scripts are not allowed. The real page still works.';res.className='res good'}
+      else{res.textContent='A CSP header is there, but "*" and \'unsafe-inline\' allow everything. A CSP is only as good as its configuration.';res.className='res bad'}
+    };
+    csp.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>paint(b.dataset.p));
+    paint('none');
+  }
+
+  // ---------- IDS / IPS ----------
+  const ids=document.getElementById('ids');
+  if(ids){
+    const E=[
+      {t:'08:55',e:'A teacher logs in with the right password',kind:'normal'},
+      {t:'09:05',e:'800 failed logins to "admin" from one address in a minute',kind:'sig'},
+      {t:'10:20',e:'A download matches a known ransomware signature',kind:'sig'},
+      {t:'13:40',e:'A brand-new attack, disguised as normal web traffic',kind:'new'},
+      {t:'23:10',e:'The technician backs up 80 GB to a new cloud service',kind:'fp'}
+    ];
+    const O={
+      off:{normal:['Allowed','good'],sig:['Nobody notices. The attack goes on.','bad'],new:['Nobody notices.','bad'],fp:['Allowed','good']},
+      ids:{normal:['Allowed','good'],sig:['ALERT sent. Still going on until a person acts.','warn'],new:['Missed: matches no signature (false negative)','bad'],fp:['ALERT at 23:10: unusual (false positive)','warn']},
+      ips:{normal:['Allowed','good'],sig:['BLOCKED automatically','good'],new:['Missed: matches no signature (false negative)','bad'],fp:['BLOCKED: the real backup fails (false positive)','bad']}
+    };
+    const MSG={off:'No monitoring: attacks are only found when the damage shows.',
+      ids:'IDS: sees and reports; a person decides. Safe for real users, but slow at night and on weekends.',
+      ips:'IPS: stops known attacks at once, but its mistakes block real work. Neither catches what it has never seen, unless anomaly-based.'};
+    const tb=$(ids,'#evt'),r=$(ids,'#idsr');
+    const paint=m=>{
+      ids.querySelectorAll('[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===m));
+      tb.textContent='';
+      const h=el('tr');h.append(el('th',null,'Time'),el('th',null,'Event'),el('th',null,'Result'));tb.appendChild(h);
+      E.forEach(x=>{const tr=el('tr');const [txt,c]=O[m][x.kind];const o=el('td','o '+c,txt);tr.append(el('td','mono',x.t),el('td',null,x.e),o);tb.appendChild(tr)});
+      r.textContent=MSG[m];r.className='res '+(m==='off'?'bad':'warn');
+    };
+    ids.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>paint(b.dataset.m));
+    paint('off');
+  }
+})();
+
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('cur',k===cur));
+  document.getElementById('pos').textContent='A2.4.3  '+(cur+1)+' / '+slides.length;
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+document.addEventListener('click',e=>{const r=e.target.closest('.reveal');if(r)r.classList.toggle('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(k==='r')slides[cur].querySelectorAll('.reveal').forEach(x=>x.classList.add('open'))
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+});
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=Number(t.dataset.min)*60;let left=total,iv=null;
+  t.innerHTML='<span class="clock"></span><button class="go">Start</button><button class="rs">Reset</button>';
+  const c=t.querySelector('.clock'),go=t.querySelector('.go');
+  const paint=()=>{c.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');c.classList.toggle('out',left===0)};
+  const stop=()=>{clearInterval(iv);iv=null;go.textContent='Start'};
+  go.onclick=()=>{if(iv){stop();return}if(left===0)left=total;go.textContent='Pause';
+    iv=setInterval(()=>{left=Math.max(0,left-1);paint();if(left===0)stop()},1000)};
+  t.querySelector('.rs').onclick=()=>{stop();left=total;paint()};
+  paint();
+});
+show((parseInt(location.hash.slice(1))||1)-1);
+
+</script>
+</body>
+</html>
