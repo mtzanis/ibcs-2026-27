@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.4.1 + A2.4.4 Checkpoint and padlock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+
+:root{--paper:#F4F6F9;--card:#FFFFFF;--ink:#1B2A3A;--muted:#5B6B7E;--line:#C6D2E0;--blue:#2B5CAD;--blue-deep:#1E3F76;--blue-wash:#E3EAF6;--amber:#B97A14;--amber-wash:#F7EDD9;--good:#2F7D52;--good-wash:#E1F0E7;--bad:#B54434;--bad-wash:#F6E4E0;--display:"Bricolage Grotesque",Verdana,sans-serif;--body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;--mono:"IBM Plex Mono","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.75vw,30px);line-height:1.4;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;padding:4.2vh 5vw 9vh;flex-direction:column;overflow:auto}
+.slide.cur{display:flex}
+.slide.title{background:var(--blue-deep);color:#fff;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.62em;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.title .eyebrow{color:#F3C56B}
+h1{font-family:var(--display);font-weight:800;font-size:3.1em;line-height:1.02;margin:.15em 0 .25em}
+h2{font-family:var(--display);font-weight:800;font-size:1.85em;line-height:1.08;margin:.1em 0 .45em}
+p{margin:.35em 0}
+.prose{color:var(--muted);max-width:60em}
+body.board .prose{display:none}
+.cols{display:grid;gap:1.2em;flex:1;align-items:start}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.8em .9em}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.12em;margin-bottom:.25em}
+.reveal{cursor:pointer;position:relative}
+.reveal .hid{visibility:hidden}
+.reveal.open .hid{visibility:visible}
+.reveal:not(.open)::after{content:"click to reveal";position:absolute;right:.7em;bottom:.5em;font-family:var(--mono);font-size:.55em;color:var(--amber)}
+.reveal.open{border-color:var(--good);background:var(--good-wash)}
+.big{font-family:var(--display);font-weight:800;font-size:1.5em}
+.mono{font-family:var(--mono)}
+svg.t{width:100%;height:auto;max-height:30vh;display:block}
+svg.t line{stroke:var(--blue);stroke-width:4;stroke-linecap:round}
+svg.t circle{fill:#fff;stroke:var(--blue-deep);stroke-width:3.5}
+svg.t rect{fill:var(--blue-wash);stroke:var(--blue-deep);stroke-width:3.5}
+.timer{display:flex;align-items:center;gap:.6em;margin:.5em 0}
+.timer .clock{font-family:var(--mono);font-weight:600;font-size:2.6em;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.05em .4em;min-width:4.2em;text-align:center}
+.timer .clock.out{background:var(--bad)}
+button{font-family:var(--mono);font-size:.62em;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.45em .9em}
+ol,ul{margin:.3em 0 .3em 1.2em;padding:0}li{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:.78em}
+th,td{border:2px solid var(--line);padding:.35em .5em;text-align:left;vertical-align:top;background:var(--card)}
+th{background:var(--blue-wash);font-family:var(--display)}
+td.reveal:not(.open)::after{content:"?";right:.5em;bottom:.2em;font-size:1em}
+.weak{border-color:var(--bad);background:var(--bad-wash)}.strong{border-color:var(--good);background:var(--good-wash)}
+.due{background:var(--amber-wash);border:2px solid var(--amber);border-radius:14px;padding:.6em .9em;margin-top:.6em}
+footer{position:fixed;left:0;right:0;bottom:0;height:6.5vh;display:flex;align-items:center;justify-content:space-between;padding:0 2vw;background:var(--card);border-top:2px solid var(--line);font-family:var(--mono);font-size:.55em;z-index:5}
+footer .keys{color:var(--muted)}
+#notes{position:fixed;right:0;top:0;bottom:6.5vh;width:min(34vw,520px);background:#FFFDF6;border-left:3px solid var(--amber);padding:1em 1.1em;overflow:auto;font-size:.62em;line-height:1.45;display:none;z-index:6}
+#notes.show{display:block}
+#notes h4{font-family:var(--display);font-size:1.25em;margin-bottom:.4em;color:var(--amber)}
+aside.tn{display:none}
+body.notes .slide{right:min(34vw,520px)}
+.ret .card{font-size:.82em;padding:.55em .7em}.ret .card h3{font-size:.98em}
+.pkt{display:flex;font-family:var(--mono);font-size:.7em;margin:.4em 0 .8em;flex:0}
+.pkt div{border:2px solid var(--blue-deep);padding:.5em .7em;background:var(--blue-wash)}
+.pkt div+div{border-left:none}
+.pkt .pay{flex:1;background:var(--amber-wash);border-color:var(--amber)}
+.pkt small{display:block;color:var(--muted);font-size:.8em}
+.fam{font-family:var(--mono);font-size:.62em;font-weight:600;background:var(--blue-deep);color:#fff;border-radius:99px;padding:.15em .7em;display:inline-block;margin-bottom:.2em}
+.ctl{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;margin:.3em 0}
+.ctl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.legend{font-family:var(--mono);font-size:.55em;color:var(--muted)}
+.bad{background:var(--bad-wash);color:var(--bad)}.good{background:var(--good-wash);color:var(--good)}.warn{background:var(--amber-wash);color:var(--amber)}
+.form{display:grid;grid-template-columns:auto 1fr;gap:.35em .6em;align-items:center;font-size:.75em}
+.form input{font-family:var(--mono);font-size:1em;padding:.3em .5em;border:2px solid var(--line);border-radius:8px}
+.inc{grid-template-columns:repeat(4,1fr);gap:.5em;flex:0}
+.inc .card{font-size:.66em;padding:.45em .6em}.inc .card h3{font-size:1.05em}
+.inc .hid{margin-top:.3em;font-weight:700;color:var(--good)}
+.ms .card{font-size:.68em;padding:.45em .65em}
+.timer.sm{margin:.3em 0}.timer.sm .clock{font-size:1.6em}
+/* firewall simulator */
+.fwgrid{grid-template-columns:.9fr 1.1fr;gap:1em}
+.fwr{font-size:.62em}.fwr td.ok{color:var(--good);font-weight:700}.fwr td.no{color:var(--bad);font-weight:700}
+.fwr tr.hit td{background:var(--amber-wash);border-color:var(--amber)}
+.fwpk{display:grid;grid-template-columns:1fr 1fr;gap:.4em}
+.fwc{font-size:.58em;padding:.4em .6em}.fwc h3{font-size:1.05em;margin:0}.fwc .fwd{font-size:.85em;color:var(--muted);margin:.15em 0}
+.fwc .ctl{margin:.15em 0}.fwc button{font-size:.9em;padding:.2em .7em}
+.fwc.allowed{border-color:var(--good)}.fwc.blocked{border-color:var(--bad)}
+.fwres{font-size:.82em;border-radius:8px;padding:.25em .5em;margin:.2em 0 0}.fwres:empty{display:none}
+/* caesar */
+.czl{display:grid;grid-template-columns:repeat(5,1fr);gap:.1em .5em;font-size:.48em;margin-top:.3em}
+.czl .found{background:var(--good-wash);color:var(--good);font-weight:700;border-radius:4px}
+/* which key + quizzes */
+.wk{display:grid;grid-template-columns:1fr 1fr;gap:.5em}
+.wkc,.qc{font-size:.6em;padding:.45em .65em}.wkc h3,.qc h3{font-size:1.05em;font-family:var(--body);margin-bottom:.2em}
+.wkc button,.qc button{font-family:var(--body);font-size:.92em;padding:.25em .6em;text-align:left}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.3em}
+button.right{background:var(--good-wash);border-color:var(--good);color:var(--good);font-weight:700}
+button.wrong{background:var(--bad-wash);border-color:var(--bad);color:var(--bad)}
+.qz{gap:.5em;flex:0}
+.chip{font-family:var(--mono);font-size:.4em;font-weight:600;vertical-align:middle;margin-left:.8em;padding:.25em .8em;border-radius:99px;background:var(--blue-wash);color:var(--blue-deep);border:2px solid var(--blue)}
+.chip.fin{background:var(--good-wash);color:var(--good);border-color:var(--good)}
+/* certificate checker */
+.cert{background:var(--card);border:2px solid var(--blue-deep);border-radius:12px;padding:.4em .7em;font-size:.62em}
+.crow{display:grid;grid-template-columns:7.5em 1fr;gap:.5em;padding:.15em 0;border-bottom:1px solid var(--line)}
+.crow span{color:var(--muted)}
+.checks{font-size:.68em;list-style:none;margin:.2em 0;padding:0}
+.checks li{padding:.25em .5em .25em 2em;position:relative;border-radius:6px;margin:.2em 0}
+.checks li::before{position:absolute;left:.5em;font-weight:700;font-family:var(--mono)}
+.checks li.pend::before{content:"?";color:var(--muted)}
+.checks li.y{background:var(--good-wash)}.checks li.y::before{content:"✓";color:var(--good)}
+.checks li.n{background:var(--bad-wash)}.checks li.n::before{content:"✗";color:var(--bad)}
+.certgrid{grid-template-columns:1fr 1fr}
+#certbtns button{font-size:.5em}
+.tls{font-size:.7em}
+.tight .card{font-size:.84em;padding:.6em .8em}.tight .due{font-size:.84em}.tight .big{font-size:.95em!important}
+.fwgrid{display:flex;flex-direction:column;gap:.4em}
+.fwgrid .fwr{font-size:.55em}.fwgrid .ctl{margin:.1em 0}
+.fwpk{grid-template-columns:repeat(4,1fr)}
+
+</style>
+</head>
+<body class="">
+<section class="slide title">
+  <div class="eyebrow">IB Computer Science SL + HL, A2.4.1 Firewalls and A2.4.4 Encryption and digital certificates</div>
+  <h1>Checkpoint and padlock</h1>
+  <p class="big" style="font-weight:500">What a firewall can stop, what it cannot, and how encryption covers the gap.</p>
+  <p class="prose" style="color:#C9D6EC">Tuesday 10 November. Today covers the two shared A2.4 statements: how well firewalls protect a network, and how encryption and digital certificates keep data private and prove who you are talking to.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Start of the lesson: homework in, then today's learning objectives</div>
+  <div class="due" style="flex:0;margin:0 0 .6em"><strong>Due now (13:55):</strong> your scores on the three InThinking eBook quizzes "A 2.3.1 IP Addressing", "A 2.3.2 Transmission Media" and "A 2.3.3 Packet Switching".</div>
+  <h2>By the end of the lesson you can...</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>1. Discuss</h3><p>how effective firewalls are: how they filter traffic, what they stop, what they miss, and the part NAT plays.</p></div>
+    <div class="card"><h3>2. Describe</h3><p>symmetric and asymmetric encryption, and which key does what.</p></div>
+    <div class="card"><h3>3. Describe</h3><p>how a digital certificate proves a website's identity, and why keys must be managed.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin-top:1em">Key questions</h3>
+  <ul>
+    <li>A firewall only sees packets. What does that let it stop, and what will always get past it?</li>
+    <li>If anyone can intercept your traffic, how can two strangers still talk in secret?</li>
+    <li>How does your browser know it is talking to the real bank?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Retrieval, 5 minutes, no notes: A2.3 and A2.1.4</div>
+  <h2>Four quick ones</h2>
+  <div class="cols c2 ret" style="grid-template-columns:1fr 1fr">
+    <div class="card reveal"><h3>1. What does NAT do on a home router?</h3><p class="hid">Translates the private IP addresses of the devices inside into the router's one public IP address, and keeps a table so replies go back to the right device.</p></div>
+    <div class="card reveal"><h3>2. Name two things a packet's header carries.</h3><p class="hid">Any two: source IP address, destination IP address, sequence number, protocol, (also a checksum, time to live).</p></div>
+    <div class="card reveal"><h3>3. Is 192.168.1.24 a public or a private address? Can a server on the internet send a packet straight to it?</h3><p class="hid">Private. No: private addresses are not routed on the internet. The packet has to go to the router's public address.</p></div>
+    <div class="card reveal"><h3>4. What is the difference between HTTP and HTTPS?</h3><p class="hid">HTTPS is HTTP with encryption (TLS): anyone on the path sees only scrambled data. HTTP sends everything as plain text.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Toolkit, 2 minutes: one idea you need first</div>
+  <h2>Port numbers: which program a packet is for</h2>
+  <p class="big" style="font-size:1.05em;flex:0">An IP address gets a packet to the right <em>device</em>. A port number gets it to the right <em>program</em> on that device.</p>
+  <table style="flex:0;margin:.5em 0">
+    <tr><th>Port</th><th>Used by</th><th>Port</th><th>Used by</th></tr>
+    <tr><td class="mono">443</td><td>HTTPS (secure web)</td><td class="mono">25</td><td>Email between mail servers (SMTP)</td></tr>
+    <tr><td class="mono">80</td><td>HTTP (web, not encrypted)</td><td class="mono">53</td><td>DNS (name lookups)</td></tr>
+    <tr><td class="mono">22</td><td>SSH (secure remote login)</td><td class="mono">23</td><td>Telnet (remote login, not encrypted)</td></tr>
+  </table>
+  <p class="prose">You do not need to learn the numbers. You need the idea: a firewall rule can say "allow web traffic to the web server" by allowing port 443 to that one address, and block everything else.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.1 Firewalls: what and where</div>
+  <h2>A checkpoint at the edge of the network</h2>
+  <p class="big" style="font-size:1.05em;flex:0">A firewall inspects every packet going in or out and applies rules to decide: allow it or block it.</p>
+  <svg class="t" viewBox="0 0 900 170" style="max-height:24vh;flex:0;margin:.4em 0" role="img" aria-label="Internet, then a firewall, then the school network">
+    <rect x="10" y="45" width="210" height="80" rx="14" style="fill:var(--bad-wash);stroke:var(--bad)"/>
+    <text x="115" y="80" text-anchor="middle" font-size="24" font-weight="700" fill="#1B2A3A">Internet</text>
+    <text x="115" y="108" text-anchor="middle" font-size="18" fill="#5B6B7E">untrusted</text>
+    <line x1="220" y1="85" x2="360" y2="85"/>
+    <rect x="360" y="25" width="180" height="120" rx="14" style="fill:var(--amber-wash);stroke:var(--amber)"/>
+    <text x="450" y="80" text-anchor="middle" font-size="24" font-weight="700" fill="#1B2A3A">Firewall</text>
+    <text x="450" y="108" text-anchor="middle" font-size="18" fill="#5B6B7E">rules: allow or block</text>
+    <line x1="540" y1="85" x2="680" y2="85"/>
+    <rect x="680" y="45" width="210" height="80" rx="14" style="fill:var(--good-wash);stroke:var(--good)"/>
+    <text x="785" y="80" text-anchor="middle" font-size="24" font-weight="700" fill="#1B2A3A">School LAN</text>
+    <text x="785" y="108" text-anchor="middle" font-size="18" fill="#5B6B7E">trusted</text>
+  </svg>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><span class="fam">Hardware</span><p>A dedicated box at the boundary between the internet and the LAN. Protects the <strong>whole network</strong>. Schools, businesses, data centers.</p></div>
+    <div class="card"><span class="fam">Software</span><p>Runs on one computer (Windows Defender Firewall, macOS firewall). Protects <strong>only that device</strong>, wherever it goes.</p></div>
+    <div class="card"><span class="fam">Next-generation</span><p>Combines all the inspection techniques on the next slide, plus intrusion prevention. The standard in organizations today.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.1 Firewalls: how deep does it look?</div>
+  <h2>Three ways to inspect a packet</h2>
+  <div class="pkt" style="font-size:.62em"><div>Source IP<small>81.2.69.160</small></div><div>Destination IP<small>web server</small></div><div>Protocol, port<small>TCP 443</small></div><div>Part of a session?<small>connection state</small></div><div class="pay">Payload<small>the data itself</small></div></div>
+  <table style="flex:0">
+    <tr><th>Technique</th><th>What it looks at</th><th>Strength</th><th>Limitation</th></tr>
+    <tr><td><strong>Packet filtering</strong></td><td>The header only: IP addresses, port, protocol. Each packet on its own.</td><td class="reveal"><span class="hid">Fast, uses little processing power</span></td><td class="reveal"><span class="hid">Cannot tell good from bad traffic on an allowed port; has no memory of connections</span></td></tr>
+    <tr><td><strong>Stateful inspection</strong></td><td>The header plus the connection: is this packet part of a conversation someone inside started?</td><td class="reveal"><span class="hid">Blocks packets that do not belong to a real session</span></td><td class="reveal"><span class="hid">Still does not read the payload</span></td></tr>
+    <tr><td><strong>Deep packet inspection (DPI)</strong></td><td>Everything, including the payload</td><td class="reveal"><span class="hid">Can spot known malware patterns and blocked apps inside allowed traffic</span></td><td class="reveal"><span class="hid">Slow and costly; cannot read encrypted (HTTPS) payloads unless it decrypts them, which raises privacy concerns</span></td></tr>
+  </table>
+</section>
+
+<section class="slide tight">
+  <div class="eyebrow">A2.4.1 Firewalls: the rules</div>
+  <h2>Whitelist, blacklist, custom rules</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><span class="fam">Whitelist</span><p>Only traffic on the list is allowed. <strong>Everything else is blocked.</strong></p><p class="prose">Example: only the partner company's IP addresses may reach the database server.</p></div>
+    <div class="card"><span class="fam">Blacklist</span><p>Traffic on the list is blocked. <strong>Everything else is allowed.</strong></p><p class="prose">Example: block the addresses of known botnet servers.</p></div>
+    <div class="card"><span class="fam">Custom rules</span><p>Any mix of conditions on IP address, port, protocol and direction.</p><p class="prose">Example: allow port 443 to the web server; block port 23 from everywhere.</p></div>
+  </div>
+  <div class="cols c2" style="flex:0;margin-top:.6em">
+    <div class="card"><h3>Order matters</h3><p>Rules are checked from top to bottom. The <strong>first rule that matches</strong> decides. The last rule is usually "block everything else": a <strong>default deny</strong> policy.</p></div>
+    <div class="card reveal"><h3>Which is more secure, a whitelist or a blacklist? Why?</h3><p class="hid">A whitelist. It is default deny: a brand-new attack is blocked because it is not on the allowed list. A blacklist only stops threats someone already knows about and has listed. The cost: a whitelist is less flexible and blocks legitimate traffic nobody thought to add.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">You are the firewall, 7 minutes, predict first</div>
+  <h2>Allow or block? Then check which rule decided</h2>
+  <div class="fwgrid" style="flex:0">
+    <div>
+      <table id="fwrules" class="fwr"></table>
+      <div class="ctl"><button id="fwpol" type="button">Switch to a blacklist policy</button><span id="fwscore" class="legend"></span></div>
+      <p class="legend" id="fwpolnote"></p>
+    </div>
+    <div id="fwpk" class="fwpk"></div>
+  </div>
+</section>
+
+<section class="slide tight">
+  <div class="eyebrow">A2.4.1 The role of NAT: you met NAT in A2.3, now see it as security</div>
+  <h2>No table entry, no way in</h2>
+  <p class="big" style="font-size:1.05em;flex:0">A reply comes in only if a device inside asked first. An unsolicited packet has no NAT table entry, so the router has nowhere to send it and drops it.</p>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>Hides the inside</h3><p>The internet sees one public address. It cannot see that 45 devices sit behind it, or their addresses.</p></div>
+    <div class="card"><h3>Blocks unsolicited inbound connections</h3><p>Nothing outside can start a connection to a private address.</p></div>
+    <div class="card"><h3>Smaller attack surface</h3><p>Private addresses cannot be targeted directly from the internet.</p></div>
+  </div>
+  <div class="cols c2" style="flex:0;margin-top:.6em">
+    <div class="card reveal"><h3>So is NAT a firewall?</h3><p class="hid">No. NAT never inspects traffic. Malware inside can still connect out, and an attack hidden in a normal web reply passes straight through. Port forwarding can also open a way in on purpose. NAT plus a firewall is stronger than either alone.</p></div>
+    <div class="card reveal"><h3>Where does NAT give no protection at all?</h3><p class="hid">Against threats from inside the network (insiders, infected devices), and against anything in traffic that a device inside asked for.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.1 Discuss: what a firewall stops and what it does not, 6 minutes</div>
+  <h2>Can the firewall stop it? Yes, partly or no</h2>
+  <div class="cols inc">
+    <div class="card reveal"><h3>Someone outside scans the school for open ports</h3><p class="hid">Yes. Unrequested inbound connections to closed ports are dropped.</p></div>
+    <div class="card reveal"><h3>Traffic from a known botnet address</h3><p class="hid">Yes. A blacklist rule blocks the address.</p></div>
+    <div class="card reveal"><h3>An infected laptop tries to contact the attacker's server</h3><p class="hid">Partly. Outbound rules can block known bad addresses, not new ones.</p></div>
+    <div class="card reveal"><h3>A virus arrives inside a download</h3><p class="hid">Partly. DPI can spot known malware; new malware gets through.</p></div>
+    <div class="card reveal"><h3>A phishing email asks a teacher for their password</h3><p class="hid">No. It is ordinary email on an allowed port; the firewall cannot see deception.</p></div>
+    <div class="card reveal"><h3>A staff member copies student records to a USB stick</h3><p class="hid">No. The insider is already inside; no packet crosses the firewall.</p></div>
+    <div class="card reveal"><h3>Malware hidden in an HTTPS download</h3><p class="hid">Limited. The payload is encrypted; only DPI with TLS inspection can look.</p></div>
+    <div class="card reveal"><h3>Attackers use an unknown flaw in the firewall itself</h3><p class="hid">No. The checkpoint becomes the way in (ArcaneDoor, see the real cases).</p></div>
+  </div>
+  <p class="big" style="font-size:1.05em;flex:0;margin-top:.5em">Strong against known, rule-based threats from outside. Weak against people, insiders and the unknown.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Check for understanding 1, 4 minutes, on your own: firewalls and NAT</div>
+  <h2>Six questions, one try each</h2>
+  <div class="quiz cols c2 qz" data-q="fw"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Real cases: reading in your copy of the deck</div>
+  <h2>When the checkpoint fails</h2>
+  <div class="cols c2" style="flex:0">
+    <div class="card"><span class="fam">WannaCry, May 2017</span><p>Ransomware spread through a Windows file-sharing flaw. Organizations whose firewalls blocked that service from outside cut their exposure. Unpatched, flat networks did not: over 80 NHS organizations hit, appointments canceled, recovery over £90 million.</p><p class="reveal" style="margin-top:.3em"><span class="hid"><strong>Lesson:</strong> a well-configured firewall helps; it does not replace patching and segmentation.</span></p></div>
+    <div class="card"><span class="fam">ArcaneDoor, 2024</span><p>Attackers used zero-day flaws in Cisco firewall devices. The compromised firewalls kept looking normal while copying traffic to the attackers and surviving reboots.</p><p class="reveal" style="margin-top:.3em"><span class="hid"><strong>Lesson:</strong> the firewall is software too. Update it, monitor it, and never treat it as the only layer.</span></p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exam technique, 2 minutes</div>
+  <h2>Discuss means both sides, then a judgment</h2>
+  <div class="card" style="flex:0"><p><strong>Discuss the effectiveness of a firewall at protecting a school network. [6]</strong></p></div>
+  <div class="cols c3" style="margin-top:.6em;flex:0">
+    <div class="card strong"><h3>For: what it does well</h3><p>Two developed points. For example: it blocks unrequested connections from outside by filtering on IP address, port and protocol, so port scans and direct attacks fail.</p></div>
+    <div class="card weak"><h3>Against: what it misses</h3><p>Two developed points. For example: phishing email arrives on an allowed port, so it passes; a staff member copying data is already inside.</p></div>
+    <div class="card"><h3>Judgment</h3><p>A clear conclusion. For example: essential for known outside threats, not enough alone, so the school also needs training, patching and encryption (defense in depth).</p></div>
+  </div>
+  <p class="big" style="font-size:1.05em;margin-top:.6em;flex:0">One-sided answers lose marks, however good the side.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.4 Encryption: the second half</div>
+  <h2>Plaintext, key, ciphertext</h2>
+  <p class="big" style="font-size:1.05em;flex:0">Encryption uses an algorithm and a key to turn readable plaintext into ciphertext. Only someone with the right key can turn it back.</p>
+  <div class="cols c2" style="flex:0">
+    <div class="card">
+      <h3>Try it: a Caesar cipher (the key is the shift)</h3>
+      <div class="form"><label for="czin">Plaintext</label><input id="czin" value="MEET AT THE LIBRARY" maxlength="40" autocomplete="off"><label for="czk">Key (shift)</label><input id="czk" type="range" min="1" max="25" value="3"></div>
+      <p class="mono" id="czout" style="font-size:.8em;margin-top:.4em"></p>
+      <div class="ctl"><button id="czbrute" type="button">Attack it: try every key</button></div>
+      <div id="czlist" class="mono czl"></div>
+    </div>
+    <div class="card">
+      <h3>Encryption gives you</h3>
+      <p><strong>Confidentiality:</strong> it stays secret.</p>
+      <p><strong>Integrity:</strong> you can tell if it was changed.</p>
+      <p><strong>Authenticity:</strong> it really came from who it claims.</p>
+      <p class="prose" style="margin-top:.5em">The Caesar cipher has only 25 keys, so a computer tries them all at once (a brute-force attack). Real keys are 128 or 256 bits long: more possible keys than there are atoms in the observable universe, for 256 bits.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.4 Symmetric encryption</div>
+  <h2>One shared key locks and unlocks</h2>
+  <svg class="t" viewBox="0 0 900 190" style="max-height:24vh;flex:0;margin:.3em 0" role="img" aria-label="Same secret key used to encrypt and decrypt">
+    <rect x="10" y="95" width="170" height="70" rx="12"/><text x="95" y="137" text-anchor="middle" font-size="22" fill="#1B2A3A">Plaintext</text>
+    <line x1="180" y1="130" x2="360" y2="130"/><text x="270" y="118" text-anchor="middle" font-size="20" fill="#5B6B7E">encrypt</text>
+    <rect x="360" y="95" width="180" height="70" rx="12" style="fill:var(--amber-wash);stroke:var(--amber)"/><text x="450" y="137" text-anchor="middle" font-size="22" fill="#1B2A3A">Ciphertext</text>
+    <line x1="540" y1="130" x2="720" y2="130"/><text x="630" y="118" text-anchor="middle" font-size="20" fill="#5B6B7E">decrypt</text>
+    <rect x="720" y="95" width="170" height="70" rx="12"/><text x="805" y="137" text-anchor="middle" font-size="22" fill="#1B2A3A">Plaintext</text>
+    <rect x="345" y="10" width="210" height="50" rx="25" style="fill:var(--good-wash);stroke:var(--good)"/><text x="450" y="42" text-anchor="middle" font-size="22" font-weight="700" fill="#1B2A3A">same secret key</text>
+    <line x1="345" y1="35" x2="270" y2="105" style="stroke-dasharray:8 8"/><line x1="555" y1="35" x2="630" y2="105" style="stroke-dasharray:8 8"/>
+  </svg>
+  <div class="cols c3" style="flex:0">
+    <div class="card strong"><h3>Strength</h3><p><strong>Very fast.</strong> Good for large amounts of data: whole disks, video, databases, Wi-Fi traffic.</p></div>
+    <div class="card"><h3>Example</h3><p><strong>AES</strong> with 128 or 256-bit keys (banks, WPA3 Wi-Fi, BitLocker, cloud storage).</p></div>
+    <div class="card weak"><h3>Weakness: the key distribution problem</h3><p>Both sides need the key first. Send it over the internet and anyone who intercepts it can read everything.</p></div>
+  </div>
+  <div class="card reveal" style="flex:0;margin-top:.6em"><h3>A class of 20 wants every pair to have its own secret key. How many keys is that?</h3><p class="hid">190 (20 × 19 ÷ 2). Shared keys grow fast with the number of people, and every one has to be delivered secretly. That is why symmetric keys alone do not work on the internet.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.4 Asymmetric encryption (public-key cryptography)</div>
+  <h2>A key pair: one public, one private</h2>
+  <svg class="t" viewBox="0 0 900 200" style="max-height:26vh;flex:0;margin:.3em 0" role="img" aria-label="Bob encrypts with Alice's public key, Alice decrypts with her private key">
+    <text x="20" y="35" font-size="24" font-weight="800" fill="#1B2A3A">Bob</text>
+    <rect x="20" y="55" width="190" height="60" rx="12"/><text x="115" y="92" text-anchor="middle" font-size="21" fill="#1B2A3A">"Hello Alice"</text>
+    <line x1="210" y1="85" x2="350" y2="85"/>
+    <rect x="350" y="55" width="200" height="60" rx="12" style="fill:var(--amber-wash);stroke:var(--amber)"/><text x="450" y="92" text-anchor="middle" font-size="21" font-family="IBM Plex Mono" fill="#1B2A3A">6EB69570...</text>
+    <line x1="550" y1="85" x2="690" y2="85"/>
+    <rect x="690" y="55" width="190" height="60" rx="12"/><text x="785" y="92" text-anchor="middle" font-size="21" fill="#1B2A3A">"Hello Alice"</text>
+    <text x="880" y="35" text-anchor="end" font-size="24" font-weight="800" fill="#1B2A3A">Alice</text>
+    <rect x="160" y="140" width="250" height="46" rx="23" style="fill:var(--good-wash);stroke:var(--good)"/><text x="285" y="170" text-anchor="middle" font-size="20" font-weight="700" fill="#1B2A3A">Alice's PUBLIC key</text>
+    <rect x="500" y="140" width="250" height="46" rx="23" style="fill:var(--bad-wash);stroke:var(--bad)"/><text x="625" y="170" text-anchor="middle" font-size="20" font-weight="700" fill="#1B2A3A">Alice's PRIVATE key</text>
+  </svg>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>Public key</h3><p>Shared with anyone. Used to <strong>encrypt</strong> data for its owner.</p></div>
+    <div class="card"><h3>Private key</h3><p>Never shared. The only key that can <strong>decrypt</strong> it. Security depends on keeping it secret.</p></div>
+    <div class="card"><h3>Trade-off</h3><p>Solves key distribution, but much <strong>slower</strong> than symmetric. Example: <strong>RSA</strong>.</p></div>
+  </div>
+  <div class="card reveal" style="flex:0;margin-top:.6em"><h3>It also works the other way round: digital signatures</h3><p class="hid">Alice <strong>signs</strong> with her own PRIVATE key. Anyone checks the signature with her PUBLIC key. If it checks out, only Alice could have signed it (authenticity) and nothing was changed since (integrity). Certificate Authorities sign certificates this way.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Which key? 4 minutes, decide before you click</div>
+  <h2>Pick the key for each job</h2>
+  <div id="wk" class="wk"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.4 Symmetric vs asymmetric, and how HTTPS uses both</div>
+  <h2>Each one covers the other's weakness</h2>
+  <table style="flex:0">
+    <tr><th></th><th>Symmetric</th><th>Asymmetric</th></tr>
+    <tr><td><strong>Keys</strong></td><td>One shared secret key</td><td>A pair: public and private</td></tr>
+    <tr><td><strong>Speed</strong></td><td>Very fast</td><td>Much slower</td></tr>
+    <tr><td><strong>Sharing keys</strong></td><td>Must be shared secretly first</td><td>Public key shared freely</td></tr>
+    <tr><td><strong>Used for</strong></td><td>The bulk of the data</td><td>Key exchange, signatures, certificates</td></tr>
+  </table>
+  <h3 style="font-family:var(--display);margin:.6em 0 .2em">Opening the school portal over HTTPS: predict asymmetric or symmetric, then click</h3>
+  <table class="tls" style="flex:0">
+    <tr><th>Step</th><th>What happens</th><th>Which?</th></tr>
+    <tr><td>1</td><td>The server sends its certificate; the browser checks it</td><td class="reveal"><span class="hid">Neither yet: checking the certificate</span></td></tr>
+    <tr><td>2</td><td>Browser and server agree a shared secret, and the server proves it owns the certificate's key</td><td class="reveal"><span class="hid">Asymmetric</span></td></tr>
+    <tr><td>3</td><td>Both turn the shared secret into session keys and encrypt the page, the login and everything else</td><td class="reveal"><span class="hid">Symmetric (fast, for all the data)</span></td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.4 Digital certificates, 5 minutes</div>
+  <h2>Proof that this public key belongs to this website</h2>
+  <div class="cols c2 certgrid" style="flex:0">
+    <div>
+      <p class="prose" style="margin:0 0 .4em">Without certificates, an attacker in the middle could hand you their own public key and pretend to be the bank. A certificate is issued by a trusted <strong>Certificate Authority (CA)</strong>, which checks who the owner is and signs the certificate with its private key.</p>
+      <div id="cert" class="cert"></div>
+      <div class="ctl" id="certbtns"></div>
+    </div>
+    <div>
+      <h3 style="font-family:var(--display)">Your browser checks</h3>
+      <ol id="certchecks" class="checks"></ol>
+      <div class="ctl"><button id="certrun" type="button">Run the checks</button></div>
+      <p id="certres" class="legend"></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">A2.4.4 Encryption key management, 3 minutes</div>
+  <h2>The algorithm can be perfect. The keys still need looking after</h2>
+  <div class="cols inc">
+    <div class="card reveal"><h3>Generation</h3><p>Truly random, long enough.</p><p class="hid">If not: keys can be guessed or brute-forced.</p></div>
+    <div class="card reveal"><h3>Storage</h3><p>Locked away, for example in a hardware security module, never next to the data.</p><p class="hid">If not: steal the key, read everything (Heartbleed, 2014, leaked keys from server memory).</p></div>
+    <div class="card reveal"><h3>Distribution</h3><p>Only over secure channels, using asymmetric methods and certificates.</p><p class="hid">If not: an intercepted key opens all past and future messages.</p></div>
+    <div class="card reveal"><h3>Rotation</h3><p>Replaced regularly; certificates expire (about 13 months at most).</p><p class="hid">If not: a silently stolen key stays useful for years.</p></div>
+    <div class="card reveal"><h3>Revocation</h3><p>Compromised certificates canceled at once (revocation lists, OCSP).</p><p class="hid">If not: attackers keep impersonating the owner (DigiNotar, 2011: fake certificates worked for days).</p></div>
+    <div class="card reveal"><h3>Destruction</h3><p>Old keys securely erased.</p><p class="hid">If not: old data can be decrypted later.</p></div>
+  </div>
+  <p class="big" style="font-size:1.05em;margin-top:.5em;flex:0">Encryption is only as strong as the way its keys are managed.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Check for understanding 2, 3 minutes, on your own: encryption and certificates</div>
+  <h2>Six questions, one try each</h2>
+  <div class="quiz cols c2 qz" data-q="enc"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exit ticket, 12 minutes, on your own, on paper</div>
+  <h2>Check your learning</h2>
+  <div class="card" style="flex:0;font-size:.86em">
+    <p><strong>1.</strong> State one way a firewall protects a network. [2]</p>
+    <p><strong>2.</strong> Explain one limitation of firewalls in providing complete security. [3]</p>
+    <p><strong>3.</strong> Describe how public and private keys are used in asymmetric encryption. [3]</p>
+    <p><strong>4.</strong> State what HTTPS relies on digital certificates to establish. [2]</p>
+  </div>
+  <div class="timer sm" data-min="12"></div>
+</section>
+
+<section class="slide tight">
+  <div class="eyebrow">Wrap-up and homework, 4 minutes</div>
+  <h2>Back to the three questions</h2>
+  <div class="cols c3" style="flex:0;gap:.6em">
+    <div class="card reveal"><h3>What will always get past a firewall?</h3><p class="hid">People (phishing), insiders, the unknown (zero-days), and anything it cannot read (encrypted payloads).</p></div>
+    <div class="card reveal"><h3>How do two strangers talk in secret?</h3><p class="hid">Asymmetric encryption sets up a shared secret without sending it; fast symmetric encryption then protects the data.</p></div>
+    <div class="card reveal"><h3>How does the browser know it is the real bank?</h3><p class="hid">The bank's certificate, signed by a CA the browser trusts, binds the bank's public key to its domain.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:.5em;flex:0">
+    <div class="due"><strong>Homework, due Tue 17 Nov, 13:55 (start of the lesson):</strong><br>1. InThinking eBook "A 2.4.4 Encryption and digital certificates": read it and do the quiz. Bring your score.<br>2. InThinking eBook "A 2.4.1 Firewalls": read it, then write short answers to two key questions: whitelisting vs blacklisting, and how NAT contributes to security.</div>
+    <div class="card"><h3>This week</h3><p><strong>Fri 13 Nov, 12:25:</strong> IA lesson.<br><strong>IA final draft due Mon 23 Nov.</strong> It comes first.</p><p class="prose">HL: Wednesday is A2.3.4 routing, with the A2.4.3 worksheet due at 12:45.</p></div>
+  </div>
+</section>
+
+<footer><span id="pos"></span><span class="keys">arrows: move &nbsp; click a card to reveal it</span></footer>
+<div id="notes" hidden><div id="ntext"></div></div><span id="bstate" hidden></span>
+<script>
+// Interactives: firewall rule simulator, Caesar cipher, which key, certificate checker, locked MCQ quizzes
+const $=id=>document.getElementById(id);
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+
+// ---------- Firewall rule simulator ----------
+(function(){
+  const box=$('fwpk');if(!box)return;
+  let black=false,score=0,done=0;
+  const rules=()=>[
+    ['1','BLOCK','Any source on the blocklist (known attackers)'],
+    ['2','ALLOW','TCP port 443 (HTTPS) to the web server'],
+    ['3','ALLOW','TCP port 25 (email) to the mail server'],
+    ['4','ALLOW','Replies to connections started inside the school'],
+    ['5',black?'ALLOW':'BLOCK',black?'Everything else (default allow)':'Everything else (default deny)']];
+  const pk=[
+    {t:'A parent opens the school website',d:'From 81.2.69.160 (a home), TCP 443, to the web server',m:()=>2},
+    {t:'A request for the website from a botnet',d:'From 45.9.20.11 (on the blocklist), TCP 443, to the web server',m:()=>1},
+    {t:'A remote login attempt',d:'From the internet, TCP 23 (Telnet), to a staff PC',m:()=>5},
+    {t:'A news page a student asked for',d:'From bbc.co.uk, TCP 443, reply to a connection the laptop started',m:()=>4},
+    {t:'An unrequested file-sharing connection',d:'From the internet, TCP 445, to a student laptop',m:()=>5},
+    {t:'An email: "Your password expires today, log in here"',d:'From a mail server, TCP 25, to the mail server',m:()=>3,why:'The firewall sees ordinary email on an allowed port. It cannot tell that the message is a lie.'},
+    {t:'A "free game" a student downloads over HTTPS, with malware inside',d:'From a download site, TCP 443, reply to the laptop',m:()=>4,why:'The payload is encrypted, so the firewall cannot see the malware.'}];
+  function drawRules(hit){const t=$('fwrules');t.innerHTML='<tr><th>#</th><th>Action</th><th>Rule</th></tr>';
+    rules().forEach(r=>{const tr=el('tr');if(String(hit)===r[0])tr.className='hit';
+      tr.appendChild(el('td','mono',r[0]));const a=el('td','mono',r[1]);a.classList.add(r[1]==='ALLOW'?'ok':'no');tr.appendChild(a);tr.appendChild(el('td','',r[2]));t.appendChild(tr)});}
+  function paint(){box.innerHTML='';done=0;score=0;
+    pk.forEach((p,i)=>{const c=el('div','card fwc');c.appendChild(el('h3','',(i+1)+'. '+p.t));c.appendChild(el('p','mono fwd',p.d));
+      const ctl=el('div','ctl');const res=el('p','fwres');
+      ['Allow','Block'].forEach(lbl=>{const b=el('button','',lbl);b.type='button';b.onclick=()=>{
+        if(c.dataset.done)return;c.dataset.done=1;done++;
+        const r=p.m(),act=rules()[r-1][1],ok=(lbl.toUpperCase()===act);if(ok)score++;
+        b.classList.add('on');drawRules(r);
+        res.textContent=(ok?'Correct. ':'Not this time. ')+act+' by rule '+r+'.'+(p.why?' '+p.why:'');
+        res.className='fwres '+(ok?'good':'bad');c.classList.add(act==='ALLOW'?'allowed':'blocked');
+        $('fwscore').textContent='Predictions right: '+score+' / '+done;};ctl.appendChild(b)});
+      c.appendChild(ctl);c.appendChild(res);box.appendChild(c)});
+    $('fwscore').textContent='';drawRules(null);}
+  $('fwpol').onclick=()=>{black=!black;$('fwpol').textContent=black?'Switch back to default deny':'Switch to a blacklist policy';
+    $('fwpolnote').textContent=black?'Rule 5 now allows everything that is not on the blocklist. Try packets 3 and 5 again.':'';paint();};
+  paint();
+})();
+
+// ---------- Caesar cipher ----------
+(function(){
+  const inp=$('czin');if(!inp)return;
+  const shift=(s,k)=>s.toUpperCase().replace(/[A-Z]/g,c=>String.fromCharCode((c.charCodeAt(0)-65+k)%26+65));
+  const upd=()=>{const k=+$('czk').value;$('czout').textContent='Key '+k+'  →  '+shift(inp.value,k);$('czlist').innerHTML=''};
+  inp.oninput=upd;$('czk').oninput=upd;
+  $('czbrute').onclick=()=>{const ct=shift(inp.value,+$('czk').value);const l=$('czlist');l.innerHTML='';
+    for(let k=1;k<=25;k++){const d=el('div','',k+': '+shift(ct,26-k));if(k===+$('czk').value)d.className='found';l.appendChild(d)}};
+  upd();
+})();
+
+// ---------- Which key? ----------
+(function(){
+  const box=$('wk');if(!box)return;
+  const jobs=[
+    {q:'1. Bob wants to send Alice a message that only Alice can read. Bob encrypts it with...',o:["Bob's public key","Bob's private key","Alice's public key","Alice's private key"],a:2,
+     e:"Alice's public key. Anyone can have it, but only Alice's private key can decrypt what it locks."},
+    {q:'2. Alice receives the message. She decrypts it with...',o:["Bob's public key","Bob's private key","Alice's public key","Alice's private key"],a:3,
+     e:"Alice's private key, the half that never leaves Alice."},
+    {q:'3. Eve intercepts the message and also has Alice\'s public key. Can she read it?',o:['Yes, with the public key','No, only the private key decrypts it','Yes, if she is on the same Wi-Fi','Only if it was sent over HTTP'],a:1,
+     e:'No. The public key only locks. That is why it is safe to give it to everyone, Eve included.'},
+    {q:'4. Alice wants to sign her IA submission so her teacher knows it really came from her. She signs it with...',o:["Alice's public key","Alice's private key","The teacher's public key","The teacher's private key"],a:1,
+     e:"Alice's private key. Only Alice has it, so only Alice could have made the signature."},
+    {q:"5. The teacher checks Alice's signature with...",o:["Alice's public key","Alice's private key","The teacher's public key","The teacher's private key"],a:0,
+     e:"Alice's public key. If it verifies, the file came from Alice and was not changed."},
+    {q:"6. Your browser checks the Certificate Authority's signature on the school portal's certificate with...",o:["The school's private key","The CA's private key","The CA's public key","Your own private key"],a:2,
+     e:"The CA's public key, which is built into the browser. The CA signed with its private key."}];
+  jobs.forEach(j=>{const c=el('div','card wkc');c.appendChild(el('h3','',j.q));const ctl=el('div','ctl');const r=el('p','fwres');
+    j.o.forEach((o,i)=>{const b=el('button','',o);b.type='button';b.onclick=()=>{if(c.dataset.done)return;c.dataset.done=1;
+      const ok=i===j.a;b.classList.add(ok?'right':'wrong');ctl.children[j.a].classList.add('right');
+      r.textContent=(ok?'Correct. ':'Not quite. ')+j.e;r.className='fwres '+(ok?'good':'bad')};ctl.appendChild(b)});
+    c.appendChild(ctl);c.appendChild(r);box.appendChild(c)});
+})();
+
+// ---------- Certificate checker ----------
+(function(){
+  const box=$('cert');if(!box)return;
+  const host='portal.westbridge.example';
+  const base={sub:host,iss:'DigiCert (trusted)',from:'1 Mar 2026',to:'31 Mar 2027',key:'04:a7:3c:91:...',rev:false};
+  const certs=[
+    ['1 Genuine',{}],
+    ['2 Expired',{from:'1 Oct 2025',to:'31 Oct 2026'}],
+    ['3 Wrong domain',{sub:'shop.example'}],
+    ['4 Hotspot',{iss:'Free WiFi Trust (not trusted)'}],
+    ['5 Stolen key',{rev:true}]];
+  const checks=[
+    ['Signed by a CA the browser trusts',c=>!/not trusted/.test(c.iss)],
+    ["The CA's signature is valid (nothing changed since signing)",c=>true],
+    ['The name matches the address bar ('+host+')',c=>c.sub===host],
+    ['In date (today: 10 Nov 2026)',c=>!/2026$/.test(c.to)||c.to==='31 Mar 2027'],
+    ['Not on the revocation list',c=>!c.rev]];
+  const msg=['Padlock. Encrypted, and it really is the school portal.',
+    'Warning: the certificate expired on 31 Oct. Probably a forgotten renewal, not an attack, but the browser cannot vouch for the site.',
+    'Warning: a real certificate, but for a different site. An attacker cannot reuse another site\'s certificate.',
+    'Warning: "Your connection is not private". The certificate was signed by a CA the browser does not trust: a man in the middle on a fake hotspot.',
+    'Warning: the school reported its private key stolen, so the CA revoked this certificate. Without revocation the thief could pose as the portal.'];
+  let cur=0;
+  function show(i){cur=i;const c=Object.assign({},base,certs[i][1]);
+    box.innerHTML='';[['Issued to',c.sub],['Issued by',c.iss],['Valid',c.from+' to '+c.to],['Public key',c.key],['Serial','7F:3A:19:0C'],['Signature','CA signature over all fields']].forEach(([k,v])=>{
+      const r=el('div','crow');r.appendChild(el('span','',k));r.appendChild(el('b','mono',v));box.appendChild(r)});
+    const ol=$('certchecks');ol.innerHTML='';checks.forEach(ch=>ol.appendChild(el('li','pend',ch[0])));
+    $('certres').textContent='';$('certres').className='legend';
+    [...$('certbtns').children].forEach((b,k)=>b.classList.toggle('on',k===i));}
+  certs.forEach((c,i)=>{const b=el('button','',c[0]);b.type='button';b.onclick=()=>show(i);$('certbtns').appendChild(b)});
+  $('certrun').onclick=()=>{const c=Object.assign({},base,certs[cur][1]);const lis=[...$('certchecks').children];
+    checks.forEach((ch,k)=>setTimeout(()=>{lis[k].className=ch[1](c)?'y':'n'},250*k));
+    setTimeout(()=>{$('certres').textContent=msg[cur];$('certres').className='fwres '+(cur===0?'good':(cur===1?'warn':'bad'))},250*checks.length)};
+  show(0);
+})();
+
+// ---------- Locked MCQ quizzes (check for understanding) ----------
+const QUIZ={
+  fw:[
+    {q:'Which firewall technique reads the payload of a packet to look for malware patterns?',o:['Packet filtering','Stateful inspection','Deep packet inspection (DPI)','NAT'],a:2,e:'Only DPI reads the payload. Packet filtering and stateful inspection read the header (and the connection state).'},
+    {q:'A firewall\'s last rule is "block everything else". This is called...',o:['A blacklist policy','Default deny','Stateful inspection','Port forwarding'],a:1,e:'Default deny: anything no rule allowed is blocked. It is what makes a whitelist approach secure.'},
+    {q:'Why is a whitelist generally more secure than a blacklist?',o:['It is faster to process','It blocks anything not approved, including attacks nobody knows about yet','It inspects encrypted traffic','It needs no updating at all'],a:1,e:'A blacklist only stops threats already on the list. A whitelist blocks unknown threats by default.'},
+    {q:'Which threat is a firewall LEAST able to stop?',o:['A port scan from outside','Traffic from a known botnet address','A phishing email asking for a password','An unrequested inbound connection'],a:2,e:'Phishing arrives as ordinary email on an allowed port. The firewall cannot see that it is a deception.'},
+    {q:'How does NAT block an unsolicited inbound packet?',o:['It scans the packet for viruses','There is no NAT table entry, so the router has nowhere to send it','It encrypts the packet','It checks the sender against a blacklist'],a:1,e:'NAT forwards only replies to connections started inside. NAT does not inspect traffic, so it is not a firewall.'},
+    {q:'A student says: "The firewall found the virus on my laptop and deleted it." What is wrong?',o:['Nothing, that is the firewall\'s main job','Firewalls filter traffic by rules; finding and removing viruses on a device is antivirus software','Only hardware firewalls delete viruses','Firewalls only delete viruses sent over HTTP'],a:1,e:'A firewall decides what traffic may pass. It does not scan files on a device or remove malware.'}],
+  enc:[
+    {q:'In symmetric encryption, the key used to decrypt is...',o:['The receiver\'s public key','The same secret key used to encrypt','The sender\'s private key','Issued by a Certificate Authority'],a:1,e:'One shared secret key both locks and unlocks.'},
+    {q:'What is the main weakness of symmetric encryption on the internet?',o:['It is too slow for large files','Both sides must already share the secret key, and sending it is risky','It cannot encrypt text','Anyone can decrypt it with a public key'],a:1,e:'The key distribution problem. Asymmetric encryption was invented to solve it.'},
+    {q:'Why does HTTPS use asymmetric AND symmetric encryption?',o:['Asymmetric sets up a shared secret and proves identity; fast symmetric encryption protects the data','Symmetric checks the certificate; asymmetric encrypts the page','Using two methods makes the key longer','Browsers cannot run asymmetric encryption'],a:0,e:'Asymmetric is slow but solves key exchange and identity. Symmetric is fast, so it carries the actual data.'},
+    {q:'Which of these does a digital certificate contain?',o:['The website\'s private key','The website\'s public key and domain, signed by a CA','The user\'s password','The session keys for the connection'],a:1,e:'A certificate binds a public key to a domain, with the CA\'s signature. The private key never leaves the server.'},
+    {q:'Your browser shows a warning because the certificate was signed by a CA it does not trust. The most likely cause on public Wi-Fi is...',o:['The certificate has expired','A man-in-the-middle attacker presenting their own certificate','The website uses symmetric encryption','The firewall blocked port 443'],a:1,e:'An attacker can make a certificate with any name, but no trusted CA will sign it.'},
+    {q:'A company\'s private key is stolen. Which key management step stops attackers using its certificate?',o:['Key generation','Key rotation next year','Revocation: the CA cancels the certificate','Making the key longer'],a:2,e:'Revocation (revocation lists or OCSP) tells browsers to stop trusting the certificate now.'}]};
+document.querySelectorAll('.quiz').forEach(qz=>{
+  const qs=QUIZ[qz.dataset.q];let score=0,n=0;const chip=el('span','chip','Score: 0 / '+qs.length);
+  qz.parentElement.querySelector('h2').appendChild(chip);
+  qs.forEach((x,i)=>{const c=el('div','card qc');c.appendChild(el('h3','',(i+1)+'. '+x.q));const ctl=el('div','opts');const r=el('p','fwres');
+    x.o.forEach((o,k)=>{const b=el('button','',String.fromCharCode(65+k)+'. '+o);b.type='button';b.onclick=()=>{
+      if(c.dataset.done)return;c.dataset.done=1;n++;const ok=k===x.a;if(ok)score++;
+      b.classList.add(ok?'right':'wrong');ctl.children[x.a].classList.add('right');
+      r.textContent=(ok?'Correct. ':'The answer is '+String.fromCharCode(65+x.a)+'. ')+x.e;r.className='fwres '+(ok?'good':'bad');
+      chip.textContent='Score: '+score+' / '+qs.length;if(n===qs.length)chip.classList.add('fin')};ctl.appendChild(b)});
+    c.appendChild(ctl);c.appendChild(r);qz.appendChild(c)});
+});
+
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('cur',k===cur));
+  document.getElementById('pos').textContent='A2.4.1 + A2.4.4  '+(cur+1)+' / '+slides.length;
+  const n=slides[cur].querySelector('aside.tn');document.getElementById('ntext').textContent=n?n.textContent:'';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+function board(){document.getElementById('bstate').textContent=document.body.classList.contains('board')?'(ON)':'(off)'}
+document.addEventListener('click',e=>{const r=e.target.closest('.reveal');if(r)r.classList.toggle('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(false){document.body.classList.toggle('board');board()}
+  else if(false){document.getElementById('notes').classList.toggle('show');document.body.classList.toggle('notes')}
+  else if(k==='r')slides[cur].querySelectorAll('.reveal').forEach(x=>x.classList.add('open'))
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+});
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=Number(t.dataset.min)*60;let left=total,iv=null;
+  t.innerHTML='<span class="clock"></span><button class="go">Start</button><button class="rs">Reset</button>';
+  const c=t.querySelector('.clock'),go=t.querySelector('.go');
+  const paint=()=>{c.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');c.classList.toggle('out',left===0)};
+  const stop=()=>{clearInterval(iv);iv=null;go.textContent='Start'};
+  go.onclick=()=>{if(iv){stop();return}if(left===0)left=total;go.textContent='Pause';
+    iv=setInterval(()=>{left=Math.max(0,left-1);paint();if(left===0)stop()},1000)};
+  t.querySelector('.rs').onclick=()=>{stop();left=total;paint()};
+  paint();
+});
+board();show((parseInt(location.hash.slice(1))||1)-1);
+
+</script>
+</body>
+</html>
