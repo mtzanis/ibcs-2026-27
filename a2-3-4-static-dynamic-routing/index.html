@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.3.4 Who writes the map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+
+:root{--paper:#F4F6F9;--card:#FFFFFF;--ink:#1B2A3A;--muted:#5B6B7E;--line:#C6D2E0;--blue:#2B5CAD;--blue-deep:#1E3F76;--blue-wash:#E3EAF6;--amber:#B97A14;--amber-wash:#F7EDD9;--good:#2F7D52;--good-wash:#E1F0E7;--bad:#B54434;--bad-wash:#F6E4E0;--display:"Bricolage Grotesque",Verdana,sans-serif;--body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;--mono:"IBM Plex Mono","Courier New",monospace}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:clamp(17px,1.75vw,30px);line-height:1.4;overflow:hidden}
+.slide{display:none;position:absolute;inset:0;padding:4.2vh 5vw 9vh;flex-direction:column;overflow:auto}
+.slide.cur{display:flex}
+.slide.title{background:var(--blue-deep);color:#fff;justify-content:center}
+.eyebrow{font-family:var(--mono);font-size:.62em;letter-spacing:.09em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.title .eyebrow{color:#F3C56B}
+h1{font-family:var(--display);font-weight:800;font-size:3.1em;line-height:1.02;margin:.15em 0 .25em}
+h2{font-family:var(--display);font-weight:800;font-size:1.85em;line-height:1.08;margin:.1em 0 .45em}
+p{margin:.35em 0}
+.prose{color:var(--muted);max-width:60em}
+body.board .prose{display:none}
+.cols{display:grid;gap:1.2em;flex:1;align-items:start}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:.8em .9em}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.12em;margin-bottom:.25em}
+.reveal{cursor:pointer;position:relative}
+.reveal .hid{visibility:hidden}
+.reveal.open .hid{visibility:visible}
+.reveal:not(.open)::after{content:"click to reveal";position:absolute;right:.7em;bottom:.5em;font-family:var(--mono);font-size:.55em;color:var(--amber)}
+.reveal.open{border-color:var(--good);background:var(--good-wash)}
+.big{font-family:var(--display);font-weight:800;font-size:1.5em}
+.mono{font-family:var(--mono)}
+svg.t{width:100%;height:auto;max-height:30vh;display:block}
+svg.t line{stroke:var(--blue);stroke-width:4;stroke-linecap:round}
+svg.t circle{fill:#fff;stroke:var(--blue-deep);stroke-width:3.5}
+svg.t rect{fill:var(--blue-wash);stroke:var(--blue-deep);stroke-width:3.5}
+.timer{display:flex;align-items:center;gap:.6em;margin:.5em 0}
+.timer .clock{font-family:var(--mono);font-weight:600;font-size:2.6em;background:var(--blue-deep);color:#fff;border-radius:12px;padding:.05em .4em;min-width:4.2em;text-align:center}
+.timer .clock.out{background:var(--bad)}
+button{font-family:var(--mono);font-size:.62em;cursor:pointer;background:var(--card);color:var(--ink);border:2px solid var(--line);border-radius:8px;padding:.45em .9em}
+ol,ul{margin:.3em 0 .3em 1.2em;padding:0}li{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:.78em}
+th,td{border:2px solid var(--line);padding:.35em .5em;text-align:left;vertical-align:top;background:var(--card)}
+th{background:var(--blue-wash);font-family:var(--display)}
+td.reveal:not(.open)::after{content:"?";right:.5em;bottom:.2em;font-size:1em}
+.weak{border-color:var(--bad);background:var(--bad-wash)}.strong{border-color:var(--good);background:var(--good-wash)}
+.due{background:var(--amber-wash);border:2px solid var(--amber);border-radius:14px;padding:.6em .9em;margin-top:.6em}
+footer{position:fixed;left:0;right:0;bottom:0;height:6.5vh;display:flex;align-items:center;justify-content:space-between;padding:0 2vw;background:var(--card);border-top:2px solid var(--line);font-family:var(--mono);font-size:.55em;z-index:5}
+footer .keys{color:var(--muted)}
+#notes{position:fixed;right:0;top:0;bottom:6.5vh;width:min(34vw,520px);background:#FFFDF6;border-left:3px solid var(--amber);padding:1em 1.1em;overflow:auto;font-size:.62em;line-height:1.45;display:none;z-index:6}
+#notes.show{display:block}
+#notes h4{font-family:var(--display);font-size:1.25em;margin-bottom:.4em;color:var(--amber)}
+aside.tn{display:none}
+body.notes .slide{right:min(34vw,520px)}
+.ret .card{font-size:.82em;padding:.55em .7em}.ret .card h3{font-size:.98em}
+.pkt{display:flex;font-family:var(--mono);font-size:.7em;margin:.4em 0 .8em;flex:0}
+.pkt div{border:2px solid var(--blue-deep);padding:.5em .7em;background:var(--blue-wash)}
+.pkt div+div{border-left:none}
+.pkt .pay{flex:1;background:var(--amber-wash);border-color:var(--amber)}
+.pkt small{display:block;color:var(--muted);font-size:.8em}
+.fam{font-family:var(--mono);font-size:.62em;font-weight:600;background:var(--blue-deep);color:#fff;border-radius:99px;padding:.15em .7em;display:inline-block;margin-bottom:.2em}
+.ctl{display:flex;gap:.5em;align-items:center;flex-wrap:wrap;margin:.3em 0}
+.ctl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.legend{font-family:var(--mono);font-size:.55em;color:var(--muted)}
+.bad{background:var(--bad-wash);color:var(--bad)}.good{background:var(--good-wash);color:var(--good)}.warn{background:var(--amber-wash);color:var(--amber)}
+.form{display:grid;grid-template-columns:auto 1fr;gap:.35em .6em;align-items:center;font-size:.75em}
+.form input{font-family:var(--mono);font-size:1em;padding:.3em .5em;border:2px solid var(--line);border-radius:8px}
+.inc{grid-template-columns:repeat(4,1fr);gap:.5em;flex:0}
+.inc .card{font-size:.66em;padding:.45em .6em}.inc .card h3{font-size:1.05em}
+.inc .hid{margin-top:.3em;font-weight:700;color:var(--good)}
+.ms .card{font-size:.68em;padding:.45em .65em}
+.timer.sm{margin:.3em 0}.timer.sm .clock{font-size:1.6em}
+/* firewall simulator */
+.fwgrid{grid-template-columns:.9fr 1.1fr;gap:1em}
+.fwr{font-size:.62em}.fwr td.ok{color:var(--good);font-weight:700}.fwr td.no{color:var(--bad);font-weight:700}
+.fwr tr.hit td{background:var(--amber-wash);border-color:var(--amber)}
+/* which key + quizzes */
+.wk{display:grid;grid-template-columns:1fr 1fr;gap:.5em}
+.wkc,.qc{font-size:.6em;padding:.45em .65em}.wkc h3,.qc h3{font-size:1.05em;font-family:var(--body);margin-bottom:.2em}
+.wkc button,.qc button{font-family:var(--body);font-size:.92em;padding:.25em .6em;text-align:left}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:.3em}
+button.right{background:var(--good-wash);border-color:var(--good);color:var(--good);font-weight:700}
+button.wrong{background:var(--bad-wash);border-color:var(--bad);color:var(--bad)}
+.qz{gap:.5em;flex:0}
+.chip{font-family:var(--mono);font-size:.4em;font-weight:600;vertical-align:middle;margin-left:.8em;padding:.25em .8em;border-radius:99px;background:var(--blue-wash);color:var(--blue-deep);border:2px solid var(--blue)}
+.chip.fin{background:var(--good-wash);color:var(--good);border-color:var(--good)}
+.fwres{font-size:.78em;border-radius:8px;padding:.25em .5em;margin:.2em 0 0}.fwres:empty{display:none}
+.do{font-size:.8em;color:var(--ink);margin:0 0 .4em;flex:0}
+.do b{color:var(--amber)}
+.nw{display:inline-block;font-family:var(--mono);font-size:.62em;font-weight:600;background:var(--amber-wash);color:var(--amber);border:2px solid var(--amber);border-radius:99px;padding:.05em .55em;margin-right:.3em;vertical-align:.1em}
+.words .card,.card.words{font-size:.78em;padding:.45em .7em}
+svg.net{width:100%;height:auto;max-height:42vh;display:block;flex:none}
+svg.net .ln{stroke:var(--blue);stroke-width:5;stroke-linecap:round}
+svg.net .ln.used{stroke:var(--amber);stroke-width:8}
+svg.net .ln.cut{stroke:var(--bad);stroke-dasharray:10 10}
+svg.net .nd circle{fill:#fff;stroke:var(--blue-deep);stroke-width:4}
+svg.net .nd rect{fill:var(--good-wash);stroke:var(--good);stroke-width:3}
+svg.net .nd.hi circle{fill:var(--amber-wash);stroke:var(--amber);stroke-width:6}
+svg.net .nd.hi rect{stroke:var(--amber);stroke-width:5}
+svg.net .t1{font-family:var(--display);font-weight:800;font-size:24px;fill:var(--ink)}
+svg.net .t2{font-size:17px;fill:var(--muted)}
+svg.net .pkt{fill:var(--amber);stroke:#fff;stroke-width:3}
+svg.net .pkt.lost{fill:var(--bad)}
+.cap{font-size:.8em;margin:0;flex:1}
+button.go1{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+.tbl2{grid-template-columns:.85fr 1.15fr;gap:1em}
+.rt{font-size:.68em}.rt.sm{font-size:.55em}.rt td.bad{background:var(--bad-wash);color:var(--bad);font-weight:700}
+.split .card{padding:.7em .9em}.split .st{border-color:var(--blue)}.split .dy{border-color:var(--good)}
+.big2{font-family:var(--display);font-weight:700;font-size:1.25em;margin:.2em 0}
+.warn-card{border-color:var(--bad);background:var(--bad-wash);font-size:.85em}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:.6em}
+.steps .card{font-size:.82em;position:relative;padding-top:1.6em}
+.steps .n{position:absolute;top:.35em;left:.7em;font-family:var(--mono);font-weight:600;color:#fff;background:var(--blue-deep);border-radius:99px;width:1.4em;height:1.4em;display:grid;place-items:center;font-size:.8em}
+.good-card{border-color:var(--good);background:var(--good-wash);font-size:.8em;margin-bottom:.45em;padding:.5em .75em}
+.bad-card{border-color:var(--bad);background:var(--bad-wash);font-size:.8em;margin-bottom:.45em;padding:.5em .75em}
+.reveal.inline{display:inline;border-bottom:3px dotted var(--amber);padding:0 .2em}
+.reveal.inline:not(.open)::after{position:static;content:" click to reveal";margin-left:.3em}
+.reveal.inline.open{background:none;border-color:var(--good)}
+.simgrid{display:grid;grid-template-columns:1.35fr 1fr;gap:1em;align-items:start}
+.simgrid .ctl button{font-size:.5em;padding:.35em .7em}
+.simgrid #simlog{font-size:.62em;min-height:2.6em}
+.todo{font-size:.62em;padding:.45em .7em}.todo ol{margin-top:.2em}
+.conv{font-family:var(--mono);font-size:.62em;font-weight:600;color:var(--amber);background:var(--amber-wash);border-radius:8px;padding:.2em .6em;margin:.3em 0;animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.4}}
+.counters{display:grid;grid-template-columns:repeat(4,1fr);gap:.4em;margin-top:.4em}
+.counters div{background:var(--card);border:2px solid var(--line);border-radius:10px;padding:.25em .4em;text-align:center}
+.counters b{display:block;font-family:var(--mono);font-size:1.1em}.counters span{display:block;font-size:.45em;color:var(--muted)}
+.counters .dim{opacity:.35}
+.tline{display:flex;font-size:.72em}
+.tline div{flex:1;padding:.6em .7em;border:2px solid var(--line);background:var(--card)}
+.tline div+div{border-left:none}
+.tline b{display:block;font-family:var(--display);font-size:1.1em}
+.tline .ok1{background:var(--good-wash);border-color:var(--good)}.tline .cut1{background:var(--bad-wash);border-color:var(--bad)}.tline .conv1{background:var(--amber-wash);border-color:var(--amber)}
+.fac{font-size:.66em}.fac td small{display:block;color:var(--muted);font-size:.85em}
+.fac td.reveal:not(.open)::after{content:"?"}
+.helper{border-color:var(--amber);background:var(--amber-wash);font-size:.74em;padding:.45em .75em;margin-bottom:.5em}
+.inc5{grid-template-columns:repeat(5,1fr);gap:.5em;flex:0}
+.inc5 .card{font-size:.64em;padding:.45em .6em}.inc5 .card h3{font-size:1.1em}
+.inc5 .hid{margin-top:.3em;font-weight:700;color:var(--good)}
+.ex .card{font-size:.82em}
+.nochip .qc{font-size:.56em}.nochip{display:grid;grid-template-columns:1fr 1fr;gap:.5em}
+.kq .card{font-size:.74em;padding:.55em .7em}.kq .card h3{font-size:1.05em}.kq .hid{margin-top:.3em}
+
+</style>
+</head>
+<body class="">
+<section class="slide title">
+  <div class="eyebrow">IB Computer Science HL, A2.3.4 Static and dynamic routing</div>
+  <h1>Who writes the map?</h1>
+  <p class="big" style="font-weight:500">How routers know where to send a packet, and what happens when a link breaks.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Start of the lesson: homework in, then today's learning objectives</div>
+  <div class="due" style="flex:0;margin:0 0 .6em"><strong>Due now (12:45):</strong> the InThinking A2.4.3 Worksheet (five scenarios).</div>
+  <h2>By the end of the lesson you can...</h2>
+  <div class="cols c3" style="flex:0">
+    <div class="card"><h3>1. Explain</h3><p>how a router uses a routing table to send a packet on.</p></div>
+    <div class="card"><h3>2. Explain</h3><p>static routing and dynamic routing: who fills in the table.</p></div>
+    <div class="card"><h3>3. Choose</h3><p>static or dynamic for a network, and give the reason.</p></div>
+  </div>
+  <h3 style="font-family:var(--display);margin-top:.8em">Key questions</h3>
+  <ul>
+    <li>Where does a router's routing table come from in each approach?</li>
+    <li>What does static routing do when a link fails, and what does dynamic routing do?</li>
+    <li>Why does typing routes by hand become a problem as a network grows?</li>
+    <li>What does dynamic routing cost in return for adapting on its own?</li>
+  </ul>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Retrieval, 6 minutes, no notes: things you already know</div>
+  <h2>Four quick ones</h2>
+  <p class="do"><b>Do this:</b> write your answer on paper, then click the card.</p>
+  <div class="cols c2 ret">
+    <div class="card reveal"><h3>1. A router and a switch: which one connects different networks together?</h3><p class="hid">The router. A switch connects devices inside one network. (A2.1.3, A2.3)</p></div>
+    <div class="card reveal"><h3>2. Name two things in a packet's header.</h3><p class="hid">Source IP address and destination IP address (also sequence number, protocol). (A2.3.3)</p></div>
+    <div class="card reveal"><h3>3. Do all packets of one message take the same route?</h3><p class="hid">Not always. Each packet can take a different route; they are put back in order at the end. (A2.3.3)</p></div>
+    <div class="card reveal"><h3>4. In a mesh topology, why does one broken cable not cut a device off?</h3><p class="hid">There is more than one path between devices, so traffic can go another way. (A2.2.1)</p></div>
+  </div>
+  <p class="big" style="font-size:1.05em;flex:0;margin-top:.5em">Today's question: when there are several paths, who decides which one a packet takes?</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Step 1, 5 minutes: one hop at a time</div>
+  <h2>A router only decides the next step</h2>
+  <p class="do"><b>Do this:</b> click <b>Next hop</b> and read the caption each time.</p>
+  <svg id="hopnet" class="net" viewBox="0 0 900 340" role="img" aria-label="A network of five routers between LAN A and LAN B"></svg>
+  <div class="ctl"><button id="hopnext" type="button" class="go1">Next hop</button><p id="hopcap" class="cap"></p></div>
+  <div class="cols c2 words" style="flex:0">
+    <div class="card"><span class="nw">New word</span> <b>Hop</b>: one jump from one router to the next.</div>
+    <div class="card"><span class="nw">New word</span> <b>Next hop</b>: the next router a packet is sent to.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Step 2, 6 minutes: the routing table</div>
+  <h2>You are router R1. Where does each packet go?</h2>
+  <div class="cols tbl2" style="flex:0">
+    <div>
+      <table class="rt">
+        <tr><th>Destination</th><th>Next hop</th><th>Cost</th></tr>
+        <tr><td>LAN B (library)</td><td class="mono">R2</td><td>2</td></tr>
+        <tr><td>LAN B (library)</td><td class="mono">R3</td><td>3</td></tr>
+        <tr><td>LAN C (new lab)</td><td class="mono">R3</td><td>2</td></tr>
+        <tr><td>Anything else (internet)</td><td class="mono">R2</td><td>1</td></tr>
+      </table>
+      <div class="card words" style="margin-top:.5em"><span class="nw">New word</span> <b>Routing table</b>: a list inside every router. For each destination, it says the next hop.</div>
+      <div class="card words" style="margin-top:.4em"><span class="nw">New word</span> <b>Cost</b> (or <b>metric</b>): a number that says how good a route is. Lower is better. Here: number of hops.</div>
+      <div class="card words" style="margin-top:.4em"><span class="nw">New word</span> <b>Default route</b>: the "anything else" row.</div>
+    </div>
+    <div class="quiz nochip" data-q="r1"></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Step 3, 2 minutes: the big question</div>
+  <h2>Who fills in the routing table?</h2>
+  <div class="cols c2 split" style="flex:0">
+    <div class="card st"><span class="fam">Static routing</span><p class="big2">A <b>person</b> types every route by hand.</p><p>The table stays the same until someone edits it.</p></div>
+    <div class="card dy"><span class="fam">Dynamic routing</span><p class="big2">The <b>routers</b> fill it in themselves.</p><p>They share what they know, and update the table when the network changes.</p></div>
+  </div>
+  <div class="card warn-card" style="flex:0;margin-top:.7em"><b>Common exam mistake:</b> "static routing has no routing table". Wrong. Both use a table. The difference is <b>who writes it</b> and <b>whether it updates by itself</b>.</div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Static routing, 4 minutes: how it works</div>
+  <h2>Static routing: typed by hand, fixed</h2>
+  <div class="steps" style="flex:0">
+    <div class="card"><span class="n">1</span>An administrator (the person who runs the network) logs in to each router.</div>
+    <div class="card"><span class="n">2</span>For each destination, they type the next hop.</div>
+    <div class="card"><span class="n">3</span>The table stays exactly as typed.</div>
+    <div class="card"><span class="n">4</span>Packets always follow those fixed routes, whatever happens.</div>
+  </div>
+  <p class="do" style="margin-top:.6em"><b>Think:</b> step 4 is both its biggest strength and its biggest weakness. Why? <span class="reveal inline"><span class="hid">Strength: you always know the path. Weakness: if that path breaks, packets keep going there.</span></span></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Static routing, 4 minutes: good and bad</div>
+  <h2>Every point has a "because"</h2>
+  <div class="cols c2" style="flex:0">
+    <div>
+      <div class="card good-card"><b>Predictable</b>, because the routes never change by themselves.</div>
+      <div class="card good-card"><b>Uses almost no router resources</b> (processing, memory, bandwidth), because routers send no extra messages and do no route calculations.</div>
+      <div class="card good-card"><b>Simple on a small network</b>, because there are only a few routes to type.</div>
+      <div class="card good-card"><b>Harder to fool</b>, because routers do not accept routes from other routers.</div>
+    </div>
+    <div>
+      <div class="card bad-card"><b>Does not adapt</b>: if a link fails, packets keep going to it until a person edits the table.</div>
+      <div class="card bad-card"><b>Lots of manual work</b>: every change means editing the routers by hand.</div>
+      <div class="card bad-card"><b>Does not scale</b>: more routers means more routes to type, and more mistakes.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Dynamic routing, 6 minutes: how it works</div>
+  <h2>Dynamic routing: the routers talk to each other</h2>
+  <div class="steps" style="flex:0">
+    <div class="card"><span class="n">1</span>Each router tells its <b>neighbors</b> which networks it can reach, and the cost.</div>
+    <div class="card"><span class="n">2</span>From those messages, every router builds its own table.</div>
+    <div class="card"><span class="n">3</span>Packets go along the best current path (lowest cost).</div>
+    <div class="card"><span class="n">4</span>If a link breaks, the routers find out, recalculate, and send traffic another way.</div>
+  </div>
+  <div class="cols c2 words" style="flex:0;margin-top:.6em">
+    <div class="card"><span class="nw">New word</span> <b>Neighbor</b>: a router directly connected to this one.</div>
+    <div class="card"><span class="nw">New word</span> <b>Routing protocol</b>: the rules routers use to share routes. Names you may meet: RIP, OSPF. You do not need to know how they work.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Try it, 12 minutes, in pairs: static vs dynamic</div>
+  <h2>Break the network and watch</h2>
+  <div class="simgrid" style="flex:0">
+    <div>
+      <div class="ctl"><button id="simstatic" type="button">Static</button><button id="simdyn" type="button">Dynamic</button><span class="legend">pick a mode first</span></div>
+      <svg id="simnet" class="net" viewBox="0 0 900 340" role="img" aria-label="Routing simulator"></svg>
+      <div class="ctl"><button id="simb" type="button" class="go1">Send packet to LAN B</button><button id="simc" type="button">Send packet to LAN C</button><button id="simcut" type="button">Cut the R2 to R4 link</button><button id="simadd" type="button">Plug in a new lab (LAN C)</button><button id="simfix" type="button">Administrator: type new routes</button></div>
+      <p id="simlog" class="fwres"></p>
+    </div>
+    <div>
+      <div class="todo card"><b>What to try</b><ol><li>Static: send to LAN B. Cut the link. Send again.</li><li>Static: click Administrator. Send again.</li><li>Switch to Dynamic. Do the same.</li><li>In both modes: plug in LAN C and send to it.</li></ol></div>
+      <p id="simconv" class="conv" hidden>Converging...</p>
+      <table id="simtab" class="rt sm"></table>
+      <div class="counters"><div><b id="sc_ok">0</b><span>delivered</span></div><div><b id="sc_lost">0</b><span>lost</span></div><div id="sc_editbox"><b id="sc_edit">0</b><span>routes typed by hand</span></div><div id="sc_msgbox"><b id="sc_msg">0</b><span>routing messages</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Convergence, 4 minutes: the one new idea dynamic routing brings</div>
+  <h2>The short wobble after a change</h2>
+  <div class="tline" style="flex:0">
+    <div class="ok1"><b>Before</b>All tables agree. Packets arrive.</div>
+    <div class="cut1"><b>Link breaks</b>Some routers know, some do not yet.</div>
+    <div class="conv1"><b>Converging</b>Routers swap messages. Tables disagree. Packets can be lost or go in circles.</div>
+    <div class="ok1"><b>Converged</b>All tables agree again, using the new path.</div>
+  </div>
+  <div class="card words" style="flex:0;margin-top:.6em"><span class="nw">New word</span> <b>Convergence</b>: the time it takes all routers to agree on the routes again after a change. Faster convergence = less disruption.</div>
+  <div class="card reveal" style="flex:0;margin-top:.5em"><h3>Does static routing have a convergence time?</h3><p class="hid">No: there is nothing to converge, because the routers never update by themselves. But that also means it never recovers by itself: the outage lasts until a person fixes the table.</p></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Check for understanding 1, 5 minutes, on your own</div>
+  <h2>Six questions, one try each</h2>
+  <div class="quiz cols c2 qz" data-q="c1"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">The seven factors, 10 minutes: predict, then click</div>
+  <h2>The guide names seven factors. Static or dynamic?</h2>
+  <p class="do"><b>Do this:</b> for each row, say which side wins and why. Then click both cells.</p>
+  <table class="fac" style="flex:0">
+    <tr><th>Factor</th><th>Static routing</th><th>Dynamic routing</th></tr>
+    <tr><td><b>Configuration</b><small>how routes get in</small></td><td class="reveal"><span class="hid">Typed by hand</span></td><td class="reveal"><span class="hid">Learned from neighbors</span></td></tr>
+    <tr><td><b>Maintenance</b><small>after a change</small></td><td class="reveal"><span class="hid">Edit the routers by hand</span></td><td class="reveal"><span class="hid">Updates itself</span></td></tr>
+    <tr><td><b>Complexity</b></td><td class="reveal"><span class="hid">Simple on a small network</span></td><td class="reveal"><span class="hid">Harder to set up and to fix</span></td></tr>
+    <tr><td><b>Resource usage</b><small>processing, memory, bandwidth</small></td><td class="reveal"><span class="hid">Very low</span></td><td class="reveal"><span class="hid">Higher: routing messages and calculations</span></td></tr>
+    <tr><td><b>Convergence</b></td><td class="reveal"><span class="hid">None, so no recovery by itself</span></td><td class="reveal"><span class="hid">Short wobble, then recovers</span></td></tr>
+    <tr><td><b>Scalability</b></td><td class="reveal"><span class="hid">Poor: work grows with the network</span></td><td class="reveal"><span class="hid">Good: routers share the work</span></td></tr>
+    <tr><td><b>Network size</b></td><td class="reveal"><span class="hid">Small and stable</span></td><td class="reveal"><span class="hid">Large or changing</span></td></tr>
+  </table>
+  <p class="big" style="font-size:1em;flex:0;margin-top:.4em">Fixed by hand: light and predictable, but cannot adapt or grow. Built by the routers: adapts and grows, but costs resources and complexity.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Routing challenge, 14 minutes, in pairs</div>
+  <h2>Static, dynamic, or both? Give two factors.</h2>
+  <div class="helper card" style="flex:0"><b>Ask three questions:</b> 1. Is it big, or will it grow? 2. Must it keep working by itself if a link breaks? 3. Is it small, stable, or must every path be tightly controlled?</div>
+  <div class="cols inc5">
+    <div class="card reveal"><h3>1. Small office</h3><p>20 computers, a printer, a file server. Must be simple and cheap.</p><p class="hid">Static. Small and stable (network size); few routes, no overhead (resource usage, complexity).</p></div>
+    <div class="card reveal"><h3>2. Online shop</h3><p>Its web server must stay up even if a link or router fails.</p><p class="hid">Dynamic. Reroutes by itself after a failure, so it keeps working when something breaks (convergence); no waiting for a person.</p></div>
+    <div class="card reveal"><h3>3. University campus</h3><p>Hundreds of devices, many departments, keeps growing.</p><p class="hid">Dynamic. Scalability and maintenance: new networks are learned automatically.</p></div>
+    <div class="card reveal"><h3>4. Bank vault systems</h3><p>Traffic must follow exact, checked paths only.</p><p class="hid">Static. Predictable and easy to check, does not accept routes from other routers (security).</p></div>
+    <div class="card reveal"><h3>5. Hospital</h3><p>Secure medical systems plus a big general network across buildings.</p><p class="hid">Both. Static for the secure systems (control); dynamic for the general network (scales, survives failures).</p></div>
+  </div>
+  <div class="timer sm" data-min="11"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Check for understanding 2, 4 minutes, on your own</div>
+  <h2>Six questions, one try each</h2>
+  <div class="quiz cols c2 qz" data-q="c2"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exam technique, 3 minutes</div>
+  <h2>Explain = give the because</h2>
+  <div class="card" style="flex:0"><p><strong>Explain why static routing suits a small, stable network but not a large, changing one. [4]</strong></p></div>
+  <div class="cols c2 ex" style="margin-top:.6em;flex:0">
+    <div class="card weak"><h3>Answer A</h3><p>"Static is manual and dynamic is automatic, so static is for small networks."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>1 mark at most:</strong> it never says why.</span></p></div>
+    <div class="card strong"><h3>Answer B</h3><p>"A small, stable network has few routes, so typing them by hand is easy, and static routing sends no routing messages. A large network has many routes, so the manual work and mistakes grow. Static routes also do not adapt, so a failed link breaks the path until someone edits the table."</p><p class="reveal" style="margin-top:.4em"><span class="hid"><strong>4 marks:</strong> two reasons for small, two for large, each with a because.</span></p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Exit ticket, 12 minutes, on your own, on paper</div>
+  <h2>Check your learning</h2>
+  <div class="card" style="flex:0;font-size:.86em">
+    <p><strong>1.</strong> State how route entries are configured in static routing. [2]</p>
+    <p><strong>2.</strong> State one function of a dynamic routing protocol. [2]</p>
+    <p><strong>3.</strong> Distinguish between static routing and dynamic routing, referring to one advantage and one disadvantage of static routing. [3]</p>
+    <p><strong>4.</strong> Explain why packets may be lost during convergence after a link fails. [3]</p>
+  </div>
+  <div class="timer sm" data-min="12"></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow">Wrap-up and homework, 3 minutes: who writes the map?</div>
+  <h2>Back to the four key questions</h2>
+  <div class="cols c4 kq" style="flex:0">
+    <div class="card reveal"><h3>Where does the table come from?</h3><p class="hid">Static: a person types it. Dynamic: the routers build it by sharing routes with their neighbors.</p></div>
+    <div class="card reveal"><h3>A link fails. Then what?</h3><p class="hid">Static: packets keep going to the broken link until a person edits the table. Dynamic: the routers converge and reroute by themselves.</p></div>
+    <div class="card reveal"><h3>Why is typing routes a problem as a network grows?</h3><p class="hid">More routers means more routes to type and keep up to date, and more mistakes: it does not scale.</p></div>
+    <div class="card reveal"><h3>What does dynamic routing cost?</h3><p class="hid">Router resources (processing, memory, bandwidth), more complexity, and convergence time after a change.</p></div>
+  </div>
+  <div class="cols c2" style="margin-top:.5em;flex:0">
+    <div class="due"><strong>Homework, due Wed 18 Nov, 12:45 (start of the lesson):</strong> the 10-question quiz on the InThinking eBook page "A 2.3.4 Static vs. Dynamic Routing (HL Only)". Bring your score.</div>
+    <div class="card"><h3>Coming up</h3><p><b>Fri 13 Nov:</b> IA lesson. <b>Wed 18 Nov:</b> A2.2 test review. <b>Fri 20 Nov:</b> A2.2 test. <b>Fri 4 Dec:</b> A2.3 and A2.4 test, which includes today.</p></div>
+  </div>
+</section>
+
+<footer><span id="pos"></span><span class="keys">arrows: move &nbsp; click a card to reveal it</span></footer>
+<div id="notes" hidden><div id="ntext"></div></div><span id="bstate" hidden></span>
+<script>
+// A2.3.4 interactives: network drawing, hop stepper, routing simulator (static vs dynamic), pick/MCQ cards
+const $=id=>document.getElementById(id);
+function el(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+const NS='http://www.w3.org/2000/svg';const OFF=44; // packet dot floats above nodes so labels stay readable
+function sv(tag,attrs,txt){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(txt!=null)e.textContent=txt;return e}
+
+// ---------- the network ----------
+const NODES={A:{x:80,y:170,lan:1,label:'LAN A',sub:'your lab'},R1:{x:240,y:170},R2:{x:420,y:70},R3:{x:420,y:270},
+  R4:{x:620,y:70},R5:{x:620,y:270},B:{x:800,y:70,lan:1,label:'LAN B',sub:'library'},C:{x:800,y:270,lan:1,label:'LAN C',sub:'new lab'}};
+const LINKS=[['A','R1'],['R1','R2'],['R1','R3'],['R2','R4'],['R3','R5'],['R5','R4'],['R4','B'],['R5','C']];
+const lk=(a,b)=>[a,b].sort().join('-');
+function drawNet(svg,opt){
+  svg.innerHTML='';const g={links:{},nodes:{}};
+  LINKS.forEach(([a,b])=>{if((a==='C'||b==='C')&&!opt.showC)return;
+    const l=sv('line',{x1:NODES[a].x,y1:NODES[a].y,x2:NODES[b].x,y2:NODES[b].y,class:'ln'});svg.appendChild(l);g.links[lk(a,b)]=l});
+  for(const id in NODES){if(id==='C'&&!opt.showC)continue;const n=NODES[id],grp=sv('g',{class:'nd'+(n.lan?' lan':'')});
+    if(n.lan){grp.appendChild(sv('rect',{x:n.x-62,y:n.y-34,width:124,height:68,rx:14}));grp.appendChild(sv('text',{x:n.x,y:n.y-4,'text-anchor':'middle',class:'t1'},n.label));grp.appendChild(sv('text',{x:n.x,y:n.y+20,'text-anchor':'middle',class:'t2'},n.sub))}
+    else{grp.appendChild(sv('circle',{cx:n.x,cy:n.y,r:30}));grp.appendChild(sv('text',{x:n.x,y:n.y+8,'text-anchor':'middle',class:'t1'},id))}
+    svg.appendChild(grp);g.nodes[id]=grp}
+  const dot=sv('circle',{r:11,class:'pkt',cx:-50,cy:-50});svg.appendChild(dot);g.dot=dot;return g}
+function animate(g,path,okUpTo,done){ // move the packet dot along path; stop (lost) after index okUpTo
+  const pts=path.map(p=>NODES[p]);let i=0,t=0;g.dot.setAttribute('class','pkt');
+  const step=()=>{if(i>=pts.length-1||i>=okUpTo){g.dot.setAttribute('cx',pts[i].x);g.dot.setAttribute('cy',pts[i].y-OFF);
+      if(i<pts.length-1)g.dot.setAttribute('class','pkt lost');done(i>=pts.length-1);return}
+    t+=0.06;const a=pts[i],b=pts[i+1];g.dot.setAttribute('cx',a.x+(b.x-a.x)*t);g.dot.setAttribute('cy',a.y+(b.y-a.y)*t-OFF);
+    if(t>=1){t=0;i++}requestAnimationFrame(step)};step()}
+
+// ---------- slide: one hop at a time ----------
+(function(){
+  const svg=$('hopnet');if(!svg)return;const g=drawNet(svg,{showC:false});
+  const path=['A','R1','R2','R4','B'];
+  const say=['A laptop in LAN A sends a packet. Its header says: destination = LAN B.',
+    'R1 reads the destination: LAN B. R1 does not know the whole journey. Its table only says: "for LAN B, next hop is R2".',
+    'R2 reads the destination again. Its table says: "for LAN B, next hop is R4".',
+    'R4 is directly connected to LAN B. It hands the packet over.',
+    'Delivered. Each router made one small decision: the next hop.'];
+  let k=0;const cap=$('hopcap');
+  const show=()=>{for(const id in g.nodes)g.nodes[id].classList.toggle('hi',id===path[k]);
+    g.dot.setAttribute('cx',NODES[path[k]].x);g.dot.setAttribute('cy',NODES[path[k]].y-OFF);
+    for(const id in g.links)g.links[id].classList.toggle('used',path.slice(0,k+1).some((p,j)=>j>0&&lk(path[j-1],p)===id));
+    cap.textContent=(k+1)+' of '+path.length+'. '+say[k];$('hopnext').textContent=k===path.length-1?'Start again':'Next hop'};
+  $('hopnext').onclick=()=>{k=(k+1)%path.length;show()};show();
+})();
+
+// ---------- slide: routing simulator ----------
+(function(){
+  const svg=$('simnet');if(!svg)return;
+  let S;
+  function reset(){S={mode:S?S.mode:'static',cut:false,fixedB:false,showC:false,knowC:false,conv:0,ok:0,lost:0,edits:0,msgs:0,busy:false};draw();log('Ready. Send a packet to LAN B.')}
+  let g;
+  function draw(){g=drawNet(svg,{showC:S.showC});if(S.cut)g.links[lk('R2','R4')].classList.add('cut');
+    $('simstatic').classList.toggle('on',S.mode==='static');$('simdyn').classList.toggle('on',S.mode==='dynamic');
+    $('simfix').hidden=S.mode!=='static';$('simc').disabled=!S.showC;
+    $('simcut').textContent=S.cut?'Repair the R2 to R4 link':'Cut the R2 to R4 link';
+    $('simadd').disabled=S.showC;tables();count()}
+  function log(t,cls){const p=$('simlog');p.textContent=t;p.className='fwres '+(cls||'')}
+  function count(){$('sc_ok').textContent=S.ok;$('sc_lost').textContent=S.lost;$('sc_edit').textContent=S.edits;$('sc_msg').textContent=S.msgs;
+    $('sc_msgbox').classList.toggle('dim',S.mode==='static');$('sc_editbox').classList.toggle('dim',S.mode==='dynamic')}
+  function hopsB(){ // next hop for LAN B per router, as the tables currently say
+    const newB=S.mode==='dynamic'?(S.cut&&S.conv===0):(S.cut&&S.fixedB);
+    return newB?{R1:'R3',R2:'R1',R3:'R5',R4:'LAN B',R5:'R4'}:{R1:'R2',R2:'R4',R3:'R1',R4:'LAN B',R5:'R4'}}
+  function hopsC(){if(!S.showC)return null;if(!S.knowC)return{R1:'none',R2:'none',R3:'none',R4:'none',R5:'LAN C'};
+    return{R1:'R3',R2:'R1',R3:'R5',R4:'R5',R5:'LAN C'}}
+  function tables(){const t=$('simtab');const b=hopsB(),c=hopsC();
+    t.innerHTML='<tr><th>Router</th><th>To LAN B, next hop</th>'+(c?'<th>To LAN C, next hop</th>':'')+'</tr>';
+    ['R1','R2','R3','R4','R5'].forEach(r=>{const tr=el('tr');tr.appendChild(el('td','mono',r));
+      const tb=el('td','mono',b[r]);if(S.cut&&r==='R2'&&b[r]==='R4')tb.className='mono bad';tr.appendChild(tb);
+      if(c){const tc=el('td','mono',c[r]);if(c[r]==='none')tc.className='mono bad';tr.appendChild(tc)}t.appendChild(tr)});
+    $('simconv').hidden=!(S.mode==='dynamic'&&S.conv>0)}
+  function send(dest){if(S.busy)return;S.busy=true;
+    let path,okUpTo=99,why;
+    if(dest==='B'){const b=hopsB();path=['A'];let r='R1';path.push(r);
+      while(r!=='R4'){r=b[r];path.push(r);if(path.length>8)break}path.push('B');
+      const i=path.indexOf('R2');if(S.cut&&i>=0&&path[i+1]==='R4'){okUpTo=i;why=S.mode==='static'?'Lost at R2. Its table still says "next hop R4", but that link is cut. Static routes never change by themselves.':'Lost at R2. The routers are still converging: R2 has not updated its table yet.'}}
+    else{const c=hopsC();if(c.R1==='none'){path=['A','R1','R3'];okUpTo=1;why=S.mode==='static'?'Lost at R1: there is no entry for LAN C in its table. Someone has to type the route into the routers.':'Lost at R1: the routers have not learned about LAN C yet.'}
+      else path=['A','R1','R3','R5','C']}
+    animate(g,path,okUpTo,ok=>{S.busy=false;if(ok){S.ok++;log('Delivered: '+path.filter(p=>p.startsWith('R')).join(' > ')+'.','good')}else{S.lost++;log(why,'bad')}count()})}
+  function converge(what){S.conv=1;tables();log('Converging: the routers are exchanging messages about the change. Packets sent now may be lost.','warn');
+    let n=0;const iv=setInterval(()=>{S.msgs+=3;count();if(++n>=8){clearInterval(iv);S.conv=0;if(what==='C')S.knowC=true;tables();
+      log(what==='C'?'Converged. Every router learned about LAN C by itself. Nobody typed anything.':'Converged. The routers found the path through R3 and R5 by themselves.','good')}},400)}
+  $('simstatic').onclick=()=>{S.mode='static';reset()};
+  $('simdyn').onclick=()=>{S.mode='dynamic';reset()};
+  $('simb').onclick=()=>send('B');$('simc').onclick=()=>send('C');
+  $('simcut').onclick=()=>{if(S.busy)return;S.cut=!S.cut;if(!S.cut){S.fixedB=false}draw();
+    if(S.cut){if(S.mode==='dynamic')converge('B');else log('Link cut. Nothing changes in the tables. Send a packet and see.','warn')}else log('Link repaired.')};
+  $('simadd').onclick=()=>{S.showC=true;draw();if(S.mode==='dynamic')converge('C');else log('LAN C plugged into R5. No other router knows it exists yet. Send a packet to LAN C.','warn')};
+  $('simfix').onclick=()=>{let e=0;if(S.cut&&!S.fixedB){S.fixedB=true;e+=2}if(S.showC&&!S.knowC){S.knowC=true;e+=4}
+    if(!e){log('Nothing to fix right now.');return}S.edits+=e;draw();log('The administrator logged in and typed '+e+' new routes by hand. Imagine doing this on 100 routers.','warn')};
+  // dynamic routing keeps chatting even when nothing changes
+  setInterval(()=>{if(S&&S.mode==='dynamic'&&document.querySelector('.slide.cur #simnet')){S.msgs++;count()}},1500);
+  reset();
+})();
+
+// ---------- pick cards and locked MCQ checks ----------
+const QUIZ={
+  r1:[ // you are R1
+    {q:'A packet arrives at R1. Destination: LAN B (library).',o:['Send to R2','Send to R3','Keep it','Send it back to LAN A'],a:0,e:'The table row for LAN B says next hop R2.'},
+    {q:'Destination: LAN C (new lab).',o:['Send to R2','Send to R3','Keep it','Drop it'],a:1,e:'The row for LAN C says next hop R3.'},
+    {q:'Destination: a website on the internet. No row matches it exactly.',o:['Drop it','Send to R2 (default route)','Send to R3','Send it back'],a:1,e:'"Anything else" is the default route: send to R2, toward the internet.'},
+    {q:'Two rows both reach LAN B: via R2 cost 2, via R3 cost 3. Which does R1 use?',o:['Via R2, lower cost','Via R3, higher cost','Both at random','Neither'],a:0,e:'Lower cost means a better route. Here cost = number of hops.'}],
+  c1:[
+    {q:'In static routing, who puts the routes into the routing table?',o:['A network administrator, by hand','The routers, by exchanging messages','The packets themselves','A DHCP server'],a:0,e:'Static routes are typed in by a person and stay fixed. Routers exchanging messages is dynamic routing.'},
+    {q:'What does a router read to decide where a packet goes next?',o:['The source address','The destination address','The size of the packet','The time it was sent'],a:1,e:'It reads the destination address in the header and looks it up in its routing table.'},
+    {q:'"Static routing does not use a routing table." True or false?',o:['True','False'],a:1,e:'False. Both use a routing table. The difference is who fills it in and whether it updates on its own.'},
+    {q:'In dynamic routing, how do routers learn their routes?',o:['An administrator types them in','They exchange routing information with their neighbors','They copy the packet header','They ask the DNS server'],a:1,e:'Each router tells its neighbors which networks it can reach, and at what cost.'},
+    {q:'A link fails in a network that uses static routing. What happens?',o:['Packets are rerouted automatically','Packets keep going to the broken link until someone rewrites the table','The routers converge','Every packet goes back to its source'],a:1,e:'Static routes never change by themselves. That is what you saw in the simulator.'},
+    {q:'The short time while dynamic routers agree on new routes after a change is called...',o:['Convergence','Configuration','Segmentation','Failover'],a:0,e:'Convergence. During it, tables can disagree and packets can be lost.'}],
+  c2:[
+    {q:'Which is an advantage of static routing?',o:['It adapts when a link fails','It uses very few router resources','It scales to huge networks','It needs no routing table'],a:1,e:'No protocol runs, so no processing, memory or bandwidth goes on routing updates.'},
+    {q:'Which is a disadvantage of dynamic routing compared with static?',o:['It uses more processing, memory and bandwidth','Every route must be typed by hand','It never reacts to changes','It cannot use a routing table'],a:0,e:'Running a protocol and exchanging updates costs resources that static routing avoids.'},
+    {q:'Why does static routing scale poorly?',o:['Its packets are larger','Every route is typed and maintained by hand, so the work grows with the network','It needs a faster internet connection','It converges too slowly'],a:1,e:'More routers means more routes to type, and more chances to make a mistake.'},
+    {q:'An online shop\'s web server must stay reachable even if a link fails. Best choice?',o:['Static routing','Dynamic routing'],a:1,e:'Dynamic routing reroutes around the failure by itself (fault tolerance).'},
+    {q:'A home office: one router, one internet connection, never changes. Best choice?',o:['Static routing','Dynamic routing'],a:0,e:'Small and stable: a few fixed routes, nothing to adapt to, no overhead.'},
+    {q:'Why can dynamic routing be a security risk?',o:['Routes are typed by hand','Routers accept route updates from neighbors, so a false update can redirect traffic','It has no routing table','It encrypts packets'],a:1,e:'Static routes do not accept updates, which removes this way of attacking the network.'}]};
+document.querySelectorAll('.quiz').forEach(qz=>{
+  const qs=QUIZ[qz.dataset.q];let score=0,n=0;const chip=el('span','chip','Score: 0 / '+qs.length);
+  if(!qz.classList.contains('nochip'))qz.parentElement.querySelector('h2').appendChild(chip);
+  qs.forEach((x,i)=>{const c=el('div','card qc');c.appendChild(el('h3','',(i+1)+'. '+x.q));const ctl=el('div','opts');const r=el('p','fwres');
+    x.o.forEach((o,k)=>{const b=el('button','',String.fromCharCode(65+k)+'. '+o);b.type='button';b.onclick=()=>{
+      if(c.dataset.done)return;c.dataset.done=1;n++;const ok=k===x.a;if(ok)score++;
+      b.classList.add(ok?'right':'wrong');ctl.children[x.a].classList.add('right');
+      r.textContent=(ok?'Correct. ':'The answer is '+String.fromCharCode(65+x.a)+'. ')+x.e;r.className='fwres '+(ok?'good':'bad');
+      chip.textContent='Score: '+score+' / '+qs.length;if(n===qs.length)chip.classList.add('fin')};ctl.appendChild(b)});
+    c.appendChild(ctl);c.appendChild(r);qz.appendChild(c)});
+});
+
+const slides=[...document.querySelectorAll('.slide')];let cur=0;
+function show(i){cur=Math.max(0,Math.min(slides.length-1,i));
+  slides.forEach((s,k)=>s.classList.toggle('cur',k===cur));
+  document.getElementById('pos').textContent='A2.3.4  '+(cur+1)+' / '+slides.length;
+  const n=slides[cur].querySelector('aside.tn');document.getElementById('ntext').textContent=n?n.textContent:'';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+}
+function board(){document.getElementById('bstate').textContent=document.body.classList.contains('board')?'(ON)':'(off)'}
+document.addEventListener('click',e=>{const r=e.target.closest('.reveal');if(r)r.classList.toggle('open')});
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT')return;
+  const k=e.key.toLowerCase();
+  if(e.key==='ArrowRight'||e.key==='PageDown'||e.key===' '){e.preventDefault();show(cur+1)}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(cur-1)}
+  else if(false){document.body.classList.toggle('board');board()}
+  else if(false){document.getElementById('notes').classList.toggle('show');document.body.classList.toggle('notes')}
+  else if(k==='r')slides[cur].querySelectorAll('.reveal').forEach(x=>x.classList.add('open'))
+  else if(k==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen()}
+});
+document.querySelectorAll('.timer').forEach(t=>{
+  const total=Number(t.dataset.min)*60;let left=total,iv=null;
+  t.innerHTML='<span class="clock"></span><button class="go">Start</button><button class="rs">Reset</button>';
+  const c=t.querySelector('.clock'),go=t.querySelector('.go');
+  const paint=()=>{c.textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');c.classList.toggle('out',left===0)};
+  const stop=()=>{clearInterval(iv);iv=null;go.textContent='Start'};
+  go.onclick=()=>{if(iv){stop();return}if(left===0)left=total;go.textContent='Pause';
+    iv=setInterval(()=>{left=Math.max(0,left-1);paint();if(left===0)stop()},1000)};
+  t.querySelector('.rs').onclick=()=>{stop();left=total;paint()};
+  paint();
+});
+board();show((parseInt(location.hash.slice(1))||1)-1);
+
+</script>
+</body>
+</html>
