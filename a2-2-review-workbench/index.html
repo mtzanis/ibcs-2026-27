@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2.2 Review Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+  :root{
+    color-scheme:light;
+    --paper:#F4F6F9; --card:#FFFFFF; --ink:#1B2A3A; --muted:#5B6B7E;
+    --blue:#2B5CAD; --blue-deep:#1E3F76; --blue-wash:#E3EAF6;
+    --amber:#B97A14; --amber-wash:#F7EDD9;
+    --good:#2F7D52; --good-wash:#E1F0E7; --bad:#B54434; --bad-wash:#F6E4E0;
+    --line:#C6D2E0;
+    --display:"Bricolage Grotesque",Verdana,sans-serif;
+    --body:"Atkinson Hyperlegible","Trebuchet MS",sans-serif;
+    --mono:"IBM Plex Mono","Courier New",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-bottom:5rem}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  .wrap{max-width:60rem;margin:0 auto;padding:0 1.2rem}
+  header{background:var(--blue-deep);color:#EEF3FB;padding:1.6rem 0 1.3rem}
+  header h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.6vw,2.4rem);line-height:1.08;margin-bottom:.4rem}
+  header p{max-width:60ch;opacity:.92}
+  .kicker{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#F0C878;margin-bottom:.4rem}
+
+  .bar{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1.5px solid var(--line);padding:.55rem 0}
+  .bar .wrap{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .chip{font-family:var(--mono);font-size:.8rem;background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:.3rem .7rem}
+  .chip b{color:var(--blue-deep)}
+  .lvl button{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:.3rem .8rem;margin-right:.3rem;font-family:var(--mono);font-size:.78rem}
+  .lvl button.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+  .bar .right{margin-left:auto;display:flex;gap:.4rem}
+  .bar .right button{background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:.3rem .7rem;font-size:.85rem}
+
+  section{margin-top:2.2rem}
+  h2{font-family:var(--display);font-weight:800;font-size:clamp(1.3rem,2.6vw,1.8rem);margin-bottom:.3rem}
+  h2 .n{font-family:var(--mono);font-size:.8rem;letter-spacing:.12em;color:var(--amber);display:block;margin-bottom:.2rem}
+  .lead{color:var(--muted);margin-bottom:1rem;max-width:70ch}
+  .howto{background:var(--amber-wash);border:1.5px solid var(--amber);border-radius:8px;padding:.9rem 1.1rem;margin:.8rem 0 1.2rem}
+  .howto ol{padding-left:1.2rem}
+  .howto li{margin-bottom:.25rem}
+
+  .q{background:var(--card);border:1.5px solid var(--line);border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.8rem}
+  .qh{font-weight:700;margin-bottom:.55rem}
+  .tag{font-family:var(--mono);font-size:.68rem;letter-spacing:.1em;background:var(--blue-wash);color:var(--blue-deep);border-radius:999px;padding:.1rem .5rem;margin-right:.35rem}
+  .marks{font-family:var(--mono);font-size:.8rem;color:var(--amber)}
+  .opts{display:flex;flex-wrap:wrap;gap:.4rem}
+  .opts button{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:.32rem .75rem;text-align:left}
+  .opts button:hover{border-color:var(--blue)}
+  .q.answered .opts button{pointer-events:none}
+  .q.answered .opts button.faded{opacity:.45}
+  .opts button.right{background:var(--good-wash);border-color:var(--good);color:var(--good);font-weight:700}
+  .opts button.wrong{background:var(--bad-wash);border-color:var(--bad);color:var(--bad)}
+  .why{display:none;margin-top:.5rem;font-size:.92em;color:var(--muted);border-left:3px solid var(--blue);padding-left:.7rem}
+  .q.answered .why{display:block}
+
+  textarea{width:100%;min-height:6.5rem;font-family:var(--body);font-size:.97em;line-height:1.5;padding:.6rem .8rem;border:1.5px solid var(--line);border-left:4px solid var(--blue);border-radius:6px;background:var(--paper);color:var(--ink);resize:vertical}
+  textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-wash)}
+  textarea[readonly]{background:#F8FAFC;color:var(--muted)}
+  .row{display:flex;gap:.7rem;align-items:center;flex-wrap:wrap;margin-top:.5rem}
+  .submit{background:var(--blue);color:#fff;border:none;border-radius:6px;padding:.45rem 1rem;font-weight:700}
+  .submit:disabled{background:var(--good-wash);color:var(--good);font-weight:700}
+  .hint{font-size:.82em;color:var(--muted)}
+  .hint.warn{color:var(--bad);font-weight:700}
+  .ms{display:none;margin-top:.8rem;border-top:1.5px dashed var(--line);padding-top:.7rem}
+  .q.shown .ms{display:block}
+  .mst{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin-bottom:.35rem}
+  .ms ul{padding-left:1.1rem;margin-bottom:.5rem}
+  .ms li{margin-bottom:.2rem}
+  .fullans{background:var(--good-wash);border-radius:6px;padding:.5rem .7rem;margin-bottom:.5rem;font-size:.95em}
+  .note{background:var(--bad-wash);border-radius:6px;padding:.5rem .7rem;font-size:.9em;margin-bottom:.6rem}
+  .selfmark{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;font-size:.92em}
+  .mk{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;width:2.1rem;height:2.1rem;font-family:var(--mono)}
+  .mk.on{background:var(--blue-deep);color:#fff;border-color:var(--blue-deep)}
+  .of{font-family:var(--mono);color:var(--muted)}
+  .src{font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:.5rem}
+
+  table.dt{border-collapse:collapse;width:100%;background:var(--card);font-size:.92em}
+  table.dt th,table.dt td{border:1px solid var(--line);padding:.45rem .7rem;text-align:left}
+  table.dt th{background:var(--blue-wash);color:var(--blue-deep)}
+  td.num{font-family:var(--mono);white-space:nowrap}
+  tr.good td:first-child{border-left:4px solid var(--good)}
+  tr.ok td:first-child{border-left:4px solid var(--amber)}
+  tr.weak td:first-child{border-left:4px solid var(--bad)}
+  .muted{color:var(--muted)}
+  .foot{margin-top:2rem;border-top:1px solid var(--line);padding-top:1rem;font-size:.9em;color:var(--muted)}
+  #hlnote{background:var(--blue-wash);border:1.5px solid var(--blue);border-radius:8px;padding:.8rem 1rem}
+  @media print{
+    .bar,.howto,#printbtn,#resetbtn,header p{display:none}
+    body{background:#fff;font-size:11pt}
+    .q{break-inside:avoid;border-color:#999}
+    textarea{min-height:0;height:auto;border:none;padding:0;background:#fff;color:#000}
+  }
+  .teach{background:var(--card);border:1.5px solid var(--line);border-left:5px solid var(--amber);border-radius:8px;padding:1rem 1.2rem;margin-bottom:1rem}
+  .teach h3{font-family:var(--display);font-size:1.1rem;color:var(--blue-deep);margin:.2rem 0 .5rem}
+  .teach h3+p,.teach p{margin-bottom:.5rem}
+  .teach ul{padding-left:1.2rem;margin-bottom:.5rem}
+  .teach li{margin-bottom:.3rem}
+  .teach code{font-family:var(--mono);background:var(--blue-wash);padding:.05rem .3rem;border-radius:4px;font-size:.92em}
+  .teach table.dt{margin:.5rem 0}
+  .teach.scen{border-left-color:var(--blue)}
+  .bits{display:flex;gap:.3rem;margin:.4rem 0 .6rem}
+  .bits span{font-family:var(--mono);background:var(--blue-deep);color:#fff;border-radius:5px;padding:.25rem 0;width:3.2rem;text-align:center;font-weight:600}
+  .stepper .step{display:none;background:var(--paper);border-radius:6px;padding:.6rem .8rem;margin-bottom:.4rem;border-left:3px solid var(--blue)}
+  .stepper .step.on{display:block}
+  .explorer input[type=range]{width:min(100%,24rem);accent-color:var(--blue)}
+  .lab input.ans{font-family:var(--mono);font-size:1em;padding:.4rem .6rem;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);min-width:14rem}
+  .lab input.ans:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-wash)}
+  .lab input.ans.right{background:var(--good-wash);border-color:var(--good);color:var(--good);font-weight:600}
+  .lab input.ans.wrong{background:var(--bad-wash);border-color:var(--bad);color:var(--bad)}
+  .lab .lbl{font-family:var(--mono);font-size:.85rem;color:var(--muted);min-width:9rem}
+  .q.lab.answered .why{display:block}
+  @media print{.teach,.explorer,#stepper{display:none}.q.lab input.ans{border:none;background:#fff}}
+  .diagrams{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.7rem;margin:.6rem 0 .8rem}
+  .diagrams figure{margin:0;background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:.6rem}
+  .diagrams svg{width:100%;height:auto;display:block}
+  .diagrams figcaption{font-size:.88em;color:var(--muted);margin-top:.3rem}
+  .diagrams figcaption b{color:var(--ink)}
+  .nd{fill:#fff;stroke:var(--ink);stroke-width:1.5}
+  .sw{fill:var(--blue-wash);stroke:var(--blue);stroke-width:2}
+  .ln{stroke:var(--muted);stroke-width:1.5}
+  .bb{stroke:var(--blue);stroke-width:2.6}
+  .svgt{fill:var(--blue-deep);font:600 10px "IBM Plex Mono",monospace}
+  .hltag{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;background:var(--amber-wash);color:var(--amber);border:1px solid var(--amber);border-radius:4px;padding:.05rem .45rem;vertical-align:middle;margin-left:.4rem}
+  body.sl .hlonly{display:none}
+  .slnote{display:none}
+  body.sl .slnote{display:block}
+  .lvlrow{display:flex;align-items:center;gap:.5rem}
+  .lvlrow .lbl{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+  .plan{border-collapse:collapse;width:100%;background:var(--card);font-size:.92em;margin:.6rem 0}
+  .plan th,.plan td{border:1px solid var(--line);padding:.4rem .65rem;text-align:left;vertical-align:top}
+  .plan th{background:var(--blue-wash);color:var(--blue-deep)}
+  .teach{overflow-x:auto}
+  @media (max-width:480px){table.dt{font-size:.85em}table.dt th,table.dt td{padding:.35rem .45rem}}
+  @media print{.diagrams{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="kicker">IB DP Computer Science · Y2 · A2.2 · Test on Fri 20 Nov · SL + HL</p>
+    <h1>A2.2 Review Workbench: topologies, servers, models and segmentation</h1>
+    <p>Everything in A2.2 in one place, to get you ready for Friday's test. Read each card, answer the quick questions (the page checks them), then write the longer answers and mark yourself against the markscheme. Nothing is sent anywhere: your answers stay in this browser.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <span class="lvlrow"><span class="lbl">Level</span><span class="lvl"><button data-l="sl">SL</button><button data-l="hl">HL</button></span></span>
+    <span class="chip">Checked by the page: <b id="autoscore">0 / 0</b></span>
+    <span class="chip">Marked by you: <b id="writtenscore">0 / 0</b></span>
+    <span class="chip" id="clockchip">Timer: <b id="clock">00:00</b></span>
+    <span class="right"><button id="printbtn">Print / save as PDF</button><button id="resetbtn">Start over</button></span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <section>
+    <h2><span class="n">How this works</span>Five parts, then a mini test</h2>
+    <div class="howto">
+      <p style="margin-bottom:.4rem"><b>First, click SL or HL in the bar above.</b> SL hides the HL-only part (A2.2.2 Servers) and leaves it out of your scores.</p>
+      <ol>
+        <li><b>Part 1, topologies (A2.2.1).</b> One card, four quick questions, two written answers.</li>
+        <li class="hlonly"><b>Part 2, servers (A2.2.2, HL only).</b> One card, four quick questions, two written answers.</li>
+        <li><b>Part 3, network models (A2.2.3).</b> One card, three quick questions, two written answers.</li>
+        <li><b>Part 4, segmentation (A2.2.4).</b> A recap card, three quick questions, two written answers.</li>
+        <li><b>Part 5, mini test.</b> One scenario, timed, like the real test. Do it last, without looking back at the cards.</li>
+      </ol>
+      <table class="plan">
+        <tr><th></th><th>When</th><th>Aim for</th></tr>
+        <tr><td><b>SL</b></td><td>On your own, before Friday</td><td>Parts 1, 3, 4 and 5: about 60 minutes. Two short sittings work better than one long one.</td></tr>
+        <tr><td><b>HL</b></td><td>Wednesday's lesson, then finish at home</td><td>Parts 1 to 4 in class, Part 5 at home: about 80 minutes in total.</td></tr>
+      </table>
+      <p><b>Rules:</b> read the card before the questions. Write your own answer before you look at the markscheme. Once you submit a written answer you cannot edit it, and that is the point: it shows you what you really know.</p>
+    </div>
+  </section>
+
+  <!-- ================= PART 1 ================= -->
+  <section>
+    <h2><span class="n">Part 1 · A2.2.1</span>Network topologies</h2>
+    <div class="teach">
+      <h3>The shape of a network</h3>
+      <p>A <b>topology</b> is the layout of how the devices (nodes) in a network are connected. It decides what happens when a link fails, how much cabling is needed and how easy the network is to grow.</p>
+      <div class="diagrams">
+        <figure>
+          <svg viewBox="0 0 200 150" role="img" aria-label="Star topology: five nodes each linked to one central switch">
+            <line class="ln" x1="100" y1="75" x2="100" y2="20"/><line class="ln" x1="100" y1="75" x2="35" y2="50"/><line class="ln" x1="100" y1="75" x2="165" y2="50"/><line class="ln" x1="100" y1="75" x2="55" y2="125"/><line class="ln" x1="100" y1="75" x2="145" y2="125"/>
+            <circle class="nd" cx="100" cy="20" r="10"/><circle class="nd" cx="35" cy="50" r="10"/><circle class="nd" cx="165" cy="50" r="10"/><circle class="nd" cx="55" cy="125" r="10"/><circle class="nd" cx="145" cy="125" r="10"/>
+            <rect class="sw" x="84" y="63" width="32" height="24" rx="4"/><text class="svgt" x="100" y="79" text-anchor="middle">SW</text>
+          </svg>
+          <figcaption><b>Star.</b> Every node has its own link to a central switch.</figcaption>
+        </figure>
+        <figure>
+          <svg viewBox="0 0 200 150" role="img" aria-label="Full mesh topology: five nodes, each linked to every other node, ten links">
+            <g class="ln"><line x1="100" y1="20" x2="35" y2="60"/><line x1="100" y1="20" x2="165" y2="60"/><line x1="100" y1="20" x2="60" y2="130"/><line x1="100" y1="20" x2="140" y2="130"/><line x1="35" y1="60" x2="165" y2="60"/><line x1="35" y1="60" x2="60" y2="130"/><line x1="35" y1="60" x2="140" y2="130"/><line x1="165" y1="60" x2="60" y2="130"/><line x1="165" y1="60" x2="140" y2="130"/><line x1="60" y1="130" x2="140" y2="130"/></g>
+            <circle class="nd" cx="100" cy="20" r="10"/><circle class="nd" cx="35" cy="60" r="10"/><circle class="nd" cx="165" cy="60" r="10"/><circle class="nd" cx="60" cy="130" r="10"/><circle class="nd" cx="140" cy="130" r="10"/>
+          </svg>
+          <figcaption><b>Full mesh.</b> Every node links to every other node: 5 nodes, 10 links.</figcaption>
+        </figure>
+        <figure>
+          <svg viewBox="0 0 200 150" role="img" aria-label="Hybrid topology: three star networks whose switches are joined in a mesh backbone">
+            <line class="bb" x1="100" y1="35" x2="40" y2="105"/><line class="bb" x1="100" y1="35" x2="160" y2="105"/><line class="bb" x1="40" y1="105" x2="160" y2="105"/>
+            <g class="ln"><line x1="100" y1="35" x2="70" y2="12"/><line x1="100" y1="35" x2="130" y2="12"/><line x1="40" y1="105" x2="12" y2="85"/><line x1="40" y1="105" x2="20" y2="138"/><line x1="160" y1="105" x2="188" y2="85"/><line x1="160" y1="105" x2="180" y2="138"/></g>
+            <circle class="nd" cx="70" cy="12" r="7"/><circle class="nd" cx="130" cy="12" r="7"/><circle class="nd" cx="12" cy="85" r="7"/><circle class="nd" cx="20" cy="138" r="7"/><circle class="nd" cx="188" cy="85" r="7"/><circle class="nd" cx="180" cy="138" r="7"/>
+            <rect class="sw" x="88" y="26" width="24" height="18" rx="3"/><rect class="sw" x="28" y="96" width="24" height="18" rx="3"/><rect class="sw" x="148" y="96" width="24" height="18" rx="3"/>
+          </svg>
+          <figcaption><b>Hybrid.</b> A star in each area, the switches joined by a mesh backbone (blue).</figcaption>
+        </figure>
+      </div>
+      <table class="dt">
+        <tr><th>Topology</th><th>Strengths</th><th>Weaknesses</th><th>Typical use</th></tr>
+        <tr><td><b>Star</b></td><td>Easy to add or remove a node. A broken cable affects only one node. Faults are easy to find.</td><td>The central switch is a <b>single point of failure</b>. Needs a cable from every node to the centre.</td><td>Most office and school LANs</td></tr>
+        <tr><td><b>Mesh</b></td><td>Several routes between nodes, so <b>no single point of failure</b>. Traffic can be spread across paths.</td><td>A full mesh of n nodes needs <code>n(n−1)/2</code> links, so cost and complexity grow fast.</td><td>Internet backbone, links between core routers, wireless mesh</td></tr>
+        <tr><td><b>Hybrid</b></td><td>Each part uses the topology that suits it, balancing cost against reliability.</td><td>More complex to design, document and manage.</td><td>Campuses, hospitals, large organizations</td></tr>
+      </table>
+      <p class="muted">A <b>partial mesh</b> links only some nodes to several others. It keeps most of the reliability of a full mesh at much lower cost, which is what real backbones use.</p>
+    </div>
+    <p class="lead">Four quick checks. Give yourself the reason before you click.</p>
+    <div id="mcq1"></div>
+    <div id="written1"></div>
+  </section>
+
+  <!-- ================= PART 2 (HL) ================= -->
+  <section>
+    <h2><span class="n">Part 2 · A2.2.2</span>Servers <span class="hltag">HL ONLY</span></h2>
+    <p class="slnote lead">You chose SL, so this part is hidden. Click HL in the bar if you want to see it.</p>
+    <div class="hlonly">
+      <div class="teach">
+        <h3>Which server does which job?</h3>
+        <p>A <b>server</b> is a computer, or a program on one, that provides a service to clients when they ask for it. One physical machine can run several server roles.</p>
+        <table class="dt">
+          <tr><th>Server</th><th>What it does</th><th>Example</th></tr>
+          <tr><td><b>DNS</b></td><td>Translates domain names into IP addresses. If it doesn't know an address, it asks other DNS servers, then caches the answer.</td><td><code>bbc.co.uk</code> → <code>151.101.0.81</code></td></tr>
+          <tr><td><b>DHCP</b></td><td>Gives each device an IP address automatically when it joins, plus the subnet mask, default gateway and DNS server. Addresses are leased for a set time, then reused.</td><td>Your laptop joins the school Wi-Fi and gets <code>10.20.4.57</code></td></tr>
+          <tr><td><b>Web</b></td><td>Stores web pages and sends them to browsers that request them, using HTTP or HTTPS.</td><td>The school website</td></tr>
+          <tr><td><b>File</b></td><td>Stores files centrally so users can share them. Access rights and backups are managed in one place.</td><td>Shared drive for department resources</td></tr>
+          <tr><td><b>Mail</b></td><td>Stores users' email and passes outgoing messages on to other mail servers.</td><td>Staff and student email</td></tr>
+          <tr><td><b>Proxy</b></td><td>Sits between users and the internet. Forwards requests, filters blocked sites, caches popular pages and hides internal addresses.</td><td>The school web filter</td></tr>
+        </table>
+        <p class="muted" style="margin-top:.5rem">Link to A2.4: a server that everyone depends on (DNS, DHCP, the web server) is also a target. Knock it offline and the whole network stops working.</p>
+      </div>
+      <p class="lead">Four quick checks: which server does this job?</p>
+      <div id="mcq2"></div>
+      <div id="written2"></div>
+    </div>
+  </section>
+
+  <!-- ================= PART 3 ================= -->
+  <section>
+    <h2><span class="n">Part 3 · A2.2.3</span>Network models</h2>
+    <div class="teach">
+      <h3>Client–server or peer-to-peer?</h3>
+      <p>A network model describes how devices share work and resources. In <b>client–server</b>, dedicated servers provide services and clients request them. In <b>peer-to-peer (P2P)</b>, every device has equal status and can act as both a client and a server.</p>
+      <table class="dt">
+        <tr><th></th><th>Client–server</th><th>Peer-to-peer</th></tr>
+        <tr><td><b>Control</b></td><td>Central: accounts, access rights and updates in one place</td><td>Each user manages their own device and what it shares</td></tr>
+        <tr><td><b>Security</b></td><td>Easier to enforce and audit</td><td>Only as good as the weakest peer</td></tr>
+        <tr><td><b>Backups</b></td><td>Done centrally, on the server</td><td>Each peer backs up its own files, or nobody does</td></tr>
+        <tr><td><b>Cost</b></td><td>Higher: server hardware, software, technical staff</td><td>Low: uses existing computers, quick to set up</td></tr>
+        <tr><td><b>Scalability</b></td><td>Grows by upgrading or adding servers</td><td>Hard to manage as peers increase (but large P2P apps share the load well)</td></tr>
+        <tr><td><b>If one machine fails</b></td><td>Server down: every client loses that service</td><td>Only that peer's resources are lost</td></tr>
+        <tr><td><b>Examples</b></td><td>School network, email, websites, online banking</td><td>Small home networks, BitTorrent, blockchain</td></tr>
+      </table>
+      <p class="muted" style="margin-top:.5rem">Both models share files and resources over a network and use the same hardware and protocols. You need those similarities for a "compare and contrast" question.</p>
+    </div>
+    <p class="lead">Three quick checks, then two written answers.</p>
+    <div id="mcq3"></div>
+    <div id="written3"></div>
+  </section>
+
+  <!-- ================= PART 4 ================= -->
+  <section>
+    <h2><span class="n">Part 4 · A2.2.4</span>Segmentation, recap</h2>
+    <div class="teach">
+      <h3>Walls inside the network</h3>
+      <p>You covered this in the <a href="../a2-2-4-segmentation-workbench/">A2.2.4 Segmentation Workbench</a>; go back to it if anything here feels new. The short version:</p>
+      <ul>
+        <li><b>Segmentation</b> divides one network into smaller, separate segments. Traffic stays inside its segment; anything crossing between segments goes through a router, Layer 3 switch or firewall, where it can be checked or blocked.</li>
+        <li><b>Subnetting</b> divides the network by IP address range. Each subnet is its own broadcast domain, and routers do not forward broadcasts. You need what it is for, not how to calculate it.</li>
+        <li><b>VLANs</b> group switch ports into separate logical LANs by function, wherever the devices physically are. One managed switch can carry several VLANs.</li>
+        <li>Two benefits, always: <b>performance</b> (smaller broadcast domains, less congestion) and <b>security</b> (a breach is contained; no lateral movement). Plus <b>management</b>: rules per group, faults contained.</li>
+      </ul>
+    </div>
+    <p class="lead">Three quick checks, then two written answers.</p>
+    <div id="mcq4"></div>
+    <div id="written4"></div>
+  </section>
+
+  <!-- ================= PART 5 ================= -->
+  <section>
+    <h2><span class="n">Part 5 · Mini test</span>Scenario: Northpoint Hotel</h2>
+    <div class="teach scen">
+      <p>Northpoint Hotel has four floors. It has:</p>
+      <ul>
+        <li><b>25 staff PCs</b> at reception and in the offices, connected by cable to a switch on each floor.</li>
+        <li><b>A booking system</b> on a server in the basement, used by reception, the hotel website and the cleaning team's tablets.</li>
+        <li><b>Guest Wi-Fi</b> for up to 300 guest devices.</li>
+        <li><b>Smart door locks</b> on all 120 rooms, which are currently on the same network as the guest Wi-Fi.</li>
+      </ul>
+    </div>
+    <p class="lead">Set the timer going and stop at about <b>12 minutes (SL, 9 marks)</b> or <b>17 minutes (HL, 13 marks)</b>: that is the real test's pace of about 1.3 minutes per mark. No looking back at the cards.</p>
+    <div id="scen"></div>
+  </section>
+
+  <section>
+    <h2><span class="n">Your diagnosis</span>What to go back to before Friday</h2>
+    <p class="lead">Built from the page's checks and the marks you gave yourself. Anything under 60% is the card to read again.</p>
+    <div id="diag"></div>
+    <div class="howto" style="margin-top:1rem">
+      <p><b>Before Friday's test:</b></p>
+      <ol>
+        <li>Reread the card for any part under 60%, then redo its quick questions in your head.</li>
+        <li>Learn the command terms: <b>state/identify</b> = a short fact; <b>outline</b> = a point plus a little development; <b>explain</b> = what happens <i>and why</i> ("so", "because"); <b>compare and contrast</b> = similarities <i>and</i> differences; <b>justify</b> = a choice plus reasons tied to the scenario.</li>
+        <li>In scenario questions, name the scenario in your answer. Generic answers lose the last mark.</li>
+      </ol>
+    </div>
+    <p class="foot">Nothing you type here leaves your laptop; it is saved in this browser only. If the page is reloaded your answers are still here. "Start over" wipes them.</p>
+  </section>
+
+</div>
+
+<script>
+/* ---------- Quick questions (auto-marked) ---------- */
+const MCQ1 = [
+  {t:"Topologies", q:"A cable to one computer in a star network is cut. What happens?", o:["The whole network stops","Only that computer loses its connection","Traffic is rerouted along another cable","Half the network stops"], a:1, why:"Each node has its own link to the switch, so a broken cable cuts off only that node. Only the switch failing stops everything."},
+  {t:"Topologies", q:"In a mesh topology, why does one broken cable not cut a device off?", o:["Mesh cables cannot break","There is more than one path between devices, so traffic goes another way","The switch repairs the link","Every device has a backup battery"], a:1, why:"Redundant paths: that is the whole point of a mesh, and why it has no single point of failure."},
+  {t:"Topologies", q:"How many links does a full mesh of 6 nodes need?", o:["6","12","15","36"], a:2, why:"n(n−1)/2 = 6 × 5 / 2 = 15. That fast growth is the main disadvantage of a full mesh."},
+  {t:"Topologies", q:"A university joins the star networks in each of its buildings with several links between buildings. This is…", o:["a star topology","a full mesh topology","a hybrid topology","a peer-to-peer model"], a:2, why:"Stars inside each building plus a mesh between them: two topologies combined, so hybrid."}
+];
+const MCQ2 = [
+  {t:"Servers", hl:1, q:"A new phone joins the school Wi-Fi and is given an IP address automatically. Which server did this?", o:["DNS server","DHCP server","Proxy server","Web server"], a:1, why:"DHCP hands out IP addresses (and the gateway and DNS settings) automatically, on a lease."},
+  {t:"Servers", hl:1, q:"You type www.ibo.org and the browser needs to know which IP address to contact. Which server answers?", o:["DNS server","DHCP server","Mail server","File server"], a:0, why:"DNS translates domain names into IP addresses."},
+  {t:"Servers", hl:1, q:"Which server can reduce a school's internet bandwidth by keeping copies of popular web pages?", o:["Mail server","DHCP server","Proxy server","File server"], a:2, why:"A proxy caches pages: the second request is served from the cache instead of the internet. It also filters blocked sites."},
+  {t:"Servers", hl:1, q:"An attacker wants to stop the whole school working at once. Knocking which server offline would do most damage?", o:["The printer","One student laptop","The DNS server","A projector"], a:2, why:"Without DNS, no names resolve, so nothing loads. DHCP is another good answer: new devices get no address. A server everyone depends on is a target."}
+];
+const MCQ3 = [
+  {t:"Models", q:"In which model can every device act as both a client and a server?", o:["Client–server","Peer-to-peer","Star","VLAN"], a:1, why:"P2P: all peers are equal, and each can request and provide resources."},
+  {t:"Models", q:"Which is the strongest reason for a hospital to use a client–server model?", o:["It is cheaper to set up","Patient records can be secured, controlled and backed up centrally","Every computer is equal","It needs no cables"], a:1, why:"Central control of security and backups. Cost is a reason for P2P, not against it."},
+  {t:"Models", q:"Which is a SIMILARITY between client–server and peer-to-peer networks?", o:["Both have a central server","Both let devices share files and resources over a network","Both are managed by one administrator","Neither needs any security"], a:1, why:"Compare and contrast questions need similarities too. Both share resources, using the same hardware and protocols."}
+];
+const MCQ4 = [
+  {t:"Segmentation", q:"Staff and student devices plug into the same switch but must be on separate networks. The most cost-effective solution is…", o:["Buy a second switch","Use a mesh topology","Configure VLANs on the switch","Use peer-to-peer"], a:2, why:"VLANs separate devices logically, on the same hardware: a setting, not new equipment."},
+  {t:"Segmentation", q:"How does segmentation improve performance?", o:["Data is encrypted","Broadcast traffic stays within each segment, so there is less congestion","Cables get faster","More IP addresses become available"], a:1, why:"Smaller broadcast domains. Never give only the security reason: performance is half the point."},
+  {t:"Segmentation", q:"Two devices are in different subnets. To communicate, their traffic must…", o:["go through a router, where it can be filtered","use the same host part","go through a proxy server","be sent as a broadcast"], a:0, why:"Crossing between subnets always goes through a router or Layer 3 switch, and that is where firewall rules sit."}
+];
+
+/* ---------- Written items (self-marked) ---------- */
+const WRITTEN1 = [
+  {t:"Topologies", id:"w1a", marks:3, q:"A full mesh network has 8 nodes. <b>Calculate</b> the number of links needed and <b>outline</b> why this is a problem as the network grows. [3]",
+   ms:["8 × 7 / 2 = 28 links;","the number of links grows roughly with the square of the number of nodes;","so each new node needs a link to every existing node: cabling, ports and cost rise quickly / it becomes hard to manage;"],
+   full:"8 × 7 / 2 = 28 links. Each new node has to be linked to every node already in the network, so the number of links grows much faster than the number of nodes, which makes a large full mesh expensive in cabling and ports and complex to manage.",
+   note:"The calculation is one mark; the other two need the reason it gets worse, not just 'it is expensive'.", src:"A2.2.1 practice"},
+  {t:"Topologies", id:"w1b", marks:3, q:"A bank links its three data centres so that each one connects directly to the other two. <b>Explain</b> why the bank chose this design instead of linking all three through one central site. [3]",
+   ms:["The design is a (full) mesh between the data centres;","if one link or one data centre fails, the other two can still reach each other directly / traffic is rerouted;","a central site would be a single point of failure, and a bank cannot afford downtime for payments and accounts;"],
+   full:"Linking each data centre to the other two makes a mesh, so there is more than one route between any two sites. If a link fails, traffic takes the other route, and if one data centre goes down the other two keep working. Routing everything through a central site would make that site a single point of failure, which a bank cannot accept because payments and accounts must always be available.",
+   note:"'Mesh is more reliable' alone is one mark. Full marks need the mechanism (other route) and the link to the bank.", src:"A2.2.1 practice"}
+];
+const WRITTEN2 = [
+  {t:"Servers", hl:1, id:"w2a", marks:2, q:"<b>Outline</b> the function of a web server. [2]",
+   ms:["Stores web pages / websites and their resources (images, scripts);","responds to requests from browsers by sending the requested pages, using HTTP or HTTPS;"],
+   full:"A web server stores the pages and files that make up a website, and when a browser requests a page it sends that page back to the browser using HTTP or HTTPS.",
+   note:"Two marks: what it holds, and what it does when asked.", src:"A2.2.2 practice"},
+  {t:"Servers", hl:1, id:"w2b", marks:4, q:"A school keeps all coursework on students' own laptops. <b>Explain</b> two benefits of moving it to a file server. [4]",
+   ms:["Files are backed up centrally; so coursework is not lost if a laptop breaks or is stolen;","access rights are set centrally; so teachers can read students' work but students cannot see each other's;","files can be opened from any school computer; so students are not tied to one device;","[1] for each benefit and [1] for its development, [4 max]"],
+   full:"First, the file server is backed up centrally every night, so a student's coursework is safe even if their laptop is lost or breaks the day before a deadline. Second, the technician sets access rights in one place, so teachers can open every student's work while each student can only see their own.",
+   note:"'Explain two' = two separate benefits, each with a 'so…'. Two benefits with no development cap at 2.", src:"A2.2.2 practice"}
+];
+const WRITTEN3 = [
+  {t:"Models", id:"w3a", marks:4, q:"<b>Outline</b> two disadvantages of using a peer-to-peer network in a school with 1,000 students. [4]",
+   ms:["No central control of security; so it is hard to stop students accessing files they should not;","no central backup; so work on one student's computer is lost if that computer fails;","files are spread across many machines; so they are hard to find, and unavailable when the owner's computer is off;","[1] for each disadvantage and [1] for its development, [4 max]"],
+   full:"With no server, there is no central control of security, so the school cannot stop a student opening files shared from another student's laptop. There is also no central backup, so if a student's laptop fails, everything stored on it is lost.",
+   note:"Tie each point to the size of the school: with 1,000 users, 'each user manages their own device' is the problem.", src:"A2.2.3 practice"},
+  {t:"Models", id:"w3b", marks:4, q:"<b>Compare and contrast</b> the client–server and peer-to-peer models in terms of security and cost. [4]",
+   ms:["Similarity: both let devices share files and resources over a network;","client–server security is managed centrally (accounts, access rights, backups) while in P2P each user secures their own device;","so client–server is easier to keep secure / P2P is only as secure as its weakest peer;","client–server costs more (server hardware, software, technical staff) while P2P uses existing computers and is cheap to set up;","[1] per valid point, max [3] if there are no similarities"],
+   full:"Both models let devices share files and resources over a network. In client–server, security is managed centrally on the server, with accounts, access rights and backups in one place, whereas in peer-to-peer each user secures their own device, so the network is only as secure as its weakest peer. Client–server costs more, because it needs server hardware, software and staff to run it, while peer-to-peer uses the computers you already have and is cheap and quick to set up.",
+   note:"Use 'whereas' or 'while' to set the two sides side by side. No similarity at all caps the answer at 3.", src:"A2.2.3 practice"}
+];
+const WRITTEN4 = [
+  {t:"Segmentation", id:"w4a", marks:2, q:"<b>Distinguish</b> between physical segmentation and a VLAN. [2]",
+   ms:["Physical segmentation uses separate hardware (switches, cables) for each segment;","a VLAN separates devices logically, in the switch settings, so segments can share the same hardware;"],
+   full:"Physical segmentation gives each segment its own switches and cabling, whereas a VLAN separates devices logically in the configuration of a managed switch, so several segments can share the same hardware.",
+   note:"'Distinguish' needs both sides. A good answer is one sentence with 'whereas'.", src:"A2.2.4 practice"},
+  {t:"Segmentation", id:"w4b", marks:3, q:"A company's staff PCs and its smart thermostats are on the same network. <b>Explain</b> why the thermostats should be on their own segment. [3]",
+   ms:["Smart devices often have weak security (default passwords, rarely updated);","if an attacker takes control of a thermostat on the same network, they can reach the staff PCs and company data (lateral movement);","on a separate segment, the router or firewall between segments blocks traffic from the thermostats to the staff network, so an attack is contained;"],
+   full:"Smart thermostats often run with default passwords and are rarely updated, so they are easy to compromise. On the same network, a hacked thermostat could be used to reach the staff PCs and the company's data. If the thermostats are on their own segment, any traffic from them to the staff network must pass through the firewall, which blocks it, so an attack stays contained.",
+   note:"Three ideas: why the device is weak, what it could reach, and what stops it. Name the checkpoint.", src:"A2.2.4 practice"}
+];
+
+/* ---------- Mini test (self-marked) ---------- */
+const SCEN = [
+  {t:"Mini test", id:"s1", marks:2, q:"<b>Outline</b> why a star topology is suitable for the staff PCs on each floor. [2]",
+   ms:["Each PC has its own cable to the floor switch;","so a faulty cable or PC affects only that PC / PCs are easy to add, move or troubleshoot;"],
+   full:"Each staff PC has its own cable to the switch on its floor, so if one cable or PC fails, only that PC is affected and the rest of reception keeps working. New PCs can be added by plugging them into the switch.",
+   note:"A point plus its consequence. Link it to the hotel: reception cannot stop working.", src:"A2.2.1 mini test"},
+  {t:"Mini test", id:"s2", marks:3, q:"<b>Explain</b> why the hotel's booking system uses the client–server model. [3]",
+   ms:["Bookings are stored in one place on the server, so reception, the website and the tablets all see the same, up-to-date data / no double bookings;","guests' personal and payment data can be secured centrally, with access rights for each type of user;","the booking data can be backed up centrally / the server can be upgraded as the hotel grows;","[3 max]"],
+   full:"All bookings are stored once, on the server, so reception, the website and the cleaners' tablets all read and update the same data and a room cannot be booked twice. Because the data is in one place, the guests' personal and payment details can be protected centrally, with different access rights for reception and cleaners, and backed up every night.",
+   note:"The key idea is one shared, current copy of the data. Generic 'it is more secure' without saying how is one mark at most.", src:"A2.2.3 mini test"},
+  {t:"Mini test", id:"s3", marks:4, q:"The smart door locks are on the same network as the guest Wi-Fi. <b>Explain</b> the risk this creates and how segmentation would reduce it. [4]",
+   ms:["Risk: any guest device can reach the door locks / a guest with malicious intent, or an infected guest device, can scan for and attack them;","the attacker could unlock rooms / tamper with the locks, putting guests' safety and property at risk;","segmentation: put the locks on their own segment (e.g. a VLAN or subnet), separate from guest Wi-Fi;","traffic from guest Wi-Fi to the locks must then pass the router or firewall, which blocks it; guests get internet access only;"],
+   full:"With the locks on the guest Wi-Fi, any of the 300 guest devices can reach them, so a guest or an infected laptop could scan the network, find the locks and try to unlock rooms. If the locks are moved to their own VLAN, guest devices can no longer see them, and any traffic from the guest network to the locks has to cross the firewall, which only allows guests out to the internet. An attack from the Wi-Fi is blocked.",
+   note:"Two marks for the risk (who can reach what, and the consequence), two for the fix (separate segment, and the checkpoint that blocks it).", src:"A2.2.4 mini test"},
+  {t:"Mini test", hl:1, id:"s4", marks:4, q:"<span class=\"hltag\" style=\"margin:0 .3rem 0 0\">HL</span>A guest types www.northpointhotel.com into a laptop. <b>Outline</b> the roles of the DNS server and the web server in loading the hotel's home page. [4]",
+   ms:["The DNS server translates / resolves the domain name www.northpointhotel.com into the web server's IP address;","it returns that IP address to the laptop (asking other DNS servers if it does not know it);","the laptop's browser sends an HTTP/HTTPS request for the page to that IP address;","the web server responds by sending the home page (and its images and scripts) back to the browser;"],
+   full:"The laptop first asks a DNS server for the IP address of www.northpointhotel.com; the DNS server resolves the name, asking other DNS servers if it has to, and returns the address. The browser then sends an HTTPS request to that IP address, and the hotel's web server responds by sending back the home page and its files, which the browser displays.",
+   note:"Two marks per server: what it does, and what it sends back. Get the order right: DNS first, then the web server.", src:"A2.2.2 mini test"}
+];
+</script>
+<script>
+(function(){
+  const KEY='a22-review-nov';
+  let state={lvl:null,mcq:{},written:{},started:null};
+  try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(state,JSON.parse(raw));}catch(e){}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  function startClock(){ if(!state.started){state.started=Date.now();save();} }
+  setInterval(()=>{ if(!state.started)return; const s=Math.floor((Date.now()-state.started)/1000);
+    document.getElementById('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },1000);
+
+  /* ---------- Level ---------- */
+  function setLvl(l){ state.lvl=l; save(); document.body.classList.toggle('sl',l==='sl');
+    document.querySelectorAll('.lvl button').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); tally(); }
+  document.querySelectorAll('.lvl button').forEach(b=>b.addEventListener('click',()=>setLvl(b.dataset.l)));
+
+  /* ---------- Quick questions ---------- */
+  function renderMCQ(list,box,prefix){
+    list.forEach((item,i)=>{
+      const key=prefix+i;
+      const d=document.createElement('div'); d.className='q rapid'+(item.hl?' hlonly':'');
+      d.innerHTML='<p class="qh"><span class="tag">'+item.t+'</span> '+(i+1)+'. '+item.q+'</p>'+
+        '<div class="opts">'+item.o.map((o,j)=>'<button data-j="'+j+'">'+o+'</button>').join('')+'</div>'+
+        '<p class="why">'+item.why+'</p>';
+      box.appendChild(d);
+      d.querySelectorAll('.opts button').forEach(b=>b.addEventListener('click',()=>{
+        if(d.classList.contains('answered'))return; startClock();
+        const j=+b.dataset.j, ok=(j===item.a);
+        d.classList.add('answered'); b.classList.add(ok?'right':'wrong');
+        if(!ok)d.querySelector('[data-j="'+item.a+'"]').classList.add('right');
+        state.mcq[key]={ok:ok?1:0,t:item.t,hl:item.hl?1:0};save();tally();
+      }));
+      const done=state.mcq[key];
+      if(done){ d.classList.add('answered'); d.querySelector('[data-j="'+item.a+'"]').classList.add('right');
+        if(!done.ok)d.querySelectorAll('.opts button').forEach(b=>{if(+b.dataset.j!==item.a)b.classList.add('faded');}); }
+    });
+  }
+  renderMCQ(MCQ1,document.getElementById('mcq1'),'m1');
+  renderMCQ(MCQ2,document.getElementById('mcq2'),'m2');
+  renderMCQ(MCQ3,document.getElementById('mcq3'),'m3');
+  renderMCQ(MCQ4,document.getElementById('mcq4'),'m4');
+
+  /* ---------- Written (self-marked) ---------- */
+  function renderWritten(item,box,n){
+    const saved=state.written[item.id]||{};
+    const d=document.createElement('div'); d.className='q written'+(item.hl?' hlonly':'');
+    d.innerHTML='<p class="qh"><span class="tag">'+item.t+'</span> '+(n?n+'. ':'')+item.q+'</p>'+
+      '<textarea placeholder="Write your full answer here, as you would on paper…">'+(saved.text||'')+'</textarea>'+
+      '<div class="row"><button class="submit">Submit answer &amp; see markscheme</button><span class="hint">Write at least a sentence first. Once you submit, you cannot edit it.</span></div>'+
+      '<div class="ms"><p class="mst">Markscheme</p><ul>'+item.ms.map(m=>'<li>'+m+'</li>').join('')+'</ul>'+
+        '<p class="fullans"><b>A full-mark answer:</b> '+item.full+'</p><p class="note"><b>Examiner note:</b> '+item.note+'</p>'+
+        '<div class="selfmark"><span>Marks you would award yourself:</span> '+Array.from({length:item.marks+1},(_,k)=>'<button class="mk" data-m="'+k+'">'+k+'</button>').join('')+' <span class="of">/ '+item.marks+'</span></div>'+
+        '<p class="src">Source: '+item.src+'</p></div>';
+    box.appendChild(d);
+    const ta=d.querySelector('textarea'), sub=d.querySelector('.submit');
+    function reveal(){ d.classList.add('shown');ta.readOnly=true;sub.disabled=true;sub.textContent='Answer submitted';
+      const h=d.querySelector('.hint');h.classList.remove('warn');h.textContent='Compare with the markscheme, then award yourself the marks.'; }
+    sub.addEventListener('click',()=>{ if(ta.value.trim().length<15){d.querySelector('.hint').classList.add('warn');ta.focus();return;} startClock();
+      state.written[item.id]=Object.assign(state.written[item.id]||{},{text:ta.value,marks:item.marks,t:item.t,hl:item.hl?1:0,sub:1});save();reveal(); });
+    ta.addEventListener('input',()=>{const s=state.written[item.id]||{};s.text=ta.value;state.written[item.id]=s;save();});
+    d.querySelectorAll('.mk').forEach(b=>b.addEventListener('click',()=>{ if(!d.classList.contains('shown'))return;
+      d.querySelectorAll('.mk').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+      const s=state.written[item.id]||{};s.mark=+b.dataset.m;s.marks=item.marks;s.t=item.t;s.hl=item.hl?1:0;state.written[item.id]=s;save();tally(); }));
+    if(saved.sub)reveal();
+    if(saved.mark!==undefined){const b=d.querySelector('.mk[data-m="'+saved.mark+'"]');if(b)b.classList.add('on');}
+  }
+  [[WRITTEN1,'written1'],[WRITTEN2,'written2'],[WRITTEN3,'written3'],[WRITTEN4,'written4'],[SCEN,'scen']]
+    .forEach(([list,id])=>list.forEach((it,i)=>renderWritten(it,document.getElementById(id),i+1)));
+
+  /* ---------- Tally + diagnosis ---------- */
+  const NAMES={"Topologies":"Part 1: topologies","Servers":"Part 2: servers (HL)","Models":"Part 3: network models","Segmentation":"Part 4: segmentation","Mini test":"Part 5: mini test"};
+  function tally(){
+    const sl=state.lvl==='sl';
+    let ag=0,ap=0,wg=0,wp=0; const by={};
+    const add=(t,g,p)=>{by[t]=by[t]||{g:0,p:0};by[t].g+=g;by[t].p+=p;};
+    Object.values(state.mcq).forEach(m=>{ if(sl&&m.hl)return; ag+=m.ok;ap+=1;add(m.t,m.ok,1);});
+    Object.values(state.written).forEach(w=>{ if(w.mark===undefined||(sl&&w.hl))return; wg+=w.mark;wp+=w.marks;add(w.t,w.mark,w.marks);});
+    document.getElementById('autoscore').textContent=ag+' / '+ap;
+    document.getElementById('writtenscore').textContent=wg+' / '+wp;
+    const rows=Object.keys(NAMES).filter(k=>by[k]).map(k=>{const o=by[k],pc=Math.round(100*o.g/o.p);
+      const cls=pc>=80?'good':(pc>=60?'ok':'weak'); const v=pc>=80?'solid':(pc>=60?'nearly there':'go back to this card');
+      return '<tr class="'+cls+'"><td>'+NAMES[k]+'</td><td class="num">'+o.g+' / '+o.p+'</td><td class="num">'+pc+'%</td><td>'+v+'</td></tr>';}).join('');
+    document.getElementById('diag').innerHTML=rows?'<table class="dt"><tr><th>Part</th><th>Your score</th><th>%</th><th>Verdict</th></tr>'+rows+'</table>':'<p class="muted">Answer some questions; your weak spots will appear here.</p>';
+  }
+  document.getElementById('printbtn').addEventListener('click',()=>window.print());
+  document.getElementById('resetbtn').addEventListener('click',()=>{ if(confirm('Clear all your answers and scores on this device?')){try{localStorage.removeItem(KEY);}catch(e){}location.reload();} });
+  if(state.lvl)setLvl(state.lvl); else tally();
+})();
+</script>
+</body>
+</html>
