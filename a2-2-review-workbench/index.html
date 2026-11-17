@@ -136,6 +136,13 @@
   .plan th,.plan td{border:1px solid var(--line);padding:.4rem .65rem;text-align:left;vertical-align:top}
   .plan th{background:var(--blue-wash);color:var(--blue-deep)}
   .teach{overflow-x:auto}
+  .si .row{margin:.35rem 0}
+  .si input{font-size:1em;padding:.4rem .6rem;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);min-width:min(14rem,100%)}
+  .si .lbl{font-family:var(--mono);font-size:.85rem;color:var(--muted);min-width:7rem}
+  .savechip.ok{background:var(--good-wash);border-color:var(--good);color:var(--good)}
+  .savechip.warn{background:var(--amber-wash);border-color:var(--amber);color:#7A5208}
+  .handin{background:var(--card);border:1.5px solid var(--blue);border-radius:8px;padding:.9rem 1.1rem;margin-top:1rem}
+  @media print{#signin,.handin .row{display:none}}
   @media (max-width:480px){table.dt{font-size:.85em}table.dt th,table.dt td{padding:.35rem .45rem}}
   @media print{.diagrams{break-inside:avoid}}
 </style>
@@ -145,13 +152,13 @@
   <div class="wrap">
     <p class="kicker">IB DP Computer Science · Y2 · A2.2 · Test on Fri 20 Nov · SL + HL</p>
     <h1>A2.2 Review Workbench: topologies, servers, models and segmentation</h1>
-    <p>Everything in A2.2 in one place, to get you ready for Friday's test. Read each card, answer the quick questions (the page checks them), then write the longer answers and mark yourself against the markscheme. Nothing is sent anywhere: your answers stay in this browser.</p>
+    <p>Everything in A2.2 in one place, to get you ready for Friday's test. Read each card, answer the quick questions (the page checks them), then write the longer answers and mark yourself against the markscheme. Sign in with your name and everything you do saves to Mr. Tzanis's class sheet as you go.</p>
   </div>
 </header>
 
 <div class="bar">
   <div class="wrap">
-    <span class="lvlrow"><span class="lbl">Level</span><span class="lvl"><button data-l="sl">SL</button><button data-l="hl">HL</button></span></span>
+    <span class="chip savechip" id="savechip">Sign in below</span>
     <span class="chip">Checked by the page: <b id="autoscore">0 / 0</b></span>
     <span class="chip">Marked by you: <b id="writtenscore">0 / 0</b></span>
     <span class="chip" id="clockchip">Timer: <b id="clock">00:00</b></span>
@@ -161,10 +168,21 @@
 
 <div class="wrap">
 
+  <section id="signin">
+    <h2><span class="n">Start here</span>Sign in</h2>
+    <div class="q si">
+      <div class="row"><label class="lbl" for="si-first">First name</label><input id="si-first" autocomplete="given-name" maxlength="40"></div>
+      <div class="row"><label class="lbl" for="si-last">Last name</label><input id="si-last" autocomplete="family-name" maxlength="40"></div>
+      <div class="row"><span class="lbl">Level</span><span class="lvl"><button data-l="sl">SL</button><button data-l="hl">HL</button></span></div>
+      <div class="row"><button class="submit" id="si-go">Start</button><span class="hint" id="si-msg"></span></div>
+    </div>
+  </section>
+
   <section>
     <h2><span class="n">How this works</span>Five parts, then a mini test</h2>
     <div class="howto">
-      <p style="margin-bottom:.4rem"><b>First, click SL or HL in the bar above.</b> SL hides the HL-only part (A2.2.2 Servers) and leaves it out of your scores.</p>
+      <p style="margin-bottom:.4rem"><b>First, sign in above</b> with your real name and your level. Everything you do saves to Mr. Tzanis's class sheet as you go, so if your laptop dies, sign in on another one with the same spelling and carry on. SL hides the HL-only part (A2.2.2 Servers) and leaves it out of your scores.</p>
+      <p style="margin-bottom:.4rem"><b>Due: before the start of Friday's lesson, 20 November.</b> Finish every part for your level, then click <b>Hand in</b> at the bottom of the page.</p>
       <ol>
         <li><b>Part 1, topologies (A2.2.1).</b> One card, four quick questions, two written answers.</li>
         <li class="hlonly"><b>Part 2, servers (A2.2.2, HL only).</b> One card, four quick questions, two written answers.</li>
@@ -173,7 +191,7 @@
         <li><b>Part 5, mini test.</b> One scenario, timed, like the real test. Do it last, without looking back at the cards.</li>
       </ol>
       <table class="plan">
-        <tr><th></th><th>When</th><th>Aim for</th></tr>
+        <tr><th></th><th>When</th><th>What to do</th></tr>
         <tr><td><b>SL</b></td><td>On your own, before Friday</td><td>Parts 1, 3, 4 and 5: about 60 minutes. Two short sittings work better than one long one.</td></tr>
         <tr><td><b>HL</b></td><td>Wednesday's lesson, then finish at home</td><td>Parts 1 to 4 in class, Part 5 at home: about 80 minutes in total.</td></tr>
       </table>
@@ -312,6 +330,10 @@
     <h2><span class="n">Your diagnosis</span>What to go back to before Friday</h2>
     <p class="lead">Built from the page's checks and the marks you gave yourself. Anything under 60% is the card to read again.</p>
     <div id="diag"></div>
+    <div class="handin">
+      <p><b>Finished? Hand in.</b> Click when you have done every part for your level. You can still change unsubmitted answers afterwards; the sheet keeps the time you first handed in.</p>
+      <div class="row"><button class="submit" id="handin">Hand in</button><span class="hint" id="handin-msg"></span></div>
+    </div>
     <div class="howto" style="margin-top:1rem">
       <p><b>Before Friday's test:</b></p>
       <ol>
@@ -320,7 +342,7 @@
         <li>In scenario questions, name the scenario in your answer. Generic answers lose the last mark.</li>
       </ol>
     </div>
-    <p class="foot">Nothing you type here leaves your laptop; it is saved in this browser only. If the page is reloaded your answers are still here. "Start over" wipes them.</p>
+    <p class="foot">Your work is saved in this browser and, once you sign in, to Mr. Tzanis's class sheet. "Start over" wipes this browser only, not the class sheet.</p>
   </section>
 
 </div>
@@ -415,9 +437,34 @@ const SCEN = [
 <script>
 (function(){
   const KEY='a22-review-nov';
-  let state={lvl:null,mcq:{},written:{},started:null};
-  try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(state,JSON.parse(raw));}catch(e){}
-  function save(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){}}
+  /* Class sheet web app (Google Apps Script /exec URL). Empty = save in this browser only. */
+  const SYNC_URL='';
+  const blank=()=>({v:1,first:'',last:'',lvl:null,mcq:{},written:{},started:null,handedIn:null,updated:0});
+  let state=blank();
+  try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(blank(),JSON.parse(raw));}catch(e){}
+  let COLS=[];
+  const savechip=document.getElementById('savechip');
+  function chip(text,cls){if(!savechip)return;savechip.textContent=text;savechip.className='chip savechip'+(cls?' '+cls:'');}
+  function sid(){ if(!state.first||!state.last)return ''; return ('a22-'+state.last+'-'+state.first).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+$/,'').slice(0,80); }
+  function payload(){tally();return JSON.stringify({action:'save',sid:sid(),first:state.first,last:state.last,level:state.lvl||'',handIn:!!state.handedIn,cols:COLS,state:JSON.stringify(state)});}
+  function post(body){return fetch(SYNC_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:body}).then(r=>r.json());}
+  let syncTimer=null,syncing=false,dirty=false;
+  function writeLocal(){try{localStorage.setItem(KEY,JSON.stringify(state));return true;}catch(e){return false;}}
+  function clockNow(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+  function save(){
+    state.updated=Date.now(); const ok=writeLocal();
+    if(SYNC_URL&&sid()){ dirty=true; chip('Saving…'); clearTimeout(syncTimer); syncTimer=setTimeout(push,2000); }
+    else if(SYNC_URL){ chip('Not saved to the class sheet yet: sign in at the top','warn'); }
+    else if(!ok){ chip('Could not save on this device','warn'); }
+  }
+  function push(){
+    if(!SYNC_URL||!sid())return;
+    if(syncing){clearTimeout(syncTimer);syncTimer=setTimeout(push,1500);return;}
+    syncing=true;dirty=false;
+    post(payload()).then(j=>{ syncing=false; if(!j||!j.ok)throw new Error('refused'); if(!dirty)chip('Saved to the class sheet · '+clockNow(),'ok'); })
+    .catch(()=>{ syncing=false;dirty=true; chip('Saved on this device · the class sheet did not answer, trying again','warn'); clearTimeout(syncTimer);syncTimer=setTimeout(push,15000); });
+  }
+  window.addEventListener('pagehide',()=>{ writeLocal(); if(dirty&&SYNC_URL&&sid()&&navigator.sendBeacon){try{navigator.sendBeacon(SYNC_URL,payload());}catch(e){}} });
   function startClock(){ if(!state.started){state.started=Date.now();save();} }
   setInterval(()=>{ if(!state.started)return; const s=Math.floor((Date.now()-state.started)/1000);
     document.getElementById('clock').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); },1000);
@@ -493,10 +540,66 @@ const SCEN = [
     const rows=Object.keys(NAMES).filter(k=>by[k]).map(k=>{const o=by[k],pc=Math.round(100*o.g/o.p);
       const cls=pc>=80?'good':(pc>=60?'ok':'weak'); const v=pc>=80?'solid':(pc>=60?'nearly there':'go back to this card');
       return '<tr class="'+cls+'"><td>'+NAMES[k]+'</td><td class="num">'+o.g+' / '+o.p+'</td><td class="num">'+pc+'%</td><td>'+v+'</td></tr>';}).join('');
+    const pct=k=>by[k]?Math.round(100*by[k].g/by[k].p)+'%':'';
+    const ALLW=[].concat(WRITTEN1,WRITTEN2,WRITTEN3,WRITTEN4,SCEN).filter(w=>!(sl&&w.hl));
+    const wrong=[]; [[MCQ1,'m1','P1'],[MCQ2,'m2','P2'],[MCQ3,'m3','P3'],[MCQ4,'m4','P4']].forEach(([l,pre,lab])=>l.forEach((it,i)=>{const m=state.mcq[pre+i]; if(m&&!m.ok&&!(sl&&m.hl))wrong.push(lab+'.'+(i+1));}));
+    const LBL={w1a:'P1 mesh links',w1b:'P1 bank mesh',w2a:'P2 web server',w2b:'P2 file server',w3a:'P3 P2P drawbacks',w3b:'P3 compare',w4a:'P4 physical vs VLAN',w4b:'P4 thermostats',s1:'Test star',s2:'Test client-server',s3:'Test door locks',s4:'Test DNS + web (HL)'};
+    const done=ALLW.filter(w=>(state.written[w.id]||{}).sub).length;
+    COLS=[['Quick checks',ag+' / '+ap],['Quick checks wrong',wrong.join(', ')],['Written (self-marked)',wg+' / '+wp],['Written submitted',done+' of '+ALLW.length],
+      ['P1 Topologies %',pct('Topologies')],['P2 Servers % (HL)',sl?'':pct('Servers')],['P3 Models %',pct('Models')],['P4 Segmentation %',pct('Segmentation')],['P5 Mini test %',pct('Mini test')],
+      ['Time on page (min)',state.started?Math.round((Date.now()-state.started)/60000):'']];
+    [].concat(WRITTEN1,WRITTEN2,WRITTEN3,WRITTEN4,SCEN).forEach(w=>{ const x=state.written[w.id]||{}; const skip=sl&&w.hl;
+      COLS.push([LBL[w.id]+': mark',skip||x.mark===undefined?'':x.mark+' / '+w.marks]);
+      COLS.push([LBL[w.id]+': answer',skip?'':(x.text||'')]); });
     document.getElementById('diag').innerHTML=rows?'<table class="dt"><tr><th>Part</th><th>Your score</th><th>%</th><th>Verdict</th></tr>'+rows+'</table>':'<p class="muted">Answer some questions; your weak spots will appear here.</p>';
   }
   document.getElementById('printbtn').addEventListener('click',()=>window.print());
   document.getElementById('resetbtn').addEventListener('click',()=>{ if(confirm('Clear all your answers and scores on this device?')){try{localStorage.removeItem(KEY);}catch(e){}location.reload();} });
+  /* ---------- Sign in ---------- */
+  const $=id=>document.getElementById(id);
+  (function(){
+    const f=$('si-first'),l=$('si-last'),go=$('si-go'),msg=$('si-msg');
+    const hasWork=s=>Object.keys(s.mcq||{}).length+Object.keys(s.written||{}).length>0;
+    function show(){ f.value=state.first; l.value=state.last; go.textContent=sid()?'Change':'Start';
+      msg.className='hint';
+      msg.textContent=sid()?('You are '+state.first+' '+state.last+(state.lvl?', '+state.lvl.toUpperCase():'')+'. Everything you do is saved as you go.'):
+        (SYNC_URL?'Use your real name and the same spelling every time: that is how your work is found again.':'Your answers are saved in this browser on this computer.');
+      if(SYNC_URL&&sid())chip('Signed in as '+state.first+' '+state.last+' · saving to the class sheet','ok');
+      else if(SYNC_URL)chip('Not saved to the class sheet yet: sign in at the top','warn');
+      else chip('Saved on this device','ok'); }
+    go.addEventListener('click',()=>{
+      const first=f.value.trim(), last=l.value.trim();
+      if(!first||!last||!state.lvl){ msg.textContent='Type your first and last name and click SL or HL.'; msg.className='hint warn'; return; }
+      const old=sid(); state.first=first.slice(0,40); state.last=last.slice(0,40);
+      if(old&&old!==sid()){ state=Object.assign(blank(),{first:state.first,last:state.last,lvl:state.lvl}); }
+      const done=()=>{ save(); if(old&&old!==sid()){location.reload();return;} show(); };
+      if(!SYNC_URL){ done(); return; }
+      msg.textContent='Looking for work you saved before…'; go.disabled=true;
+      post(JSON.stringify({action:'load',sid:sid()})).then(j=>{
+        go.disabled=false; let remote=null;
+        try{ remote=j&&j.ok&&j.state?JSON.parse(j.state):null; }catch(e){}
+        if(remote&&remote.v===1&&hasWork(remote)&&(!hasWork(state)||remote.updated>state.updated)){
+          state=Object.assign(blank(),remote,{first:state.first,last:state.last}); writeLocal(); location.reload(); return; }
+        done();
+      }).catch(()=>{ go.disabled=false; done(); msg.textContent='Signed in. The class sheet did not answer just now; your work is saved on this device and will be sent when it does.'; });
+    });
+    show();
+  })();
+
+  /* ---------- Hand in ---------- */
+  (function(){
+    const b=$('handin'), m=$('handin-msg');
+    function show(){ if(state.handedIn){ b.textContent='Handed in'; b.disabled=true; m.className='hint';
+      m.textContent='Handed in on '+new Date(state.handedIn).toLocaleString([], {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'.'; } }
+    b.addEventListener('click',()=>{
+      if(!sid()){ m.textContent='Sign in at the top first, so Mr. Tzanis knows whose work this is.'; m.className='hint warn'; return; }
+      const ALLW=[].concat(WRITTEN1,WRITTEN2,WRITTEN3,WRITTEN4,SCEN).filter(w=>!(state.lvl==='sl'&&w.hl));
+      const left=ALLW.filter(w=>!(state.written[w.id]||{}).sub).length;
+      if(left&&!b.dataset.sure){ b.dataset.sure='1'; m.className='hint warn'; m.textContent=left+' written answer'+(left>1?'s are':' is')+' not submitted yet. Click Hand in again to hand in anyway.'; return; }
+      state.handedIn=Date.now(); save(); if(SYNC_URL){clearTimeout(syncTimer);push();} show(); });
+    show();
+  })();
+
   if(state.lvl)setLvl(state.lvl); else tally();
 })();
 </script>
