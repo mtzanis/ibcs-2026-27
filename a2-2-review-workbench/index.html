@@ -141,6 +141,8 @@
   .si .lbl{font-family:var(--mono);font-size:.85rem;color:var(--muted);min-width:7rem}
   .savechip.ok{background:var(--good-wash);border-color:var(--good);color:var(--good)}
   .savechip.warn{background:var(--amber-wash);border-color:var(--amber);color:#7A5208}
+  .printname{display:none}
+  @media print{.printname{display:block;font-weight:700;margin-top:.4rem}}
   .handin{background:var(--card);border:1.5px solid var(--blue);border-radius:8px;padding:.9rem 1.1rem;margin-top:1rem}
   @media print{#signin,.handin .row{display:none}}
   @media (max-width:480px){table.dt{font-size:.85em}table.dt th,table.dt td{padding:.35rem .45rem}}
@@ -152,7 +154,8 @@
   <div class="wrap">
     <p class="kicker">IB DP Computer Science · Y2 · A2.2 · Test on Fri 20 Nov · SL + HL</p>
     <h1>A2.2 Review Workbench: topologies, servers, models and segmentation</h1>
-    <p>Everything in A2.2 in one place, to get you ready for Friday's test. Read each card, answer the quick questions (the page checks them), then write the longer answers and mark yourself against the markscheme. Sign in with your name and everything you do saves to Mr. Tzanis's class sheet as you go.</p>
+    <p>Everything in A2.2 in one place, to get you ready for Friday's test. Read each card, answer the quick questions (the page checks them), then write the longer answers and mark yourself against the markscheme. Your answers save in this browser as you go. When you have finished, save the page as a PDF and upload it to Classroom.</p>
+    <p class="printname" id="printname"></p>
   </div>
 </header>
 
@@ -181,8 +184,8 @@
   <section>
     <h2><span class="n">How this works</span>Five parts, then a mini test</h2>
     <div class="howto">
-      <p style="margin-bottom:.4rem"><b>First, sign in above</b> with your real name and your level. Everything you do saves to Mr. Tzanis's class sheet as you go, so if your laptop dies, sign in on another one with the same spelling and carry on. SL hides the HL-only part (A2.2.2 Servers) and leaves it out of your scores.</p>
-      <p style="margin-bottom:.4rem"><b>Due: before the start of Friday's lesson, 20 November.</b> Finish every part for your level, then click <b>Hand in</b> at the bottom of the page.</p>
+      <p style="margin-bottom:.4rem"><b>First, sign in above</b> with your real name and your level, so your name is on your PDF. Your work saves in this browser, so use the same laptop and browser each time. SL hides the HL-only part (A2.2.2 Servers) and leaves it out of your scores.</p>
+      <p style="margin-bottom:.4rem"><b>Due: before the start of Friday's lesson, 20 November.</b> Finish every part for your level, then click <b>Print / save as PDF</b> at the top and upload the PDF to the Classroom assignment <b>"A2.2 Review Workbench"</b>.</p>
       <ol>
         <li><b>Part 1, topologies (A2.2.1).</b> One card, four quick questions, two written answers.</li>
         <li class="hlonly"><b>Part 2, servers (A2.2.2, HL only).</b> One card, four quick questions, two written answers.</li>
@@ -331,8 +334,8 @@
     <p class="lead">Built from the page's checks and the marks you gave yourself. Anything under 60% is the card to read again.</p>
     <div id="diag"></div>
     <div class="handin">
-      <p><b>Finished? Hand in.</b> Click when you have done every part for your level. You can still change unsubmitted answers afterwards; the sheet keeps the time you first handed in.</p>
-      <div class="row"><button class="submit" id="handin">Hand in</button><span class="hint" id="handin-msg"></span></div>
+      <p><b>Finished? Hand in.</b> When you have done every part for your level, save the page as a PDF and upload it to the Classroom assignment <b>"A2.2 Review Workbench"</b> before the start of Friday's lesson.</p>
+      <div class="row"><button class="submit" id="handinpdf">Print / save as PDF</button></div>
     </div>
     <div class="howto" style="margin-top:1rem">
       <p><b>Before Friday's test:</b></p>
@@ -342,7 +345,7 @@
         <li>In scenario questions, name the scenario in your answer. Generic answers lose the last mark.</li>
       </ol>
     </div>
-    <p class="foot">Your work is saved in this browser and, once you sign in, to Mr. Tzanis's class sheet. "Start over" wipes this browser only, not the class sheet.</p>
+    <p class="foot">Nothing you type here leaves your laptop; it is saved in this browser only. If the page is reloaded your answers are still here. "Start over" wipes them.</p>
   </section>
 
 </div>
@@ -438,7 +441,7 @@ const SCEN = [
 (function(){
   const KEY='a22-review-nov';
   /* Class sheet web app (Google Apps Script /exec URL). Empty = save in this browser only. */
-  const SYNC_URL='https://script.google.com/macros/s/AKfycbxpWb4eKUMYev6pgkqlKVkj6tJDeqa3rnEFB6Rg8K9OD5Yig3d-dpUtvH4VNUj3cMw2Mg/exec';
+  const SYNC_URL='';
   const blank=()=>({v:1,first:'',last:'',lvl:null,mcq:{},written:{},started:null,handedIn:null,updated:0});
   let state=blank();
   try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(blank(),JSON.parse(raw));}catch(e){}
@@ -588,7 +591,7 @@ const SCEN = [
 
   /* ---------- Hand in ---------- */
   (function(){
-    const b=$('handin'), m=$('handin-msg');
+    const b=$('handin'), m=$('handin-msg'); if(!b)return;
     function show(){ if(state.handedIn){ b.textContent='Handed in'; b.disabled=true; m.className='hint';
       m.textContent='Handed in on '+new Date(state.handedIn).toLocaleString([], {weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'.'; } }
     b.addEventListener('click',()=>{
@@ -600,7 +603,11 @@ const SCEN = [
     show();
   })();
 
+  const pdf=$('handinpdf'); if(pdf)pdf.addEventListener('click',()=>window.print());
+  function printName(){ const el=$('printname'); if(el)el.textContent=sid()?('Name: '+state.first+' '+state.last+(state.lvl?' · '+state.lvl.toUpperCase():'')):''; }
+  $('si-go').addEventListener('click',()=>setTimeout(printName,0));
   if(state.lvl)setLvl(state.lvl); else tally();
+  printName();
 })();
 </script>
 </body>
