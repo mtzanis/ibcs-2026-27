@@ -438,7 +438,7 @@ const SCEN = [
 (function(){
   const KEY='a22-review-nov';
   /* Class sheet web app (Google Apps Script /exec URL). Empty = save in this browser only. */
-  const SYNC_URL='';
+  const SYNC_URL='https://script.google.com/macros/s/AKfycbxpWb4eKUMYev6pgkqlKVkj6tJDeqa3rnEFB6Rg8K9OD5Yig3d-dpUtvH4VNUj3cMw2Mg/exec';
   const blank=()=>({v:1,first:'',last:'',lvl:null,mcq:{},written:{},started:null,handedIn:null,updated:0});
   let state=blank();
   try{const raw=localStorage.getItem(KEY); if(raw)state=Object.assign(blank(),JSON.parse(raw));}catch(e){}
